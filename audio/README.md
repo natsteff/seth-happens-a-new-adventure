@@ -4,22 +4,24 @@ Music is by **[BT-AI](https://suno.com/@bt_ai)**. Selected sound effects are cre
 
 ## Radio playlist
 
-| Track | Availability |
+| Track / level | Availability |
 | --- | --- |
-| Arcade Staircase | Starting playlist |
-| The Beer of Destiny | Starting playlist |
-| Twenty-Six Floors of Celts | Starting playlist |
-| Go Seth Go | Starting playlist |
-| The Haunted Happy Hour | Starting playlist |
-| Thai Food Run | Unlock Thai Takeout Run |
-| Scooter Run | Unlock Scooter Ride |
-| Eye of the Stairwell (Leads Take Me Away!) | Unlock Concert Chaos |
+| 1 · Arcade Staircase | Available initially |
+| 2 · Thai Food Run | Unlock Thai Takeout Run |
+| 3 · Scooter Run | Unlock Scooter Ride |
+| 4 · Eye of the Stairwell (Leads Take Me Away!) | Unlock Concert Chaos |
+| 5 · The Haunted Happy Hour | Unlock Haunted House |
+| 6 · The Beer of Destiny | Unlock Zombie Apocalypse |
+| 7 · Twenty-Six Floors of Celts | Unlock Snow Day From Hell |
+| 8 · Go Seth Go | Unlock Carnival Catastrophe |
 
 Unlocked tracks can be selected on any level. Countdown and outcome recordings include The Final Warning, System Failure Imminent, Failure - Twenty-Six Floors for Nothing, Big Stupid Cheater, 26 Floors of Glory and Eye of the Stairwell. The champion recording Eye of the Stairwell is separate from the Concert Chaos song.
 
 ## Effects and voices
 
 The WAV recordings cover jumping, falls, collision reactions, pickups, intro, completion, location cues and special interactions. Master mute controls voices and effects; the radio also has independent music controls. Browsers require a player gesture to start audio.
+
+The supplied `spring-boing.wav` plays on Mega Jump. The previous Mega Jump recording, `grunt.wav`, remains unchanged and joins `ouch.wav` and `ahh.wav` in the random rooftop object-collision reaction pool. Normal jump and person/fall/squish reactions remain distinct.
 
 ## Music file integrity
 
@@ -30,3 +32,5 @@ The WAV recordings cover jumping, falls, collision reactions, pickups, intro, co
 | music/concert-eye-of-the-stairwell.mp3 | 93885e7f101ed6b21ae79726fb43394d198129600b7121e847bb67b0979e3341 |
 
 Audio files retain their recorded bytes. Provider credits do not transfer copyright or grant additional rights to redistribute recordings.
+
+Supplied Mega Jump WAV SHA-256: `6706096d1e187e72827a0068e02fe2cbb9ddd90c8f106773d14600066c81d435`.
