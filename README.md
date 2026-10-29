@@ -48,6 +48,14 @@ Complete Concert Chaos to unlock Haunted House. Cross the dark neighborhood and 
 
 Ghosts disappear, glow as a harmless warning, become solid hazards, then fade harmlessly. Warning marks precede falling books; landed books are harmless. Familiar characters appear as spectral visitors, with the larger landlord ghost joining the escape. Platforms have clearly highlighted wood tops; mansion treads and floor sections use one-way support, allowing upward jumps through them. Controls, Mega Jump, sprint, pause, touch/controller input and independent records are reused. Score: 5,000 + 20 per rounded-up escape second remaining − 100 per scare − 3 per rounded-up total run second, floored at zero.
 
+## Level 6 · Zombie Apocalypse
+
+Complete Haunted House to unlock Zombie Apocalypse. Survive a close-building neighborhood, jumping over familiar zombie characters and climbing bins and parked buses. Sprint from the bins to reach the bus roofs. Allison advances independently and clears nearby threats herself; there is no rescue objective. Press **F / Action** beside the truck to board together. The finale automatically drives forward: left brakes, right accelerates, and Jump clears marked barricades. Truck contact flattens zombies; reaching the safe zone completes the level. Stamina loss returns to the street start or truck checkpoint. Restart clears the truck and horde. Score: 6,000 + 100 per zombie flattened − 5 per whole run second − 100 per hit, floored at zero.
+
+## Level 7 · Snow Day From Hell
+
+Complete Zombie Apocalypse to unlock Snow Day. Reach the warming shelter and press **F / Action**. Blue strips mark ice: releasing movement leaves a slide, while steering against it brakes faster. Snowbanks provide stepped high routes. Snowplow roofs and rear contacts are safe; directional front impacts and periodic thrown snow walls hurt. Yellow warnings precede falling icicles. Two warm bus stops automatically restore stamina and save checkpoints. Snow and periodic haze preserve visibility of platform tops and hazards. Score: 6,500 − 8 per whole run second − 125 per hit, floored at zero.
+
 ## Computer and mobile
 
 The same scenery renders in the existing game world on desktop and mobile. It scales with the canvas and leaves the existing responsive touch controls intact. Landscape Home Screen app play remains the inherited recommended mobile path. Browser viewport checks do not establish physical iOS, Android or controller acceptance. No new mobile-browser fixes are included.

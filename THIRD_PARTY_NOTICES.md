@@ -29,3 +29,7 @@ The new adventure logo was supplied directly by the project and copied unchanged
 ## Haunted House additions
 
 The mansion-wall scenery was generated with the built-in imagegen tool and copied unchanged into public/assets/haunted/mansion-wall-v1.png; exact prompt/provenance in docs/haunted-art.md. Existing character art is reused as tinted translucent spectral visitors, alongside the existing street/brick scenery and The Haunted Happy Hour soundtrack. Original assets and generated originals remain preserved. No new audio generation or public distribution.
+
+## Zombie Apocalypse and Snow Day additions
+
+These local first efforts reuse the existing street backdrop, owner-authorized character art and unlocked music. Zombie coloration, truck and plow art, buses/bins, snowbanks, snow/ice effects and icicles are generated in code within the scenes. No new third-party download, likeness reference, paid asset or audio was introduced. Existing asset permissions still require the same owner review before public distribution.

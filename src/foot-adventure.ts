@@ -31,8 +31,11 @@ export abstract class FootAdventure extends Phaser.Scene{
  abstract objectiveText():string;
  abstract tick(delta:number,action:boolean):void;
  resetMission(){} afterPlayer(){} drawExtras(){} motionHeld(){return false;}
+ movementVelocity(direction:number,sprint:boolean,_delta:number){return direction*(sprint?385:275);}
+ jumpVelocity(){return -490;}
  create(){
   const c=this.config;this.renderScale=(this.game.config.width as number)/W;this.runVersion++;this.elapsedMs=0;this.hits=0;this.stamina=100;this.immuneMs=0;this.paused=false;this.won=false;this.failed=false;this.introActive=true;this.introStarted=false;this.restartSince=null;this.hazards=[];this.controller=new ControllerInput();this.photos=new Set();this.facing=1;this.lastGround=-1000;this.jumpUntil=0;this.jumpStarted=-1;this.megaUsed=false;this.checkpoint={x:c.startX,bottom:c.startY};this.resetMission();
+  const live=document.getElementById('live-status');if(live)for(const key of Object.keys(live.dataset))delete live.dataset[key];
   document.body.dataset.level=c.key;levelControlCopy(c.key);document.getElementById('current-level')!.textContent=`Level ${c.number} · ${c.title}`;document.getElementById('game')!.setAttribute('aria-label',`${c.title} platform adventure`);document.getElementById('next-level')!.hidden=true;
   const footer=document.querySelector('footer')!;footer.dataset.rooftopHtml??=footer.innerHTML;footer.textContent='MOVE A/D or arrows · JUMP W / Up / Space · Double-tap: Mega Jump · SPRINT Shift · ACTION F · PAUSE P · RESTART hold R';
   touch.clear();resetScoreEntry();resetAdventureScores();(document.getElementById('touch-menu') as HTMLDialogElement).close();gameAudio.beginRun(c.key);
@@ -70,10 +73,10 @@ export abstract class FootAdventure extends Phaser.Scene{
   if(this.keys.R.isDown||m.restart){this.restartSince??=time;if(time-this.restartSince>=650){this.scene.restart();return;}}else this.restartSince=null;
   if(this.won||this.failed){this.publishStatus();return;}const dt=Math.min(delta,100);this.elapsedMs+=dt;this.immuneMs=Math.max(0,this.immuneMs-dt);
   const body=this.player.body as Phaser.Physics.Arcade.Body;let direction=keyboardOrControllerMove(this.keys.A.isDown||this.keys.LEFT.isDown,this.keys.D.isDown||this.keys.RIGHT.isDown,c.move||m.move);if(this.motionHeld())direction=0;const crowd=this.hazards.some(h=>h.kind==='concert-fans'&&Math.abs(this.player.x-h.art.x)<85&&Math.abs(body.bottom-(h.art.y))<90);
-  this.player.setVelocityX(direction*((this.keys.SHIFT.isDown||c.sprint||m.sprint)?385:275)*(crowd?.55:1));if(direction)this.facing=direction;
+  this.player.setVelocityX(this.movementVelocity(direction,this.keys.SHIFT.isDown||c.sprint||m.sprint,dt)*(crowd?.55:1));if(direction)this.facing=direction;
   if(body.blocked.down){this.lastGround=time;if(body.velocity.y>=0){this.jumpStarted=-1;this.megaUsed=false;}}
   const pressed=!this.motionHeld()&&(c.jump||m.jump||['W','UP','SPACE'].some(k=>Phaser.Input.Keyboard.JustDown(this.keys[k]))),mega=pressed&&!this.megaUsed&&this.jumpStarted>=0?megaJumpVelocity(this.elapsedMs-this.jumpStarted,body.velocity.y):null;
-  if(mega!==null){this.player.setVelocityY(mega);this.megaUsed=true;}else{if(pressed)this.jumpUntil=time+130;if(this.jumpUntil>time&&time-this.lastGround<110){this.player.setVelocityY(-490);this.jumpUntil=0;this.lastGround=-1000;this.jumpStarted=this.elapsedMs;this.megaUsed=false;gameAudio.play('jump');}}
+  if(mega!==null){this.player.setVelocityY(mega);this.megaUsed=true;}else{if(pressed)this.jumpUntil=time+130;if(this.jumpUntil>time&&time-this.lastGround<110){this.player.setVelocityY(this.jumpVelocity());this.jumpUntil=0;this.lastGround=-1000;this.jumpStarted=this.elapsedMs;this.megaUsed=false;gameAudio.play('jump');}}
   for(const h of this.hazards){h.art.x=h.x+Math.sin(this.elapsedMs/h.period*2*Math.PI)*h.range;const x=h.art.x,y=h.art.y-h.height/2;if(h.active!==false&&Math.abs(this.player.x-x)<(26+h.width)/2&&Math.abs(this.player.y-y)<(48+h.height)/2)this.takeHit(h.kind==='concert-fans'?'Crowd surge! Jump over the crush.':'Another obstacle with terrible timing.');}
   if(body.bottom>this.config.height+100){this.hits++;this.respawn();}
   this.prompt.setVisible(false);this.tick(dt,Phaser.Input.Keyboard.JustDown(this.keys.F)||c.interact||m.interact);
