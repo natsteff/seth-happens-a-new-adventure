@@ -24,3 +24,5 @@ Build-tool and transitive dependency notices are included with their installed p
 ## Artwork references
 
 Technical descriptions of runtime artwork and icon sizes are available in [scenery notes](https://github.com/natsteff/seth-happens-a-new-adventure/blob/main/docs/scenery.md), [Thai Takeout art](https://github.com/natsteff/seth-happens-a-new-adventure/blob/main/docs/thai-art.md), [Scooter Ride art](https://github.com/natsteff/seth-happens-a-new-adventure/blob/main/docs/scooter-art.md), [Concert Chaos art](https://github.com/natsteff/seth-happens-a-new-adventure/blob/main/docs/concert-art.md), [Haunted House art](https://github.com/natsteff/seth-happens-a-new-adventure/blob/main/docs/haunted-art.md) and [app icons](https://github.com/natsteff/seth-happens-a-new-adventure/blob/main/docs/app-icons.md).
+
+Cabin Fever woods, cabin, lake, boats, docks, cooler and wildlife are drawn in scene code; existing Seth/Allison art and audio are reused. See [Cabin Fever art](https://github.com/natsteff/seth-happens-a-new-adventure/blob/main/docs/cabin-art.md).
