@@ -30,3 +30,21 @@ test('unavailable/corrupt storage does not bypass the lock or prevent a session 
  }
  const p=createLevelProgress(null);assert.equal(p.unlocked,false);assert.equal(p.completeRooftop(),false);assert.equal(p.canPlay('thai'),true);
 });
+test('Level 3 requires a Thai finish; both unlocks persist without scores',()=>{
+ const s=store(),p=createLevelProgress(s);assert.equal(p.canPlay('scooter'),false);assert.equal(p.completeTakeout(),false);
+ p.completeRooftop();assert.equal(p.canPlay('scooter'),false);p.completeTakeout();assert.equal(p.canPlay('scooter'),true);
+ const q=createLevelProgress(s);for(const key of ['rooftop','thai','scooter'])assert.equal(q.canPlay(key),true);
+});
+test('old progress schema keeps Level 2 open while Level 3 remains locked',()=>{
+ const s=store([[PROGRESS_KEY,JSON.stringify({version:1,level1Completed:true})]]),p=createLevelProgress(s);assert.equal(p.canPlay('thai'),true);assert.equal(p.canPlay('scooter'),false);
+ p.completeTakeout();assert.equal(createLevelProgress(s).canPlay('scooter'),true);
+});
+test('valid prior Thai results unlock Level 3 only after rooftop qualification',()=>{
+ const record={id:'thai',name:'TEST',score:2000,date:'2026-10-28T18:00:00Z',condition:80,warmth:50,hits:1,elapsedMs:100000};
+ const s=store([['seth-new-adventure.thai-scores.v1',JSON.stringify([record])]]);assert.equal(createLevelProgress(s).canPlay('scooter'),false);
+ s.data.set(PROGRESS_KEY,JSON.stringify({version:1,level1Completed:true}));assert.equal(createLevelProgress(s).canPlay('scooter'),true);
+});
+test('Level 3 session unlock preserves corrupt saves and rejects inconsistent flags',()=>{
+ const raw=JSON.stringify({version:1,level1Completed:false,level2Completed:true}),s=store([[PROGRESS_KEY,raw]]),p=createLevelProgress(s);
+ assert.equal(p.canPlay('scooter'),false);p.completeRooftop();p.completeTakeout();assert.equal(p.canPlay('scooter'),true);assert.equal(p.persistent,false);assert.equal(s.data.get(PROGRESS_KEY),raw);
+});

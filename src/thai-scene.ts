@@ -1,3 +1,4 @@
+import {levelControlCopy} from './level-control-copy';
 import Phaser from 'phaser';
 import { gameAudio } from './audio';
 import { ControllerInput, keyboardOrControllerMove } from './controller.mjs';
@@ -46,7 +47,7 @@ export class ThaiTakeout extends Phaser.Scene {
   }
   create(){
     this.renderScale=(this.game.config.width as number)/W;
-    document.body.dataset.level='thai';document.getElementById('current-level')!.textContent='Level 2 · Thai Takeout Run';
+    document.body.dataset.level='thai';levelControlCopy('thai');for(const key of ['grip','jumps','speed','biggest','bonus','risky','reaction'])delete document.getElementById('live-status')!.dataset[key];document.getElementById('current-level')!.textContent='Level 2 · Thai Takeout Run';
     document.getElementById('game')!.setAttribute('aria-label','Level 2 · Thai Takeout Run platform game');
     const footer=document.querySelector('footer')!;footer.dataset.rooftopHtml??=footer.innerHTML;
     footer.textContent='MOVE A/D or arrows · JUMP W / Up / Space · Double-tap for Mega Jump · SPRINT Shift · PICKUP / ELEVATOR F · PAUSE P · RESTART hold R';
@@ -261,6 +262,7 @@ export class ThaiTakeout extends Phaser.Scene {
   finishRun(){
     if(this.won)return;
     this.riding=false;this.won=true;this.run={...this.run,phase:'complete'};this.physics.world.pause();
+    window.dispatchEvent(new Event('takeout-completed'));
     gameAudio.music.finishRun('success');gameAudio.play('win');
     (document.getElementById('pause-toggle') as HTMLButtonElement).disabled=true;
     const warmth=foodWarmth(this.run,this.deliveryElapsed),score=takeoutScore(this.run,this.deliveryElapsed);

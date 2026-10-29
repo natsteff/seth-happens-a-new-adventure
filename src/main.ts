@@ -1,3 +1,4 @@
+import {levelControlCopy} from './level-control-copy';
 import { SummitReminder, REMINDER_MS } from './reminders.mjs';
 import { checkForUpdate } from './updates.mjs';
 import { loadSettings, saveSettings } from './preferences.mjs';
@@ -7,6 +8,8 @@ import { controlCopy } from './control-copy.mjs';
 import Phaser from 'phaser';
 import { cityBackdrop, brickBuilding } from './scenery';
 import { ThaiTakeout } from './thai-scene';
+import { ScooterRide } from './scooter-scene';
+import { resetScooterScores } from './scooter-scoreboard';
 import { resetTakeoutScores } from './thai-scoreboard';
 import { createLevelProgress } from './progression.mjs';
 import { ControllerInput, keyboardOrControllerMove } from './controller.mjs';
@@ -80,7 +83,7 @@ class Errand extends Phaser.Scene {
     this.load.image('cats','./assets/cats.png');
   }
   create() {
-    document.body.dataset.level='rooftop';document.getElementById('current-level')!.textContent='Level 1 · Rooftop Beer Run';document.getElementById('next-level')!.hidden=true;
+    document.body.dataset.level='rooftop';levelControlCopy('rooftop');for(const key of ['grip','jumps','speed','biggest','bonus','risky','reaction'])delete document.getElementById('live-status')!.dataset[key];document.getElementById('current-level')!.textContent='Level 1 · Rooftop Beer Run';document.getElementById('next-level')!.hidden=true;
     const live=document.getElementById('live-status')!;live.dataset.level='rooftop';for(const key of ['phase','food','condition','warmth','hits'])delete live.dataset[key];
     document.getElementById('game')!.setAttribute('aria-label','Level 1 · Rooftop Beer Run platform game');
     const footer=document.querySelector('footer')!;if(footer.dataset.rooftopHtml)footer.innerHTML=footer.dataset.rooftopHtml;
@@ -710,7 +713,7 @@ class Errand extends Phaser.Scene {
   }
   finish(){
     levelProgress.completeRooftop();refreshLevelLocks();
-    document.getElementById('next-level')!.hidden=false;
+    const next=document.getElementById('next-level')!;next.hidden=false;next.dataset.nextLevel='thai';next.textContent='Continue to Level 2 · Thai Takeout Run →';
     gameAudio.music.finishRun(this.cheater?'cheater':'success');
     (document.getElementById('pause-toggle') as HTMLButtonElement).disabled=true;
     if(this.cheater)gameAudio.speak('Cheater!','cheater');else gameAudio.play('win');this.won=true;this.player.setVelocity(0,0);this.walking=false;this.prompt.setVisible(false);this.reminder.setVisible(false);this.say('Allison: “You’re home! The elevator just got fixed.”');
@@ -731,9 +734,12 @@ class Errand extends Phaser.Scene {
     offerScore({score,...this.mishaps,photos:this.photos.size,latePhotos:this.latePhotos.size,beer:this.beer,elapsedMs:Math.round(this.elapsedMs),bonus:this.cheater?0:timeBonus(this.elapsedMs),cheater:this.cheater});
   }
 }
-const initialScenes=new URLSearchParams(location.search).get('level')==='thai'&&levelProgress.canPlay('thai')?[ThaiTakeout,Errand]:[Errand,ThaiTakeout];
+const requestedLevel=new URLSearchParams(location.search).get('level');
+const scenes=[Errand,ThaiTakeout,ScooterRide];
+const first=requestedLevel==='scooter'&&levelProgress.canPlay('scooter')?ScooterRide:requestedLevel==='thai'&&levelProgress.canPlay('thai')?ThaiTakeout:Errand;
+const initialScenes=[first,...scenes.filter(scene=>scene!==first)];
 const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W*RENDER_SCALE,height:H*RENDER_SCALE,physics:{default:'arcade',arcade:{gravity:{x:0,y:1050},debug:false}},scene:initialScenes,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true}});
-function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout;}
+function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout|ScooterRide;}
 
 const soundToggle=document.getElementById('sound-toggle');
 soundToggle?.addEventListener('click',()=>{void gameAudio.unlock();gameAudio.toggle();(soundToggle as HTMLButtonElement).blur();});
@@ -819,8 +825,8 @@ function openTouchMenu(){
   const scene=activeScene();
   if(!scene||(scene.introActive&&scene.introStarted)||scoresOpen()||touchMenu.open||controlSettings?.open||installHelp?.open)return;
   touch.clear();if(!scene.introActive&&!scene.paused&&!scene.won&&!scene.failed)scene.togglePause();
-  (document.getElementById('touch-recall') as HTMLButtonElement).disabled=scene instanceof ThaiTakeout||scene.introActive||scene.won||scene.failed||missedPhotos(scene.player.x,scene.photos).length===0;
-  document.getElementById('touch-recall')!.hidden=scene instanceof ThaiTakeout;
+  (document.getElementById('touch-recall') as HTMLButtonElement).disabled=!(scene instanceof Errand)||scene.introActive||scene.won||scene.failed||missedPhotos(scene.player.x,scene.photos).length===0;
+  document.getElementById('touch-recall')!.hidden=!(scene instanceof Errand);
   document.querySelectorAll<HTMLButtonElement>('[data-proxy]').forEach(button=>{button.textContent=controlCopy(Array.from(document.getElementById(button.dataset.proxy!)!.childNodes).map(node=>node.nodeName==='BR'?'\n':node.textContent??'').join(''),touch.enabled);});
   const resume=document.getElementById('touch-resume') as HTMLButtonElement;
   const restart=touchMenu.querySelector<HTMLButtonElement>('[data-proxy="restart-run"]')!;
@@ -867,6 +873,7 @@ function applyControls(){
  document.getElementById('touch-arrows')!.hidden=controlStyle!=='default';
  document.getElementById('touch-stick')!.hidden=controlStyle==='default';
  document.querySelector('.touch-hint')!.textContent=controlStyle==='default'?(controlQuickSprint?'Double-tap + hold arrow · sprint':'Left / right · release to stop'):controlStyle==='stick'?'Game Stick · edges sprint':'Slide to move · edges sprint';
+ levelControlCopy(document.body.dataset.level??'rooftop');
 }
 function previewControls(){document.querySelectorAll<HTMLInputElement>('input[name=movement-style]').forEach(radio=>{radio.checked=radio.value===styleSelect.value;});document.getElementById('style-detail')!.textContent=styleSelect.value==='stick'?'Up/down has no game action. Jump and Action stay separate.':'Jump and Action stay separate.';document.getElementById('spacing-value')!.textContent=spacingInput.value;document.getElementById('spacing-preview')!.style.gap=`${8+(Number(spacingInput.value)-1)*8}px`;spacingInput.disabled=styleSelect.value!=='default';quickSprintInput.disabled=styleSelect.value!=='default';}
 const controlInputGuard=installOpeningGuard(controlSettings);
@@ -902,12 +909,14 @@ window.addEventListener('game-layout',()=>requestAnimationFrame(positionStartGam
 
 const levelDialog=document.getElementById('level-dialog') as HTMLDialogElement;
 function refreshLevelLocks(){
- const button=document.querySelector<HTMLButtonElement>('[data-start-level="thai"]')!;
- button.disabled=!levelProgress.canPlay('thai');
- button.querySelector('span')!.textContent=levelProgress.unlocked?'Collect dinner, dodge traffic, bring it home hot':'Locked · Complete Level 1 to unlock';
- document.getElementById('level-progress')!.textContent=levelProgress.unlocked
-  ?levelProgress.persistent?'Level 2 unlocked. Replay either level anytime.':'Level 2 unlocked for this session. Browser progress could not be saved.'
-  :'Complete Level 1 to unlock Thai Takeout Run. Your unlock is saved in this browser.';
+ for(const [key,copy,locked] of [['thai','Collect dinner, dodge traffic, bring it home hot','Complete Level 1'],['scooter','Ride with Allison · Big ramps, bigger regrets','Complete Level 2']]){
+  const button=document.querySelector<HTMLButtonElement>(`[data-start-level="${key}"]`)!;
+  button.disabled=!levelProgress.canPlay(key);button.querySelector('span')!.textContent=levelProgress.canPlay(key)?copy:`Locked · ${locked} to unlock`;
+ }
+ document.getElementById('level-progress')!.textContent=levelProgress.scooterUnlocked
+  ?(levelProgress.persistent?'All three levels unlocked. Replay any level anytime.':'All levels unlocked for this session. Browser progress could not be saved.')
+  :levelProgress.unlocked?(levelProgress.persistent?'Level 2 unlocked. Complete it to unlock Scooter Ride.':'Level 2 unlocked for this session. Browser progress could not be saved.')
+  :'Complete Level 1 to unlock Thai Takeout Run, then Level 2 to unlock Scooter Ride. Progress is saved in this browser.';
 }
 refreshLevelLocks();
 let levelPickerWasRunning=false,levelPickerFromMenu=false;
@@ -922,16 +931,20 @@ document.getElementById('choose-level')!.addEventListener('click',()=>{
 function closeLevelPicker(){levelDialog.close();if(levelPickerFromMenu)openTouchMenu();else if(levelPickerWasRunning&&activeScene()?.paused)activeScene().togglePause();}
 document.getElementById('level-cancel')!.addEventListener('click',closeLevelPicker);
 levelDialog.addEventListener('cancel',event=>{event.preventDefault();closeLevelPicker();});
-function startLevel(key:'rooftop'|'thai'){
+function startLevel(key:'rooftop'|'thai'|'scooter'){
  if(!levelProgress.canPlay(key)){refreshLevelLocks();return;}
- levelDialog.close();touchMenu.close();touch.clear();resetScoreEntry();resetTakeoutScores();
+ levelDialog.close();touchMenu.close();touch.clear();resetScoreEntry();resetTakeoutScores();resetScooterScores();
  const previous=activeScene();if(previous)game.scene.stop(previous.sys.settings.key);
  gameAudio.beginRun();game.scene.start(key);
  const url=new URL(location.href);url.searchParams.set('level',key);history.replaceState(null,'',url);
  requestAnimationFrame(positionStartGame);
 }
-document.querySelectorAll<HTMLButtonElement>('[data-start-level]').forEach(button=>button.addEventListener('click',()=>startLevel(button.dataset.startLevel as 'rooftop'|'thai')));
-document.getElementById('next-level')!.addEventListener('click',()=>startLevel('thai'));
+document.querySelectorAll<HTMLButtonElement>('[data-start-level]').forEach(button=>button.addEventListener('click',()=>startLevel(button.dataset.startLevel as 'rooftop'|'thai'|'scooter')));
+document.getElementById('next-level')!.addEventListener('click',()=>startLevel(document.getElementById('next-level')!.dataset.nextLevel==='scooter'?'scooter':'thai'));
+window.addEventListener('takeout-completed',()=>{
+ if(!(activeScene() instanceof ThaiTakeout)||!activeScene().won)return;
+ levelProgress.completeTakeout();refreshLevelLocks();const next=document.getElementById('next-level')!;next.hidden=false;next.dataset.nextLevel='scooter';next.textContent='Continue to Level 3 · Scooter Ride →';
+});
 for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{if(levelDialog.open)event.stopPropagation();},true);
 
 window.addEventListener('blur',clearPlayPointers);

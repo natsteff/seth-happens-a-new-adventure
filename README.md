@@ -30,6 +30,14 @@ Head right from the apartment to the Thai restaurant, then press **F / Action** 
 
 New sprites and close-building backdrop were generated with imagegen. See [art and exact prompts](docs/thai-art.md). Collision geometry remains separate from the art.
 
+## Level 3 · Scooter Ride
+
+Complete **Level 2** to unlock **Level 3**, then replay any unlocked level at any time. Thai delivery completion grants access before saving a score and offers a Continue button. Previously saved valid new-game Thai finishes also qualify after Level 1 completion. `/?level=scooter` respects the lock. Progress remains independent of score records; unavailable/corrupt storage falls back to session unlocks without overwriting unreadable data.
+
+Seth drives a stand-up electric scooter with Allison behind him on the same deck. Auto-forward momentum keeps the ride moving. **A / Left** brakes, **D / Right / Shift** accelerates, and **W / Up / Space** hops. Mobile arrows and controller stick/D-pad brake or accelerate; Jump / A / Cross hops. **F / Action / X / Square** toggles the optional high ramp. The five main ramps launch automatically, building from a dumpster hop to bus and rooftop leaps. The optional higher route awards one 750-point sky bonus; the lower route remains available.
+
+Allison's grip starts at 100%. Walker, bird, sign and front-obstacle impacts cost 18; exceptionally hard landings cost 10, with 1.5 seconds of recovery between hits. Roof landings and rear contacts are safe. Zero grip or a 120-second rental expiry fails the ride without a record. Finish with Allison aboard to score: 2,000 + 20 × grip + sky bonus + 10 × whole seconds remaining below 120 − 100 × bumps. The first route takes roughly 16–35 seconds depending on speed; this is an initial gameplay pass for tuning.
+
 ## Computer and mobile
 
 The same scenery renders in the existing game world on desktop and mobile. It scales with the canvas and leaves the existing responsive touch controls intact. Landscape Home Screen app play remains the inherited recommended mobile path. Browser viewport checks do not establish physical iOS, Android or controller acceptance. No new mobile-browser fixes are included.
