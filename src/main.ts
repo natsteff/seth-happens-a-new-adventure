@@ -990,4 +990,4 @@ window.addEventListener('pageshow',()=>{void checkUpdates();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)void checkUpdates();});
 void checkUpdates();
 
-document.getElementById('splash-version')!.textContent=document.getElementById('game-version')!.textContent;
+document.getElementById('splash-version')!.textContent=`${document.getElementById('game-version')!.textContent} · ${document.getElementById('release-stage')!.textContent}`;

@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#101d30",
   "theme_color": "#101d30",
-  "description": "Eight unlockable platform adventures with Seth and Allison, from rooftops and takeout to scooters, concerts and carnival chaos.",
+  "description": "Early alpha. Eight unlockable platform adventures with Seth and Allison, from rooftops and takeout to scooters, concerts and carnival chaos.",
   "icons": [
     {
       "src": "./icons/app-192.png?v=0.8.1",
