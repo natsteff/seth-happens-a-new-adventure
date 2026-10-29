@@ -12,7 +12,7 @@ One very ordinary guy. Eight increasingly unreasonable adventures.
 
 Run, jump, dodge and ride through a city full of familiar faces and questionable decisions. Pick up dinner, survive a scooter ride with Allison, photograph a concert, escape a haunted house, and find out just how badly a Wisconsin snow day can go.
 
-**Version 0.8.1 · Early alpha**
+**Version 0.8.2 · Early alpha**
 
 ## Your adventures
 

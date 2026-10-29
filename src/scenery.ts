@@ -13,9 +13,18 @@ export function cityBackdrop(scene: Phaser.Scene, width: number, height: number)
 
 export function brickBuilding(scene: Phaser.Scene, x: number, roofY: number, width: number, bottom: number, floor: number) {
   const height = bottom - roofY;
-  const facade = scene.add.tileSprite(x, roofY + 8, width, Math.max(1, height - 8), 'adventure-brick')
-    .setOrigin(0).setTileScale(.19).setDepth(-8);
-  facade.tilePositionX = (floor % 4) * 384;
+  // TileSprite owns a POT fill canvas + GPU texture for every building. Using
+  // the 1536x1024 original here duplicated 8 MiB 26 times at startup. Sample
+  // once near the displayed size; retain the original file and repeat spacing.
+  const tileKey = 'adventure-brick-display';
+  if (!scene.textures.exists(tileKey)) {
+    const tile = scene.textures.createCanvas(tileKey, 384, 256)!;
+    tile.context.drawImage(scene.textures.get('adventure-brick').getSourceImage() as HTMLImageElement, 0, 0, 384, 256);
+    tile.refresh();
+  }
+  const facade = scene.add.tileSprite(x, roofY + 8, width, Math.max(1, height - 8), tileKey)
+    .setOrigin(0).setTileScale(.76).setDepth(-8);
+  facade.tilePositionX = (floor % 4) * 96;
   const detail = scene.add.graphics().setDepth(-7);
   // Dark return and base establish depth without changing the playable roof width.
   detail.fillStyle(0x101725, .55).fillRect(x + width - 10, roofY + 8, 10, height - 8);
