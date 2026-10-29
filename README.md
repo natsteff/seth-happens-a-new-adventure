@@ -17,7 +17,7 @@ Use the local URL printed by Vite; occupied ports cause it to select another por
 
 ## Level 2 · Thai Takeout Run
 
-Choose **Level 2** from **Choose Level** on desktop or in the mobile menu. Level 1 also offers **Continue to Level 2** after completion. Direct local link: `/?level=thai`.
+Complete **Level 1** once to unlock **Level 2**, then replay either from **Choose Level** on desktop or in the mobile menu. The unlock is saved in this browser independently of scores; clearing browser site data removes it. Existing saved rooftop finishes in this new game also count. Original Seth Happens records do not unlock this game. Level 1 also offers **Continue to Level 2** after completion. Direct local link: `/?level=thai` (returns to Level 1 while locked).
 
 Head right from the apartment to the Thai restaurant, then press **F / Action** at the pickup door. Return left to the apartment and press **F / Action** at the elevator to complete delivery. No photo or soccer interaction is required. The route includes jumpable dumpsters, parked buses, food carts and one-/two-story buildings. Moving cars and familiar wandering pedestrians are hazards. On the return, traffic is faster and a food snatcher chases Seth within its block.
 

@@ -248,3 +248,5 @@ html.touch-play-locked main>*:not(#play-area){visibility:hidden}
 .level-dialog button span{display:block;font-size:12px;color:#bbd1d4;margin-top:6px}.level-dialog #level-cancel{text-align:center;background:#27384c}
 #next-level{position:absolute;z-index:15;left:50%;bottom:4%;transform:translateX(-50%);padding:12px 18px;background:#326b51;color:#fff3cc;border:2px solid #c3d5ac;border-radius:10px;font-weight:bold;max-width:90%}
 #next-level[hidden]{display:none}
+
+.level-dialog button:disabled{opacity:.55;cursor:not-allowed}#level-progress{color:#ffcf8a}

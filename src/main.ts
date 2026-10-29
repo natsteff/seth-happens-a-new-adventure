@@ -8,6 +8,7 @@ import Phaser from 'phaser';
 import { cityBackdrop, brickBuilding } from './scenery';
 import { ThaiTakeout } from './thai-scene';
 import { resetTakeoutScores } from './thai-scoreboard';
+import { createLevelProgress } from './progression.mjs';
 import { ControllerInput, keyboardOrControllerMove } from './controller.mjs';
 import './style.css';
 import { touch } from './touch.mjs';
@@ -21,6 +22,8 @@ import { walkLayout, fallLayout } from './art-layout';
 import { REGULAR_JUMP_SPEED, megaJumpVelocity, countdownLabel, formatRunSeconds, fallingPose, timerWarningSecond, fallDecision, runExpired, RUN_LIMIT_MS, SPRINT_SPEED, timeBonus, finalScore, roadLandingIsFall, fallingStep, fallingObjectHurts, fallingObjectSolid, patrolX, EGG, fallingAssignments, floors, photoStops, beerSpot, recordMishap, RESTART_HOLD_MS, missing, missedPhotos, photoIndicator, LEVEL_WIDTH, GROUND_Y, ROAD, FLOOR_RISE, objectImpactReaction } from './mission.mjs';
 
 const W = 1100, H = 600;
+let progressStorage:Storage|null=null;try{progressStorage=localStorage;}catch{/* Session unlock remains available. */}
+const levelProgress=createLevelProgress(progressStorage);
 // Render at display density, retaining the same logical play area and physics.
 const RENDER_SCALE = Math.min(3, Math.max(1, Math.ceil(
   Math.min(screen.width / W, screen.height / H) * window.devicePixelRatio)));
@@ -706,6 +709,7 @@ class Errand extends Phaser.Scene {
     }finally{this.refreshControlCopy();}
   }
   finish(){
+    levelProgress.completeRooftop();refreshLevelLocks();
     document.getElementById('next-level')!.hidden=false;
     gameAudio.music.finishRun(this.cheater?'cheater':'success');
     (document.getElementById('pause-toggle') as HTMLButtonElement).disabled=true;
@@ -727,7 +731,7 @@ class Errand extends Phaser.Scene {
     offerScore({score,...this.mishaps,photos:this.photos.size,latePhotos:this.latePhotos.size,beer:this.beer,elapsedMs:Math.round(this.elapsedMs),bonus:this.cheater?0:timeBonus(this.elapsedMs),cheater:this.cheater});
   }
 }
-const initialScenes=new URLSearchParams(location.search).get('level')==='thai'?[ThaiTakeout,Errand]:[Errand,ThaiTakeout];
+const initialScenes=new URLSearchParams(location.search).get('level')==='thai'&&levelProgress.canPlay('thai')?[ThaiTakeout,Errand]:[Errand,ThaiTakeout];
 const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W*RENDER_SCALE,height:H*RENDER_SCALE,physics:{default:'arcade',arcade:{gravity:{x:0,y:1050},debug:false}},scene:initialScenes,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true}});
 function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout;}
 
@@ -897,18 +901,29 @@ game.scale.on('resize',()=>requestAnimationFrame(positionStartGame));
 window.addEventListener('game-layout',()=>requestAnimationFrame(positionStartGame));
 
 const levelDialog=document.getElementById('level-dialog') as HTMLDialogElement;
+function refreshLevelLocks(){
+ const button=document.querySelector<HTMLButtonElement>('[data-start-level="thai"]')!;
+ button.disabled=!levelProgress.canPlay('thai');
+ button.querySelector('span')!.textContent=levelProgress.unlocked?'Collect dinner, dodge traffic, bring it home hot':'Locked · Complete Level 1 to unlock';
+ document.getElementById('level-progress')!.textContent=levelProgress.unlocked
+  ?levelProgress.persistent?'Level 2 unlocked. Replay either level anytime.':'Level 2 unlocked for this session. Browser progress could not be saved.'
+  :'Complete Level 1 to unlock Thai Takeout Run. Your unlock is saved in this browser.';
+}
+refreshLevelLocks();
 let levelPickerWasRunning=false,levelPickerFromMenu=false;
 document.getElementById('choose-level')!.addEventListener('click',()=>{
  const scene=activeScene();if(!scene||(scene.introActive&&scene.introStarted)||scoresOpen())return;
  levelPickerWasRunning=!scene.paused&&!scene.introActive&&!scene.won&&!scene.failed;
  levelPickerFromMenu=touchMenu.open;touchMenu.close();touch.clear();
  if(levelPickerWasRunning)scene.togglePause();
+ refreshLevelLocks();
  levelDialog.showModal();
 });
 function closeLevelPicker(){levelDialog.close();if(levelPickerFromMenu)openTouchMenu();else if(levelPickerWasRunning&&activeScene()?.paused)activeScene().togglePause();}
 document.getElementById('level-cancel')!.addEventListener('click',closeLevelPicker);
 levelDialog.addEventListener('cancel',event=>{event.preventDefault();closeLevelPicker();});
 function startLevel(key:'rooftop'|'thai'){
+ if(!levelProgress.canPlay(key)){refreshLevelLocks();return;}
  levelDialog.close();touchMenu.close();touch.clear();resetScoreEntry();resetTakeoutScores();
  const previous=activeScene();if(previous)game.scene.stop(previous.sys.settings.key);
  gameAudio.beginRun();game.scene.start(key);
