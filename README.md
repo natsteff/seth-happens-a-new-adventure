@@ -5,99 +5,78 @@
 # Seth Happens - A New Adventure
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><strong>▶ PLAY NOW</strong></a> · <a href="#play-on-iphone">Play on iPhone</a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><strong>▶ PLAY NOW</strong></a> · <a href="#play-on-iphone">Play on iPhone</a> · <a href="https://github.com/natsteff/seth-happens-a-new-adventure/issues">Report a bug</a>
 </p>
 
-This separate game builds on the complete **Seth Happens v0.3.12** release. The original remains a standalone game.
+One very ordinary guy. Eight increasingly unreasonable adventures.
 
-**[Play Now](https://natsteff.github.io/seth-happens-a-new-adventure/)** · [Source on GitHub](https://github.com/natsteff/seth-happens-a-new-adventure)
+Run, jump, dodge and ride through a city full of familiar faces and questionable decisions. Pick up dinner, survive a scooter ride with Allison, photograph a concert, escape a haunted house, and find out just how badly a Wisconsin snow day can go.
 
-Complete each level to unlock the next, then replay any unlocked adventure. Progress and records are saved only in your browser. No account, backend or analytics is required.
+**Version 0.8.1 · Alpha/beta testing build**
 
-Level 1 retains the original 26-rooftop beer run, characters, two photo objectives, hazards, elevator secret, timeout sequence, scoring, keyboard/controller/mobile controls, sound effects, voices, radio and outcome music. Its scenery uses a dusk-city treatment: illustrated skyline and river, textured brick buildings, stone roof caps and decorative rooftop ventilation. Collision geometry, movement, timer and scoring rules are unchanged.
+## Your adventures
 
-The game has a separate browser-storage namespace for scores, preferences, touch controls and update guards. It never imports or clears the original game's records.
+| Level | Adventure | Your mission |
+| --- | --- | --- |
+| 1 | Rooftop Beer Run | Climb 26 rooftops, take the photos and deliver the beer. |
+| 2 | Thai Takeout Run | Collect dinner and bring it home through busier streets. |
+| 3 | Scooter Ride | Tackle bigger ramps with Allison still aboard. |
+| 4 | Concert Chaos | Get your press pass, reach the photo pit and get the shots. |
+| 5 | Haunted House | Find the attic key and escape before the house catches up. |
+| 6 | Zombie Apocalypse | Survive the neighborhood, find a truck and drive to safety. |
+| 7 | Snow Day From Hell | Cross icy streets and dodge snowplows to reach warmth. |
+| 8 | Carnival Catastrophe | Search for Allison across moving rides and a chaotic midway. |
+
+Complete each level to unlock the next. Once unlocked, replay any adventure from **Choose Level** in the desktop controls or mobile game menu.
+
+## Controls
+
+| Action | Keyboard | Controller | Touch |
+| --- | --- | --- | --- |
+| Move | A / D or ← / → | Left stick / D-pad | On-screen arrows or chosen movement control |
+| Jump | W / ↑ / Space | A / Cross | Jump |
+| Mega Jump | Double-tap Jump | Double-press Jump | Double-tap Jump |
+| Sprint | Shift | RT / R2 | Customize movement controls in the menu |
+| Interact / photograph | F | X / Square | Action |
+| Pause | P | Menu / Options | Game menu |
+| Restart | Hold R or Restart button | Use the game menu | Menu → Restart |
+
+On the scooter and in the truck, **left brakes** and **right accelerates**. Ramps launch the scooter automatically. The level's opening screen explains special objectives and controls.
+
+Full screen is recommended. An optional controller can be paired before play; use keyboard or touch for menus and score entry.
 
 ## Play on iPhone
 
-1. Open [Play Now](https://natsteff.github.io/seth-happens-a-new-adventure/) in Safari.
-2. Tap **Share → Add to Home Screen**, enable **Open as Web App** if offered, then tap **Add**.
-3. Launch **New Adventure** from its new icon and rotate to landscape.
+1. Open **[Play Now](https://natsteff.github.io/seth-happens-a-new-adventure/)** in Safari.
+2. Choose **Share → Add to Home Screen**. Enable **Open as Web App** if offered, then tap **Add**.
+3. Launch **New Adventure** from its icon and rotate to landscape.
 
-Keep the original Seth Happens installed separately; this URL installs New Adventure. If an earlier installation of this New Adventure URL keeps its old icon, iOS may require removing and adding that installation again; preserve any important local records first. Browser and Home Screen installations may keep separate saves. Internet is required; offline play is not included.
+Use the on-screen movement, Jump and Action controls. Open the game menu to adjust controls, change music, restart or choose a level.
 
-Desktop: use keyboard controls or an optional controller. Mobile: use the on-screen controls and game menu.
+The original **Seth Happens** can stay installed separately. This game has its own icon, name and progress. If an older installation of this New Adventure URL keeps a cached icon, adding it again may be necessary; preserve important records before removing an installation.
 
-## Run locally
+Android players can use the browser's **Install app / Add to Home screen** option. Internet is required; offline play is not included.
 
-Use Node >=22.13.0 and pnpm 11.25.0:
+## Music and sound
 
-```sh
-pnpm install --frozen-lockfile
-./dev.sh
-```
+Sound effects and music have separate controls. Choose a track with the radio, or open the mobile game menu for music settings.
 
-Use the local URL printed by Vite; occupied ports cause it to select another port. `pnpm build` typechecks and builds `dist/`. `pnpm test` runs the existing regression suite, including a loopback-only server test. The optional leaderboard server code is retained from the release, but shared scores remain disabled. No backend is deployed.
+The starting playlist has five tracks. Unlocking Thai Takeout Run, Scooter Ride and Concert Chaos adds their soundtracks, which can then be selected on any unlocked level. Each level remembers your music choice. Muting music or sound stays in effect when switching levels.
 
-## Level 2 · Thai Takeout Run
+## Progress and records
 
-Complete **Level 1** once to unlock **Level 2**, then replay either from **Choose Level** on desktop or in the mobile menu. The unlock is saved in this browser independently of scores; clearing browser site data removes it. Existing saved rooftop finishes in this new game also count. Original Seth Happens records do not unlock this game. Level 1 also offers **Continue to Level 2** after completion. Direct local link: `/?level=thai` (returns to Level 1 while locked).
+Unlocks, high scores and settings are saved in your browser. No account is required. They do not sync between devices, and browser and Home Screen installations may keep separate records. Clearing site data can remove them.
 
-Head right from the apartment to the Thai restaurant, then press **F / Action** at the pickup door. Return left to the apartment and press **F / Action** at the elevator to complete delivery. No photo or soccer interaction is required. The route includes jumpable dumpsters, parked buses, food carts and one-/two-story buildings. Moving vehicles support landings and riding on their roofs, hoods and trunks. Only their front bumper causes vehicle damage; rear/roof contact is harmless. Familiar wandering pedestrians remain hazards. On the return, traffic is faster and a food snatcher chases Seth within its block.
+Every adventure has its own score list. This game keeps its saves separate from the original Seth Happens.
 
-- 180-second run deadline; pause freezes gameplay, time, and food warmth.
-- Food starts at 100% condition and warmth when collected. Warmth falls one point per active return second.
-- A hit reduces food condition by 12 and warmth by 8; the food snatcher reduces them by 20 and 12. A 1.6-second recovery window prevents repeated damage from one contact. Outbound hits affect the mishap count but cannot damage food not yet collected.
-- A battered/cold order remains deliverable. Final score: 1,000 delivery + 10 × condition + 10 × remaining warmth + 10 × whole seconds below 180, minus 25 per hit, floored at zero.
-- Entering the home elevator secures the food and freezes its delivery time/warmth. The elevator ride uses the existing sound timing and supports pause.
-- Takeout records are local-only and separate from rooftop records. No existing records are migrated or rewritten.
+## Help test the game
 
-New sprites and close-building backdrop were generated with imagegen. See [art and exact prompts](docs/thai-art.md). Collision geometry remains separate from the art.
+Found a problem? [Report a bug](https://github.com/natsteff/seth-happens-a-new-adventure/issues) with the level, what happened, what you expected, and your device/browser. A screenshot helps, especially for touch controls or landing problems.
 
-## Level 3 · Scooter Ride
+## Credits
 
-Complete **Level 2** to unlock **Level 3**, then replay any unlocked level at any time. Thai delivery completion grants access before saving a score and offers a Continue button. Previously saved valid new-game Thai finishes also qualify after Level 1 completion. `/?level=scooter` respects the lock. Progress remains independent of score records; unavailable/corrupt storage falls back to session unlocks without overwriting unreadable data.
+Music: **[BT-AI](https://suno.com/@bt_ai)**. Selected sound effects: **[Pixabay](https://pixabay.com/sound-effects/)**. Voice production: **[ElevenLabs](https://elevenlabs.io/)**. Built with **[Phaser](https://phaser.io/)**.
 
-Seth drives a stand-up electric scooter with Allison behind him on the same deck. Auto-forward momentum keeps the ride moving. **A / Left** brakes, **D / Right / Shift** accelerates, and **W / Up / Space** hops. Mobile arrows and controller stick/D-pad brake or accelerate; Jump / A / Cross hops. **F / Action / X / Square** toggles the optional high ramp. The five main ramps launch automatically, building from a dumpster hop to bus and rooftop leaps. The optional higher route awards one 750-point sky bonus; the lower route remains available.
-
-Allison's grip starts at 100%. Walker, bird, sign and front-obstacle impacts cost 18; exceptionally hard landings cost 10, with 1.5 seconds of recovery between hits. Roof landings and rear contacts are safe. Zero grip or a 120-second rental expiry fails the ride without a record. Finish with Allison aboard to score: 2,000 + 20 × grip + sky bonus + 10 × whole seconds remaining below 120 − 100 × bumps. The first route takes roughly 16–35 seconds depending on speed; this is an initial gameplay pass for tuning.
-
-## Level 4 · Concert Chaos
-
-Regular jumps, double-tap Mega Jump, sprint, controller/touch controls, pause, restart and music are reused. Street vehicles remain landable and damage only at their front bumper. Concertgoers, spilled drinks and a crowd surfer provide obstacles. Losing stamina returns Seth to the current checkpoint; a full restart clears the pass and photographs. Three successful shots finish with **SETH GOT THE SHOT!** and a separate local record book. Score: 4,000 + 750 per saved shot − 5 per rounded-up run second − 80 per mishap − 100 per missed photo, floored at zero. **Eye of the Stairwell (Leads Take Me Away!)** is the Level4 default, unlocked with Concert Chaos and then selectable on every level as track8. It is separate from the existing champion-track recording.
-
-## Level 5 · Haunted House
-
-Complete Concert Chaos to unlock Haunted House. Cross the dark neighborhood and press **F / Action** at the mansion door. Climb four floors using the east, west and attic staircases. The landing bell sets a checkpoint; the attic key sets another checkpoint and wakes a pursuing ghost. Escape down the long east staircase to the exit door within 90 active seconds, then press **F / Action** to leave. Running out of escape time returns Seth to the attic checkpoint with another attempt; losing stamina returns him to the current checkpoint. A full restart clears entry, key and checkpoints.
-
-Ghosts disappear, glow as a harmless warning, become solid hazards, then fade harmlessly. Warning marks precede falling books; landed books are harmless. Familiar characters appear as spectral visitors, with the larger landlord ghost joining the escape. Platforms have clearly highlighted wood tops; mansion treads and floor sections use one-way support, allowing upward jumps through them. Controls, Mega Jump, sprint, pause, touch/controller input and independent records are reused. Score: 5,000 + 20 per rounded-up escape second remaining − 100 per scare − 3 per rounded-up total run second, floored at zero.
-
-## Level 6 · Zombie Apocalypse
-
-Complete Haunted House to unlock Zombie Apocalypse. Survive a close-building neighborhood, jumping over familiar zombie characters and climbing bins and parked buses. Sprint from the bins to reach the bus roofs. Allison advances independently and clears nearby threats herself; there is no rescue objective. Press **F / Action** beside the truck to board together. The finale automatically drives forward: left brakes, right accelerates, and Jump clears marked barricades. Truck contact flattens zombies; reaching the safe zone completes the level. Stamina loss returns to the street start or truck checkpoint. Restart clears the truck and horde. Score: 6,000 + 100 per zombie flattened − 5 per whole run second − 100 per hit, floored at zero.
-
-## Level 7 · Snow Day From Hell
-
-Complete Zombie Apocalypse to unlock Snow Day. Reach the warming shelter and press **F / Action**. Blue strips mark ice: releasing movement leaves a slide, while steering against it brakes faster. Snowbanks provide stepped high routes. Snowplow roofs and rear contacts are safe; directional front impacts and periodic thrown snow walls hurt. Yellow warnings precede falling icicles. Two warm bus stops automatically restore stamina and save checkpoints. Snow and periodic haze preserve visibility of platform tops and hazards. Score: 6,500 − 8 per whole run second − 125 per hit, floored at zero.
-
-## Level 8 · Carnival Catastrophe
-
-Complete Snow Day From Hell to unlock Carnival. Ask the ticket-booth attendant about Allison with **F / Action**, then cross the ride works using a rising lift, fixed landings, a horizontal shuttle and a final lift. Wait for the first lift to lower, jump aboard, and ride up before jumping to the landing. Cream-colored edges mark playable surfaces; tents, lights and ride supports are decorative. Falling returns Seth to the booth checkpoint, or the ride-exit checkpoint after reaching the far side.
-
-The rotating Ferris-wheel gondolas are rideable optional platforms; reaching the top awards a single 1,000-point sky bonus. The later raised coaster route awards a single 500-point bonus and has a moving car to dodge or ride. The ground route remains available there. Crowds slow Seth, while runaway bumper cars have safe roofs/rears and damaging front contacts. Allison is calmly enjoying the snack stand at the far end: press **F / Action** beside her to reunite and finish. She was never a rescue objective. Score: 6,500 + optional bonuses − 6 per whole run second − 100 per mishap, floored at zero.
-
-## Computer and mobile
-
-The same scenery renders in the existing game world on desktop and mobile. It scales with the canvas and leaves the existing responsive touch controls intact. Landscape Home Screen app play remains the inherited recommended mobile path. Browser viewport checks do not establish physical iOS, Android or controller acceptance. No new mobile-browser fixes are included.
-
-## Music, sound and asset credits
-
-## Unlockable level music
-
-Level 1 starts with the original five radio choices and Arcade Staircase as its default. Unlocking Level 2 also unlocks **Thai Food Run**, which is Level 2's default. Unlocking Level 3 also unlocks **Scooter Run**, which is Level 3's default. Each unlocked soundtrack is available on every level through the radio's Track picker (in the mobile menu), previous/next buttons, or keys **6**, **7**, and **8**. Locked tracks cannot be selected by shortcut or restored from an old preference.
-
-## Release status
-
-This project does not replace or maintain the original standalone game. Browser checks do not certify physical iPhone/Android/controller acceptance. Supplied assets and third-party notices are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+See [asset and dependency notices](THIRD_PARTY_NOTICES.md) for credits and third-party rights. This is a fictional comedy adventure with no official team, band or venue affiliation.
 
 
