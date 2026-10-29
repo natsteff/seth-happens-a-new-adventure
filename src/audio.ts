@@ -1,7 +1,7 @@
 import {loadSettings,saveSettings} from './preferences.mjs';
 import { MusicRadio } from './music';
 import { recordedClips, type VoiceReaction, type LocationCue, type AudioClip } from './voice-clips';
-type Cue = 'jump' | 'photo' | 'pickup' | 'impact' | 'miss' | 'win' | 'piano' | 'clown' | 'timer';
+type Cue = 'jump' | 'photo' | 'pickup' | 'takeout' | 'impact' | 'miss' | 'win' | 'piano' | 'clown' | 'timer';
 /** Original synthesized effects; nothing downloaded and no audio service. */
 class GameAudio {
   readonly music=new MusicRadio();
@@ -125,7 +125,7 @@ class GameAudio {
     if(cue==='photo'){
       const source=ctx.createBufferSource(),gain=ctx.createGain();source.buffer=this.noise!;gain.gain.value=.65;source.connect(gain);gain.connect(this.effects!);source.start();source.onended=()=>{source.disconnect();gain.disconnect();};tone(1150,.03);tone(660,.04,.065);
     }
-    if(cue==='pickup'){this.speak('Mmm, beer!','beer');tone(440,.13);tone(554,.13,.10);tone(659,.23,.20);}
+    if(cue==='pickup'||cue==='takeout'){if(cue==='pickup')this.speak('Mmm, beer!','beer');tone(440,.13);tone(554,.13,.10);tone(659,.23,.20);}
     if(cue==='impact'){tone(120,.22,0,'triangle',42);tone(75,.12,.03,'sine',35);}
     if(cue==='miss'){tone(440,.16,0,'triangle',240);tone(220,.17,.16,'triangle',130);}
     if(cue==='win'){this.speak('Great success!','win');[392,494,587,784].forEach((f,i)=>tone(f,.3,i*.13));}

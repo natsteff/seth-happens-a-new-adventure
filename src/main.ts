@@ -6,6 +6,8 @@ import { installOpeningGuard } from './dialog-input.mjs';
 import { controlCopy } from './control-copy.mjs';
 import Phaser from 'phaser';
 import { cityBackdrop, brickBuilding } from './scenery';
+import { ThaiTakeout } from './thai-scene';
+import { resetTakeoutScores } from './thai-scoreboard';
 import { ControllerInput, keyboardOrControllerMove } from './controller.mjs';
 import './style.css';
 import { touch } from './touch.mjs';
@@ -27,6 +29,7 @@ type HazardKind = 'keg' | 'ball' | 'piano' | 'anvil' | 'ac' | 'cooler' | 'partie
 type Hazard = { kind: HazardKind; floor: number; x: number; y: number; art: Phaser.GameObjects.Container; body: Phaser.Physics.Arcade.Image; warning?: Phaser.GameObjects.Text; phase: number; dropCycle?: number; piano?: {startedAt:number;readyAt:number;serial:number;dropping?:boolean;landed?:boolean;warning?:boolean}; nextHonk?: number; impacted?:number };
 const isFalling=(kind:string)=>['piano','anvil','ac','cooler'].includes(kind);
 class Errand extends Phaser.Scene {
+  constructor(){super({key:'rooftop'});}
   sharpObjects=new WeakSet<Phaser.GameObjects.GameObject>();
   player!: Phaser.Physics.Arcade.Sprite;
   keys!: Record<string, Phaser.Input.Keyboard.Key>;
@@ -74,6 +77,10 @@ class Errand extends Phaser.Scene {
     this.load.image('cats','./assets/cats.png');
   }
   create() {
+    document.body.dataset.level='rooftop';document.getElementById('current-level')!.textContent='Level 1 · Rooftop Beer Run';document.getElementById('next-level')!.hidden=true;
+    const live=document.getElementById('live-status')!;live.dataset.level='rooftop';for(const key of ['phase','food','condition','warmth','hits'])delete live.dataset[key];
+    document.getElementById('game')!.setAttribute('aria-label','Level 1 · Rooftop Beer Run platform game');
+    const footer=document.querySelector('footer')!;if(footer.dataset.rooftopHtml)footer.innerHTML=footer.dataset.rooftopHtml;
     touch.clear();(document.getElementById('touch-menu') as HTMLDialogElement).close();(document.getElementById('touch-menu-open') as HTMLButtonElement).disabled=true;resetScoreEntry();this.scorePaused=false;this.controller=new ControllerInput();
     this.input.keyboard!.enabled=true;
     this.elapsedMs=0;this.lastTimerBeep=0;this.failed=false;this.cheater=false;this.riding=false;this.rideTween=undefined;
@@ -699,6 +706,7 @@ class Errand extends Phaser.Scene {
     }finally{this.refreshControlCopy();}
   }
   finish(){
+    document.getElementById('next-level')!.hidden=false;
     gameAudio.music.finishRun(this.cheater?'cheater':'success');
     (document.getElementById('pause-toggle') as HTMLButtonElement).disabled=true;
     if(this.cheater)gameAudio.speak('Cheater!','cheater');else gameAudio.play('win');this.won=true;this.player.setVelocity(0,0);this.walking=false;this.prompt.setVisible(false);this.reminder.setVisible(false);this.say('Allison: “You’re home! The elevator just got fixed.”');
@@ -719,7 +727,9 @@ class Errand extends Phaser.Scene {
     offerScore({score,...this.mishaps,photos:this.photos.size,latePhotos:this.latePhotos.size,beer:this.beer,elapsedMs:Math.round(this.elapsedMs),bonus:this.cheater?0:timeBonus(this.elapsedMs),cheater:this.cheater});
   }
 }
-const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W*RENDER_SCALE,height:H*RENDER_SCALE,physics:{default:'arcade',arcade:{gravity:{x:0,y:1050},debug:false}},scene:Errand,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true}});
+const initialScenes=new URLSearchParams(location.search).get('level')==='thai'?[ThaiTakeout,Errand]:[Errand,ThaiTakeout];
+const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W*RENDER_SCALE,height:H*RENDER_SCALE,physics:{default:'arcade',arcade:{gravity:{x:0,y:1050},debug:false}},scene:initialScenes,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true}});
+function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout;}
 
 const soundToggle=document.getElementById('sound-toggle');
 soundToggle?.addEventListener('click',()=>{void gameAudio.unlock();gameAudio.toggle();(soundToggle as HTMLButtonElement).blur();});
@@ -772,7 +782,7 @@ function setTouch(enabled:boolean){
   document.getElementById('touch-controls')!.hidden=!enabled;
   gameElement.classList.toggle('touch-mode',enabled);
   touchViewport.sync();
-  (game.scene.scenes[0] as Errand)?.refreshControlCopy();
+  activeScene()?.refreshControlCopy();
   const radio=document.getElementById('radio')!;
   if(enabled)document.getElementById('touch-radio-slot')!.append(radio);else gameElement.insertBefore(radio,document.getElementById('game'));
   if(!enabled)(document.getElementById('touch-menu') as HTMLDialogElement).close();
@@ -797,15 +807,16 @@ document.querySelectorAll<HTMLButtonElement>('[data-proxy]').forEach(button=>{
 const touchMenu=document.getElementById('touch-menu') as HTMLDialogElement;
 function closeTouchMenu(resume=true){
   touchMenu.close();touch.clear();
-  const scene=game.scene.scenes[0] as Errand;
+  const scene=activeScene();
   if(resume&&scene?.paused)scene.togglePause();
 }
 const menuButton=document.getElementById('touch-menu-open') as HTMLButtonElement;
 function openTouchMenu(){
-  const scene=game.scene.scenes[0] as Errand;
+  const scene=activeScene();
   if(!scene||(scene.introActive&&scene.introStarted)||scoresOpen()||touchMenu.open||controlSettings?.open||installHelp?.open)return;
   touch.clear();if(!scene.introActive&&!scene.paused&&!scene.won&&!scene.failed)scene.togglePause();
-  (document.getElementById('touch-recall') as HTMLButtonElement).disabled=scene.introActive||scene.won||scene.failed||missedPhotos(scene.player.x,scene.photos).length===0;
+  (document.getElementById('touch-recall') as HTMLButtonElement).disabled=scene instanceof ThaiTakeout||scene.introActive||scene.won||scene.failed||missedPhotos(scene.player.x,scene.photos).length===0;
+  document.getElementById('touch-recall')!.hidden=scene instanceof ThaiTakeout;
   document.querySelectorAll<HTMLButtonElement>('[data-proxy]').forEach(button=>{button.textContent=controlCopy(Array.from(document.getElementById(button.dataset.proxy!)!.childNodes).map(node=>node.nodeName==='BR'?'\n':node.textContent??'').join(''),touch.enabled);});
   const resume=document.getElementById('touch-resume') as HTMLButtonElement;
   const restart=touchMenu.querySelector<HTMLButtonElement>('[data-proxy="restart-run"]')!;
@@ -867,7 +878,7 @@ const installHelp=document.getElementById('install-help') as HTMLDialogElement;
 document.querySelectorAll('[data-install-help]').forEach(button=>button.addEventListener('click',()=>{touch.clear();installHelp.showModal();}));
 document.getElementById('install-close')!.addEventListener('click',()=>installHelp.close());
 for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{if(controlSettings.open||installHelp.open||touchOffer.open)event.stopPropagation();},true);
-document.getElementById('start-game')!.addEventListener('click',()=>{gameAudio.unlock();const scene=game.scene.scenes[0] as Errand;void scene?.startIntro();});
+document.getElementById('start-game')!.addEventListener('click',()=>{gameAudio.unlock();void activeScene()?.startIntro();});
 applyControls();
 
 // Follow the fitted canvas, rather than the radio + game wrapper or letterbox.
@@ -883,6 +894,30 @@ function positionStartGame(){
  button.style.top=`${frame.top-parent.top+Math.min(frame.height*.94,frame.height-button.offsetHeight/2-8)}px`;
 }
 game.scale.on('resize',()=>requestAnimationFrame(positionStartGame));
+window.addEventListener('game-layout',()=>requestAnimationFrame(positionStartGame));
+
+const levelDialog=document.getElementById('level-dialog') as HTMLDialogElement;
+let levelPickerWasRunning=false,levelPickerFromMenu=false;
+document.getElementById('choose-level')!.addEventListener('click',()=>{
+ const scene=activeScene();if(!scene||(scene.introActive&&scene.introStarted)||scoresOpen())return;
+ levelPickerWasRunning=!scene.paused&&!scene.introActive&&!scene.won&&!scene.failed;
+ levelPickerFromMenu=touchMenu.open;touchMenu.close();touch.clear();
+ if(levelPickerWasRunning)scene.togglePause();
+ levelDialog.showModal();
+});
+function closeLevelPicker(){levelDialog.close();if(levelPickerFromMenu)openTouchMenu();else if(levelPickerWasRunning&&activeScene()?.paused)activeScene().togglePause();}
+document.getElementById('level-cancel')!.addEventListener('click',closeLevelPicker);
+levelDialog.addEventListener('cancel',event=>{event.preventDefault();closeLevelPicker();});
+function startLevel(key:'rooftop'|'thai'){
+ levelDialog.close();touchMenu.close();touch.clear();resetScoreEntry();resetTakeoutScores();
+ const previous=activeScene();if(previous)game.scene.stop(previous.sys.settings.key);
+ gameAudio.beginRun();game.scene.start(key);
+ const url=new URL(location.href);url.searchParams.set('level',key);history.replaceState(null,'',url);
+ requestAnimationFrame(positionStartGame);
+}
+document.querySelectorAll<HTMLButtonElement>('[data-start-level]').forEach(button=>button.addEventListener('click',()=>startLevel(button.dataset.startLevel as 'rooftop'|'thai')));
+document.getElementById('next-level')!.addEventListener('click',()=>startLevel('thai'));
+for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{if(levelDialog.open)event.stopPropagation();},true);
 
 window.addEventListener('blur',clearPlayPointers);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearPlayPointers();});

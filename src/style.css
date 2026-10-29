@@ -239,3 +239,12 @@ html.touch-play-locked main>*:not(#play-area){visibility:hidden}
 #update-settings{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:12px;color:#b9d1db}#update-settings input{accent-color:#7ee0c5}#update-settings button{min-height:36px;padding:5px 10px}#update-status{font-size:11px}
 
 #splash-version{display:block;font-size:11px;font-weight:normal;line-height:14px;color:#b9d1db}
+
+/* Shared level selection stays available from desktop and the mobile pause menu. */
+#current-level{font-size:12px;color:#a9dccc;margin:8px 0 0}
+.level-dialog{width:min(560px,94vw);max-height:90dvh;overflow:auto;background:#13263b;color:#e8f3ec;border:2px solid #9be0c6;border-radius:15px;padding:24px}
+.level-dialog::backdrop{background:#071321bb}.level-dialog h2{color:#ffd08b;margin:0 0 12px}.level-dialog p{font-size:13px;line-height:1.5}
+.level-dialog button{display:block;width:100%;min-height:48px;margin-top:12px;padding:15px;text-align:left;background:#244654;color:#e8f4ec;border:1px solid #6b969b;border-radius:10px}
+.level-dialog button span{display:block;font-size:12px;color:#bbd1d4;margin-top:6px}.level-dialog #level-cancel{text-align:center;background:#27384c}
+#next-level{position:absolute;z-index:15;left:50%;bottom:4%;transform:translateX(-50%);padding:12px 18px;background:#326b51;color:#fff3cc;border:2px solid #c3d5ac;border-radius:10px;font-weight:bold;max-width:90%}
+#next-level[hidden]{display:none}

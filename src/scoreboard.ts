@@ -11,10 +11,10 @@ let scope:'server'|'local'='local';
 let notice='';
 let returnFocus:HTMLElement|null=null;
 let nameDraft='';
-export function scoresOpen(){return dialog.open;}
+export function scoresOpen(){return dialog.open||!!document.querySelector('#thai-scores[open]');}
 // Prevent Phaser's window listeners from capturing letters while a dialog is open.
 for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{
-  if(dialog.open)event.stopPropagation();
+  if(scoresOpen())event.stopPropagation();
 },true);
 function message(text:string){dialog.querySelector('[role="status"]')!.textContent=text;}
 let revision=0;
@@ -124,6 +124,7 @@ function render(){
   });
 }
 async function openScores(){
+  if(document.body.dataset.level==='thai'){window.dispatchEvent(new Event('open-thai-scores'));return;}
   returnFocus=document.activeElement as HTMLElement;
   await configReady;if(!serverEnabled)scope='local';
   if(serverEnabled){try{await syncLocalScores();}catch{notice='Some local scores could not sync. They remain on this PC; retry by reopening High Scores.';}}

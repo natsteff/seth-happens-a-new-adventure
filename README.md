@@ -1,8 +1,6 @@
 # Seth Happens - A New Adventure
 
-A separate game project derived from the complete **Seth Happens v0.3.12** release. First local version: **0.1.0**.
-
-This version retains the original 26-rooftop beer run, characters, two photo objectives, hazards, elevator secret, timeout sequence, scoring, keyboard/controller/mobile controls, sound effects, voices, radio and outcome music. The initial change is the dusk-city scenery: illustrated skyline and river, textured brick buildings, stone roof caps and decorative rooftop ventilation. Collision geometry, movement, timer and scoring rules are unchanged.
+Level 1 retains the original 26-rooftop beer run, characters, two photo objectives, hazards, elevator secret, timeout sequence, scoring, keyboard/controller/mobile controls, sound effects, voices, radio and outcome music. Its scenery uses a dusk-city treatment: illustrated skyline and river, textured brick buildings, stone roof caps and decorative rooftop ventilation. Collision geometry, movement, timer and scoring rules are unchanged.
 
 The game has a separate browser-storage namespace for scores, preferences, touch controls and update guards. It never imports or clears the original game's records.
 
@@ -16,6 +14,21 @@ pnpm install --frozen-lockfile
 ```
 
 Use the local URL printed by Vite; occupied ports cause it to select another port. `pnpm build` typechecks and builds `dist/`. `pnpm test` runs the existing regression suite, including a loopback-only server test. The optional leaderboard server code is retained from the release, but shared scores remain disabled. No backend is deployed.
+
+## Level 2 · Thai Takeout Run
+
+Choose **Level 2** from **Choose Level** on desktop or in the mobile menu. Level 1 also offers **Continue to Level 2** after completion. Direct local link: `/?level=thai`.
+
+Head right from the apartment to the Thai restaurant, then press **F / Action** at the pickup door. Return left to the apartment and press **F / Action** at the elevator to complete delivery. No photo or soccer interaction is required. The route includes jumpable dumpsters, parked buses, food carts and one-/two-story buildings. Moving cars and familiar wandering pedestrians are hazards. On the return, traffic is faster and a food snatcher chases Seth within its block.
+
+- 180-second run deadline; pause freezes gameplay, time, and food warmth.
+- Food starts at 100% condition and warmth when collected. Warmth falls one point per active return second.
+- A hit reduces food condition by 12 and warmth by 8; the food snatcher reduces them by 20 and 12. A 1.6-second recovery window prevents repeated damage from one contact. Outbound hits affect the mishap count but cannot damage food not yet collected.
+- A battered/cold order remains deliverable. Final score: 1,000 delivery + 10 × condition + 10 × remaining warmth + 10 × whole seconds below 180, minus 25 per hit, floored at zero.
+- Entering the home elevator secures the food and freezes its delivery time/warmth. The elevator ride uses the existing sound timing and supports pause.
+- Takeout records are local-only and separate from rooftop records. No existing records are migrated or rewritten.
+
+New sprites and close-building backdrop were generated with imagegen. See [art and exact prompts](docs/thai-art.md). Collision geometry remains separate from the art.
 
 ## Computer and mobile
 
