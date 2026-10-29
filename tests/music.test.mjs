@@ -91,3 +91,20 @@ test('rejected second-deck playback falls back to the previously playing element
  m.updateRemaining(30);await Promise.resolve();await Promise.resolve();await Promise.resolve();
  assert.equal(m.audio,active);assert.match(active.src,/the-final-warning/);assert.equal(active.paused,false);m.endRun();
 });
+
+test('Thai soundtrack unlocks across levels, defaults on Thai entry and remembers per-level choices',()=>{
+ const data=new Map();globalThis.localStorage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
+ const m=new MusicRadio();let unlocked=false,scooter=false;m.configureLevels(level=>level==='thai'?unlocked:level==='scooter'?scooter:false);
+ m.select(5);assert.equal(m.selected,0);m.step(-1);assert.equal(m.selected,4);
+ unlocked=true;m.refreshUnlocks();m.beginRun('thai');assert.equal(m.selected,5);assert.match(m.audio.src,/thai-food-run/);
+ m.off();m.beginRun('thai');assert.equal(m.enabled,false);assert.equal(m.selected,5);
+ m.beginRun('rooftop');assert.equal(m.selected,4);m.select(5);m.beginRun('rooftop');assert.equal(m.selected,5);
+ scooter=true;m.refreshUnlocks();m.beginRun('scooter');assert.equal(m.selected,6);m.select(5);m.beginRun('thai');assert.equal(m.selected,5);
+ const reloaded=new MusicRadio();reloaded.configureLevels(()=>true);reloaded.beginRun('scooter');assert.equal(reloaded.selected,5);
+ const locked=new MusicRadio();locked.configureLevels(()=>false);assert.equal(locked.selected,0);
+ delete globalThis.localStorage;
+});
+
+test('locked Scooter track cannot be selected by shortcut/index or remembered preference',()=>{
+ const m=new MusicRadio();m.configureLevels(level=>level==='thai');m.select(6);assert.equal(m.selected,0);m.select(5);assert.equal(m.selected,5);m.step(1);assert.equal(m.selected,0);
+});

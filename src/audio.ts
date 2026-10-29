@@ -55,8 +55,8 @@ class GameAudio {
     const button=document.getElementById('sound-toggle');
     if(button){button.textContent=`Sound: ${this.muted?'Off':'On'} · S`;button.setAttribute('aria-pressed',String(!this.muted));button.dataset.context=this.state;}
   }
-  beginRun(){
-    this.music.beginRun();
+  beginRun(level?:string){
+    this.music.beginRun(level);
     void this.setPaused(false);this.cancelRide();this.stopVoice();this.stopLocations();this.lastSpoken='';this.lastLocation='';
   }
   private stopLocations(){for(const source of this.locationSources)source.stop();this.locationSources.clear();}

@@ -1,5 +1,6 @@
 import {loadSettings,saveSettings} from './preferences.mjs';
-import {championTracks,failureTrack,cheaterTrack,countdownTracks,radioTracks,DEFAULT_RADIO_TRACK,nextRadioTrack} from './radio-playlist.mjs';
+import {championTracks,failureTrack,cheaterTrack,countdownTracks,radioTracks,DEFAULT_RADIO_TRACK,nextRadioTrack,unlockedRadioTracks,defaultLevelTrack} from './radio-playlist.mjs';
+const LEVEL_MUSIC_KEY='seth-new-adventure.level-music.v1';
 /** Stream only the selected owner-supplied MP3; no decoding/caching the whole playlist. */
 export class MusicRadio{
  audio=document.createElement('audio');
@@ -16,9 +17,26 @@ export class MusicRadio{
  private holds=new Set<string>();private version=0;
  private listeners=new Set<()=>void>();
  private singleDeck:boolean;
+ private level='rooftop';private canPlay:(level:string)=>boolean=()=>false;
+ private choices:Record<string,number>={};
+ get availableTracks(){return unlockedRadioTracks(this.canPlay);}
+ configureLevels(canPlay:(level:string)=>boolean){this.canPlay=canPlay;this.refreshUnlocks();}
+ refreshUnlocks(){if(!this.availableTracks.includes(this.selected)){this.selected=DEFAULT_RADIO_TRACK;if(!this.countdown&&!this.outcome){this.audio.pause();this.audio.src=this.trackUrl();}}this.notify();}
+ private chooseLevel(level:string){
+  if(level===this.level)return;
+  this.level=level;const choice=this.choices[level]??defaultLevelTrack(level);
+  this.selected=this.availableTracks.includes(choice)?choice:DEFAULT_RADIO_TRACK;
+ }
+ private saveChoice(){
+  this.choices[this.level]=this.selected;
+  try{const raw=localStorage.getItem(LEVEL_MUSIC_KEY);if(raw!==null){const value=JSON.parse(raw);if(!value||typeof value!=='object'||Array.isArray(value))return;}
+   localStorage.setItem(LEVEL_MUSIC_KEY,JSON.stringify(this.choices));}catch{/* Session selection remains available; preserve corrupt saves. */}
+ }
  constructor(singleDeck=(globalThis.navigator?.maxTouchPoints??0)>0){
   this.singleDeck=singleDeck;
   const settings=loadSettings();this.selected=settings.track;this.countdownSelected=settings.countdownTrack;this.championSelected=settings.championTrack;this.volume=settings.volume;this.enabled=settings.musicEnabled;this.muted=settings.muted;
+  try{const value=JSON.parse(localStorage.getItem(LEVEL_MUSIC_KEY)??'{}');if(value&&typeof value==='object'&&!Array.isArray(value))for(const level of ['rooftop','thai','scooter'])if(Number.isInteger(value[level])&&value[level]>=0&&value[level]<radioTracks.length)this.choices[level]=value[level];}catch{}
+  this.selected=this.choices.rooftop??(settings.track<5?settings.track:DEFAULT_RADIO_TRACK);
   for(const element of this.elements){
    element.hidden=true;element.preload='none';element.loop=true;
    element.addEventListener('ended',()=>{if(element===this.audio&&this.outcome==='cheater'){this.ended=true;this.notify();}});
@@ -65,14 +83,14 @@ export class MusicRadio{
  setVolume(value:number){if(!Number.isFinite(value))return;this.volume=Math.max(0,Math.min(1,value));this.updateGain();this.save();this.notify();}
  select(index:number){
   if(this.countdown||this.outcome)return;
-  if(!Number.isInteger(index)||index<0||index>=radioTracks.length)return;
+  if(!Number.isInteger(index)||index<0||index>=radioTracks.length||!this.availableTracks.includes(index))return;
   this.version++;this.audio.pause();this.selected=index;this.enabled=true;this.error='';
-  this.audio.src=this.trackUrl();this.audio.loop=true;this.save();this.refresh();
+  this.audio.src=this.trackUrl();this.audio.loop=true;this.saveChoice();this.save();this.refresh();
  }
- step(direction:number){this.select(nextRadioTrack(this.selected,direction));}
+ step(direction:number){this.select(nextRadioTrack(this.selected,direction,this.availableTracks));}
  off(){this.cancelFade();this.enabled=false;this.save();this.refresh();}
  toggle(){if(this.enabled)this.cancelFade();this.enabled=!this.enabled;this.save();this.refresh();}
- beginRun(){this.cancelFade();this.clearLeadIn();this.outcome=null;this.ended=false;this.audio.loop=true;this.countdown=false;this.audio.src=this.trackUrl();this.running=false;this.version++;this.audio.pause();this.audio.currentTime=0;this.holds.clear();this.error='';this.prepareCountdown();this.notify();}
+ beginRun(level?:string){if(level)this.chooseLevel(level);this.refreshUnlocks();this.cancelFade();this.clearLeadIn();this.outcome=null;this.ended=false;this.audio.loop=true;this.countdown=false;this.audio.src=this.trackUrl();this.running=false;this.version++;this.audio.pause();this.audio.currentTime=0;this.holds.clear();this.error='';this.prepareCountdown();this.notify();}
  startRun(){this.running=true;this.refresh();}
  endRun(){this.cancelFade();this.clearLeadIn();this.running=false;this.refresh();}
  setHold(reason:string,value:boolean){

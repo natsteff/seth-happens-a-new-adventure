@@ -1,13 +1,24 @@
 import {gameAudio} from './audio';
-import {championTracks,countdownTracks,radioShortcut} from './radio-playlist.mjs';
+import {championTracks,countdownTracks,radioShortcut,radioTracks} from './radio-playlist.mjs';
 import {scoresOpen} from './scoreboard';
 const radio=document.getElementById('radio')!;
 const music=gameAudio.music;
+const trackLabel=document.createElement('label');trackLabel.textContent='Track ';
+const trackSelect=document.createElement('select');trackSelect.id='radio-select';trackSelect.setAttribute('aria-label','Music track');
+radioTracks.forEach((track,index)=>{const option=document.createElement('option');option.value=String(index);option.textContent=`${index+1} · ${track.title}`;trackSelect.append(option);});
+trackLabel.append(trackSelect);radio.querySelector('.radio-actions')!.prepend(trackLabel);
+trackSelect.addEventListener('change',()=>{const index=Number(trackSelect.value);void gameAudio.unlock();music.select(index);trackSelect.blur();});
+
 radio.append(...music.elements);
 const volume=document.getElementById('radio-volume') as HTMLInputElement;
 const toggle=document.getElementById('radio-toggle') as HTMLButtonElement;
 music.subscribe(()=>{
  const track=music.track;
+ const available=music.availableTracks;
+ for(const option of Array.from(trackSelect.options)){const index=Number(option.value),unlocked=available.includes(index);option.disabled=!unlocked;option.textContent=`${index+1} · ${radioTracks[index].title}${unlocked?'':` · Locked: complete Level ${index===5?1:2}`}`;}
+ trackSelect.value=String(music.selected);trackSelect.disabled=music.countdown||!!music.outcome;
+ radio.querySelector('.radio-brand span')!.textContent=`1–${available.length} tracks · 0 off · [ previous · ] next`;
+
  radio.dataset.countdown=String(music.countdown);
  radio.dataset.finished=String(!!music.outcome);
  (document.getElementById('radio-champion') as HTMLButtonElement).disabled=!!music.outcome;
@@ -27,7 +38,7 @@ for(const [id,direction] of [['radio-prev',-1],['radio-next',1]] as const){docum
 toggle.addEventListener('click',()=>{void gameAudio.unlock();music.toggle();toggle.blur();});
 volume.addEventListener('input',()=>{const value=Number(volume.value)/100;music.setVolume(value);void gameAudio.unlock();});
 for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{
- if(event.target instanceof Element&&event.target.closest('#radio input'))event.stopPropagation();
+ if(event.target instanceof Element&&event.target.closest('#radio input, #radio select'))event.stopPropagation();
 },true);
 document.addEventListener('keydown',event=>{
  if(event.repeat||event.ctrlKey||event.metaKey||event.altKey||scoresOpen())return;

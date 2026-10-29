@@ -27,6 +27,7 @@ import { REGULAR_JUMP_SPEED, megaJumpVelocity, countdownLabel, formatRunSeconds,
 const W = 1100, H = 600;
 let progressStorage:Storage|null=null;try{progressStorage=localStorage;}catch{/* Session unlock remains available. */}
 const levelProgress=createLevelProgress(progressStorage);
+gameAudio.music.configureLevels(level=>levelProgress.canPlay(level));
 // Render at display density, retaining the same logical play area and physics.
 const RENDER_SCALE = Math.min(3, Math.max(1, Math.ceil(
   Math.min(screen.width / W, screen.height / H) * window.devicePixelRatio)));
@@ -94,7 +95,7 @@ class Errand extends Phaser.Scene {
     this.mishaps={falls:0,squishes:0,bumps:0};this.restartSince=null;this.touchRestartSince=null;
     this.summitReminder=new SummitReminder();this.reminderAt=-Infinity;
     this.runVersion++;this.onRoad=true;this.fallSoundPlayed=false;this.heroHeard=false;this.heroPlaying=false;
-    gameAudio.beginRun();this.introActive=true;this.introStarted=false;
+    gameAudio.beginRun('rooftop');this.introActive=true;this.introStarted=false;
     this.latePhotos = new Set();
     this.photos = new Set(); this.warned = new Set(); this.beer = false; this.won = false; this.retries = 0; this.hazards=[];this.heardLocations=new Set();this.visitedWalkFrames=new Set();this.failurePhase='none';this.timeoutAngel=undefined;
     this.lastGround=-1000; this.jumpUntil=0; this.immuneUntil=0; this.floor=0; this.facing=1;
@@ -154,8 +155,8 @@ class Errand extends Phaser.Scene {
     this.keys=this.input.keyboard!.addKeys('A,D,W,LEFT,RIGHT,UP,SPACE,F,R,B,S,SHIFT,P') as Record<string,Phaser.Input.Keyboard.Key>;
     const onBlur=()=>{touch.clear();this.player.setVelocityX(0);for(const key of Object.values(this.keys))key.reset();if(!this.paused)this.togglePause();};
     const onRadioFocus=()=>{for(const key of Object.values(this.keys))key.reset();this.player.setVelocityX(0);};
-    const radioVolume=document.getElementById('radio-volume')!;radioVolume.addEventListener('focus',onRadioFocus);
-    this.events.once('shutdown',()=>radioVolume.removeEventListener('focus',onRadioFocus));
+    const radioVolume=document.getElementById('radio-volume')!,radioSelect=document.getElementById('radio-select')!;radioVolume.addEventListener('focus',onRadioFocus);radioSelect.addEventListener('focus',onRadioFocus);
+    this.events.once('shutdown',()=>{radioVolume.removeEventListener('focus',onRadioFocus);radioSelect.removeEventListener('focus',onRadioFocus);});
     const onHidden=()=>{if(document.hidden)onBlur();};document.addEventListener('visibilitychange',onHidden);this.events.once('shutdown',()=>document.removeEventListener('visibilitychange',onHidden));
     window.addEventListener('blur',onBlur);this.events.once('shutdown',()=>window.removeEventListener('blur',onBlur));
     this.input.keyboard!.addCapture(['SPACE','UP','DOWN','LEFT','RIGHT']);
@@ -560,7 +561,7 @@ class Errand extends Phaser.Scene {
     try{
     gameAudio.music.setHold('scores',scoresOpen());
     let pads:readonly (Gamepad|null)[]=[];try{pads=navigator.getGamepads?.()??[];}catch{/* Keyboard remains usable if gamepad access is blocked. */}
-    const controller=this.controller.sample(Array.from(pads),document.hasFocus()&&!scoresOpen()&&!(document.getElementById('touch-menu') as HTMLDialogElement).open&&document.activeElement?.id!=='radio-volume');const mobile=touch.sample(scoresOpen()||document.hidden||!!document.querySelector('dialog[open]'));
+    const controller=this.controller.sample(Array.from(pads),document.hasFocus()&&!scoresOpen()&&!(document.getElementById('touch-menu') as HTMLDialogElement).open&&!['radio-volume','radio-select'].includes(document.activeElement?.id??''));const mobile=touch.sample(scoresOpen()||document.hidden||!!document.querySelector('dialog[open]'));
     controller.move=controller.move||mobile.move;
     controller.jump ||= mobile.jump;controller.interact ||= mobile.interact;controller.recall ||= mobile.recall;controller.pause ||= mobile.pause;controller.sprint ||= mobile.sprint;
     this.pad=controller;
@@ -909,6 +910,7 @@ window.addEventListener('game-layout',()=>requestAnimationFrame(positionStartGam
 
 const levelDialog=document.getElementById('level-dialog') as HTMLDialogElement;
 function refreshLevelLocks(){
+ gameAudio.music.refreshUnlocks();
  for(const [key,copy,locked] of [['thai','Collect dinner, dodge traffic, bring it home hot','Complete Level 1'],['scooter','Ride with Allison · Big ramps, bigger regrets','Complete Level 2']]){
   const button=document.querySelector<HTMLButtonElement>(`[data-start-level="${key}"]`)!;
   button.disabled=!levelProgress.canPlay(key);button.querySelector('span')!.textContent=levelProgress.canPlay(key)?copy:`Locked · ${locked} to unlock`;

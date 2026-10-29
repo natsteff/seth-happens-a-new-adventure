@@ -44,5 +44,9 @@ The same scenery renders in the existing game world on desktop and mobile. It sc
 
 ## Music, sound and asset credits
 
+## Unlockable level music
+
+Level 1 starts with the original five radio choices and Arcade Staircase as its default. Unlocking Level 2 also unlocks **Thai Food Run**, which is Level 2's default. Unlocking Level 3 also unlocks **Scooter Run**, which is Level 3's default. Each unlocked soundtrack is available on every level through the radio's Track picker (in the mobile menu), previous/next buttons, or keys **6** and **7**. Locked tracks cannot be selected by shortcut or restored from an old preference.
+
 ## Release status
 

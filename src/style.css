@@ -250,3 +250,5 @@ html.touch-play-locked main>*:not(#play-area){visibility:hidden}
 #next-level[hidden]{display:none}
 
 .level-dialog button:disabled{opacity:.55;cursor:not-allowed}#level-progress{color:#ffcf8a}
+
+#radio-select{max-width:240px;background:#203747;color:#f3e0ba;border:1px solid #6b8290;border-radius:6px;padding:8px;font:inherit} .radio-actions label:has(#radio-select){display:flex;align-items:center;gap:6px}

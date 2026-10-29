@@ -57,7 +57,7 @@ export class ThaiTakeout extends Phaser.Scene {
     this.won=false;this.failed=false;this.riding=false;this.scorePaused=false;this.controller=new ControllerInput();this.photos=new Set();
     this.facing=1;this.lastGround=-1000;this.jumpUntil=0;this.jumpStarted=-1;this.megaUsed=false;this.immuneUntil=0;this.restartSince=null;this.lastBeep=0;
     this.traffic=[];this.pedestrians=[];this.runVersion++;this.input.keyboard!.enabled=true;
-    gameAudio.beginRun();
+    gameAudio.beginRun('thai');
     this.cameras.main.setZoom(this.renderScale).setBackgroundColor('#1b2436').setBounds(0,0,THAI.width,H);
     this.drawStreet();
     const frames=this.textures.get('thai-props');
@@ -107,10 +107,10 @@ export class ThaiTakeout extends Phaser.Scene {
     const hidden=()=>{if(document.hidden)blur();};
     window.addEventListener('blur',blur);document.addEventListener('visibilitychange',hidden);
     const focus=()=>{this.player.setVelocityX(0);for(const key of Object.values(this.keys))key.reset();};
-    document.getElementById('radio-volume')!.addEventListener('focus',focus);
+    for(const id of ['radio-volume','radio-select'])document.getElementById(id)!.addEventListener('focus',focus);
     this.events.once('shutdown',()=>{
       this.runVersion++;touch.clear();gameAudio.cancelRide();window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',hidden);
-      document.getElementById('radio-volume')!.removeEventListener('focus',focus);
+      for(const id of ['radio-volume','radio-select'])document.getElementById(id)!.removeEventListener('focus',focus);
     });
     this.showIntro();this.refreshControlCopy();this.publishStatus();
   }
@@ -302,7 +302,7 @@ export class ThaiTakeout extends Phaser.Scene {
     const dialogOpen=!!document.querySelector('dialog[open]');
     gameAudio.music.setHold('scores',scoresOpen());
     let pads:readonly (Gamepad|null)[]=[];try{pads=navigator.getGamepads?.()??[];}catch{/* Keyboard stays available. */}
-    const controller=this.controller.sample(Array.from(pads),document.hasFocus()&&!dialogOpen&&document.activeElement?.id!=='radio-volume');
+    const controller=this.controller.sample(Array.from(pads),document.hasFocus()&&!dialogOpen&&!['radio-volume','radio-select'].includes(document.activeElement?.id??''));
     const mobile=touch.sample(dialogOpen||document.hidden);
     const move=controller.move||mobile.move,jump=controller.jump||mobile.jump,action=controller.interact||mobile.interact;
     if(controller.disconnected&&!this.paused)this.togglePause();

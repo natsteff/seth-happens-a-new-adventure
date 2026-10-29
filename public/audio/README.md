@@ -37,3 +37,14 @@ Intro autoplay is attempted immediately; browser policy may require a first gest
 Additional owner recordings: elevator.wav (ride, arrival synchronized to end), goal.wav (Easter egg kick), crashing.wav (cooler debris), quick-jump.wav (tap jump), cheater.wav (shortcut arrival). Originals preserved.
 
 Soundtrack: owner-supplied unmodified MP3 files in music/ (Arcade Staircase, The Beer of Destiny, Twenty-Six Floors of Celts, Go Seth Go, The Haunted Happy Hour). Runtime copies from the project's provided files; original intake hashes are retained privately by the project owner. No third-party download in this update. Countdown/outcome tracks are also owner supplied: The Final Warning, System Failure Imminent, Failure - Twenty-Six Floors for Nothing, Big Stupid Cheater, 26 Floors of Glory, Eye of the Stairwell. All runtime MP3s preserve supplied bytes; no Beer Delivery World Champion track is used.
+
+## New Adventure level soundtracks · October 28, 2026
+
+Owner-supplied MP3s copied byte-for-byte; supplied originals remain unchanged. Added for local review only, without push or publication. Both are stereo 48 kHz MP3. No transcoding or trimming.
+
+| Runtime file | Supplied file | Default / unlock | Browser duration | SHA-256 |
+| --- | --- | --- | --- | --- |
+| music/thai-food-run.mp3 | Thai Food Run.mp3 | Level 2; unlocks with Level 2 | 176.60s | d982b6af5c331755bb512758cf263f5b64bd6b2320fd849c0c8ed17efd0e01e3 |
+| music/scooter-run.mp3 | Scooter Run.mp3 | Level 3; unlocks with Level 3 | 132.20s | 5e0863db44880a8fe8b78dafa4a0b924dcf5b24424269aa0c3b2613d5d3823b2 |
+
+Once unlocked, either track can be selected on any level. Tracks stream on demand through the existing radio; no backend or audio service added. Level 1's initial five tracks/order/default, countdown tracks and outcome tracks are retained. Per-level choices use seth-new-adventure.level-music.v1, separate from original-game settings and all score/progress keys.

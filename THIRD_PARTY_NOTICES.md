@@ -17,3 +17,7 @@ Level 2 Thai Takeout Run adds a close-street backdrop and alpha-transparent prop
 ## Scooter Ride additions
 
 `public/assets/scooter/seth-allison-v1.png` was generated with the built-in imagegen tool using the existing owner-authorized game character illustrations as appearance references. It contains a generic electric stand-up scooter without a third-party logo. The generated original is preserved; the game trims its transparent margins at runtime. Exact prompt and provenance: [docs/scooter-art.md](docs/scooter-art.md). Existing street scenery, props, character art and music are reused with their existing attribution and pre-release audit requirements. No Allison voice audio was generated or added.
+
+## Additional New Adventure music
+
+Thai Food Run and Scooter Run were supplied directly by the project for Levels 2 and 3. Runtime MP3s preserve supplied bytes; no external download or audio generation was used. See [audio provenance](public/audio/README.md) for filenames and hashes. Local integration is owner-authorized; new public distribution still requires the release/rights review described above.

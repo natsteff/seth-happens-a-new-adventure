@@ -3,13 +3,21 @@ export const radioTracks=[
  {title:'The Beer of Destiny',description:'Cinematic gothic folk & punk',file:'beer-of-destiny.mp3'},
  {title:'Twenty-Six Floors of Celts',description:'Celtic punk & folk metal',file:'twenty-six-floors-of-glory.mp3'},
  {title:'Go Seth Go',description:'Gothic Americana & punk',file:'go-seth-go.mp3'},
- {title:'The Haunted Happy Hour',description:'Dark swing & gothic cabaret',file:'haunted-happy-hour.mp3'}
+ {title:'The Haunted Happy Hour',description:'Dark swing & gothic cabaret',file:'haunted-happy-hour.mp3'},
+ {title:'Thai Food Run',description:'Level 2 · Thai Takeout Run soundtrack',file:'thai-food-run.mp3',unlockLevel:'thai'},
+ {title:'Scooter Run',description:'Level 3 · Scooter Ride soundtrack',file:'scooter-run.mp3',unlockLevel:'scooter'}
 ];
 export const DEFAULT_RADIO_TRACK=0;
-export function nextRadioTrack(index,step){return ((index+step)%radioTracks.length+radioTracks.length)%radioTracks.length;}
+/** @param {(level: string) => boolean} canPlay */
+export function unlockedRadioTracks(canPlay=()=>false){return radioTracks.map((track,index)=>({track,index})).filter(({track})=>!track.unlockLevel||canPlay(track.unlockLevel)).map(({index})=>index);}
+export function defaultLevelTrack(level){const index=radioTracks.findIndex(track=>track.unlockLevel===level);return index<0?DEFAULT_RADIO_TRACK:index;}
+export function nextRadioTrack(index,step,available=unlockedRadioTracks()){
+ const position=available.indexOf(index),base=position<0?0:position;
+ return available[((base+step)%available.length+available.length)%available.length];
+}
 export function radioShortcut(code){
  if(code==='Digit0'||code==='Numpad0')return {off:true};
- const digit=/^(?:Digit|Numpad)([1-5])$/.exec(code);
+ const digit=/^(?:Digit|Numpad)([1-7])$/.exec(code);
  if(digit)return {track:Number(digit[1])-1};
  if(code==='BracketLeft')return {step:-1};
  if(code==='BracketRight')return {step:1};

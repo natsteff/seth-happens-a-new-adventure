@@ -26,7 +26,7 @@ export class ScooterRide extends Phaser.Scene{
   this.paused=false;this.introActive=true;this.introStarted=false;this.won=false;this.failed=false;this.riding=false;this.scorePaused=false;this.restartSince=null;this.bubbleUntil=0;this.toastUntil=0;
   document.body.dataset.level='scooter';levelControlCopy('scooter');document.getElementById('current-level')!.textContent='Level 3 · Scooter Ride';document.getElementById('game')!.setAttribute('aria-label','Level 3 · Scooter Ride with Seth and Allison');
   const footer=document.querySelector('footer')!;footer.dataset.rooftopHtml??=footer.innerHTML;footer.textContent='AUTO RIDE → · BRAKE A / Left · ACCELERATE D / Right / Shift · HOP W / Up / Space · RISKY RAMP F / Action · PAUSE P · RESTART hold R';
-  document.getElementById('next-level')!.hidden=true;touch.clear();resetScoreEntry();resetScooterScores();(document.getElementById('touch-menu') as HTMLDialogElement).close();gameAudio.beginRun();
+  document.getElementById('next-level')!.hidden=true;touch.clear();resetScoreEntry();resetScooterScores();(document.getElementById('touch-menu') as HTMLDialogElement).close();gameAudio.beginRun('scooter');
   this.cameras.main.setBackgroundColor('#202738').setBounds(0,0,SCOOTER.width,1200).setZoom(this.renderScale);
   const frames=this.textures.get('thai-props');for(const [name,x,y,w,h] of [['bus',20,185,697,266],['car-left',726,263,418,192],['bin',1171,204,339,251],['car-right',497,710,550,226]] as [string,number,number,number,number][])if(!frames.has(name))frames.add(name,0,x,y,w,h);
   const riders=this.textures.get('scooter-riders');if(!riders.has('trim'))riders.add('trim',0,380,8,865,1008);
@@ -46,8 +46,8 @@ export class ScooterRide extends Phaser.Scene{
   const pause=document.getElementById('pause-toggle') as HTMLButtonElement,restart=document.getElementById('restart-run') as HTMLButtonElement;pause.textContent='Pause · P';pause.setAttribute('aria-pressed','false');pause.disabled=true;restart.disabled=true;
   pause.onclick=()=>{this.togglePause();pause.blur();};restart.onclick=()=>{restart.blur();this.scene.restart();};
   const blur=()=>{touch.clear();for(const k of Object.values(this.keys))k.reset();if(!this.paused)this.togglePause();};const hidden=()=>{if(document.hidden)blur();};window.addEventListener('blur',blur);document.addEventListener('visibilitychange',hidden);
-  document.getElementById('radio-volume')!.addEventListener('focus',blur);
-  this.events.once('shutdown',()=>{this.runVersion++;touch.clear();window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',hidden);document.getElementById('radio-volume')!.removeEventListener('focus',blur);});
+  for(const id of ['radio-volume','radio-select'])document.getElementById(id)!.addEventListener('focus',blur);
+  this.events.once('shutdown',()=>{this.runVersion++;touch.clear();window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',hidden);for(const id of ['radio-volume','radio-select'])document.getElementById(id)!.removeEventListener('focus',blur);});
   this.showIntro();this.updateHud();this.publishStatus();
  }
  drawCity(){
@@ -94,7 +94,7 @@ export class ScooterRide extends Phaser.Scene{
  updateHud(){this.hud.setText(`LEVEL 3 · SCOOTER RIDE   Allison’s grip ${this.run.grip}%`);this.objective.setText(`${Math.min(100,Math.round(this.run.x/SCOOTER.finish*100))}% of route · ${this.run.jumps} jumps · ${this.run.hits} bumps · High ramp ${this.run.risky?'ON':'OFF'} · Bonus ${this.run.bonus}`);this.progress.setSize((W-36)*Math.min(1,this.run.x/SCOOTER.finish),3);this.refreshControlCopy();}
  publishStatus(){const live=document.getElementById('live-status');if(!live)return;Object.assign(live.dataset,{level:'scooter',intro:String(this.introActive),paused:String(this.paused),won:String(this.won),failed:String(this.failed),riding:String(!this.failed),x:String(Math.round(this.run.x)),y:String(Math.round(this.run.y)),elapsed:String(Math.round(this.run.elapsedMs)),grip:String(this.run.grip),hits:String(this.run.hits),jumps:String(this.run.jumps),grounded:String(this.run.grounded),speed:String(Math.round(this.run.vx)),biggest:String(Math.round(this.run.biggest)),bonus:String(this.run.bonus),risky:String(this.run.risky),muted:String(gameAudio.muted),reaction:this.bubbleText?.text??''});live.textContent=`Scooter Ride. ${this.hud?.text??''}. ${this.objective?.text??''}. ${this.paused?'Paused.':this.won?'Ride complete.':this.failed?'Ride failed.':this.introActive?'Select Start Game.':this.bubble.visible?this.bubbleText.text:''}`;}
  update(time:number,delta:number){
-  if(!this.player)return;const dialog=!!document.querySelector('dialog[open]'),focus=document.hasFocus()&&!dialog&&document.activeElement?.id!=='radio-volume';let pads:readonly(Gamepad|null)[]=[];try{pads=navigator.getGamepads?.()??[];}catch{}
+  if(!this.player)return;const dialog=!!document.querySelector('dialog[open]'),focus=document.hasFocus()&&!dialog&&!['radio-volume','radio-select'].includes(document.activeElement?.id??'');let pads:readonly(Gamepad|null)[]=[];try{pads=navigator.getGamepads?.()??[];}catch{}
   const c=this.controller.sample(Array.from(pads),focus),m=touch.sample(dialog||document.hidden);gameAudio.music.setHold('scores',scoresOpen());
   if(c.disconnected&&!this.paused)this.togglePause();if(Phaser.Input.Keyboard.JustDown(this.keys.P)||c.pause||m.pause)this.togglePause();if(Phaser.Input.Keyboard.JustDown(this.keys.S))gameAudio.toggle();
   if(this.paused||dialog){this.publishStatus();return;}
