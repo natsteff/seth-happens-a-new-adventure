@@ -1,14 +1,14 @@
 # Seth Happens - A New Adventure
 
-**Version 0.8.4 · Early alpha**
+**Version 0.8.5 · Early alpha**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.8.4 Early alpha"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.8.5 Early alpha"></a>
 </p>
 
-**Play version 0.8.4** — Fullscreen highly recommended.
+**Play version 0.8.5** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
@@ -16,14 +16,14 @@ One very ordinary guy. Eight increasingly unreasonable adventures.
 
 Run, jump, dodge and ride through a city full of familiar faces and questionable decisions. Pick up dinner, survive a scooter ride with Allison, photograph a concert, escape a haunted house, and find out just how badly a Wisconsin snow day can go.
 
-🎵 **[Listen to the entire video game soundtrack](https://suno.com/playlist/0ef61d61-9481-48f2-b67f-989cffdc9cca)**.
+🎵 **[Listen to the entire video game soundtrack](https://suno.com/playlist/6f596364-f5aa-4fea-8732-fde11fe15526)**.
 
 ## Fun things to explore
 
 - Complete each adventure to unlock the next, then replay your favorites.
 - Unlock each level's soundtrack and try it on earlier adventures.
 - Try alternate routes, Mega Jumps and the rooftop easter egg.
-- Customize touch controls, countdown music and Champion Tracks.
+- Customize touch controls and your unlocked soundtrack selections.
 - Watch for Allison's reactions on the scooter ride.
 
 ## Your adventures
@@ -88,7 +88,7 @@ New players start with **1 · Arcade Staircase**. Completing a level unlocks the
 
 Each level starts with its assigned song unless you choose another unlocked track for that level. That choice is remembered across replays and future visits, independently for every level. Existing saved choices retain their song identity where unlocked; a newly locked choice falls back to the level's assigned song. Sound/music mute and volume preferences stay in effect.
 
-Keyboard **1–8** selects the corresponding unlocked song, **0** turns music off, and **[ / ]** moves through unlocked songs. On mobile, choose music in the game menu. Countdown and outcome tracks keep their separate selections.
+Keyboard **1–8** selects the corresponding unlocked song, **0** turns music off, and **[ / ]** moves through unlocked songs. On mobile, choose music in the game menu. The countdown always uses **The Final Warning**; successful finishes use **26 Floors of Glory**. Failure and shortcut music keep their existing behavior.
 
 ## Progress and records
 

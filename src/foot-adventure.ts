@@ -1,3 +1,4 @@
+import {modalNavigation} from './modal-navigation.mjs';
 import Phaser from 'phaser';
 import {gameAudio} from './audio';
 import {touch} from './touch.mjs';
@@ -38,7 +39,7 @@ export abstract class FootAdventure extends Phaser.Scene{
   const live=document.getElementById('live-status');if(live)for(const key of Object.keys(live.dataset))delete live.dataset[key];
   document.body.dataset.level=c.key;levelControlCopy(c.key);document.getElementById('current-level')!.textContent=`Level ${c.number} · ${c.title}`;document.getElementById('game')!.setAttribute('aria-label',`${c.title} platform adventure`);document.getElementById('next-level')!.hidden=true;
   const footer=document.querySelector('footer')!;footer.dataset.rooftopHtml??=footer.innerHTML;footer.textContent='MOVE A/D or arrows · JUMP W / Up / Space · Double-tap: Mega Jump · SPRINT Shift · ACTION F · PAUSE P · RESTART hold R';
-  touch.clear();resetScoreEntry();resetAdventureScores();(document.getElementById('touch-menu') as HTMLDialogElement).close();gameAudio.beginRun(c.key);
+  touch.clear();resetScoreEntry();resetAdventureScores();modalNavigation.reset();(document.getElementById('touch-menu') as HTMLDialogElement).close();gameAudio.beginRun(c.key);
   this.cameras.main.setZoom(this.renderScale).setBackgroundColor('#152334').setBounds(0,0,c.width,c.height);this.physics.world.setBounds(0,0,c.width,c.height+200);this.platforms=this.physics.add.staticGroup();this.buildWorld();
   if(!this.textures.exists('foot-body')){const g=this.add.graphics().fillStyle(0xffffff).fillRect(0,0,26,48);g.generateTexture('foot-body',26,48);g.destroy();}
   this.player=this.physics.add.sprite(c.startX,c.startY-24,'foot-body').setVisible(false).setMaxVelocity(450,850).setCollideWorldBounds(true);this.physics.add.collider(this.player,this.platforms);

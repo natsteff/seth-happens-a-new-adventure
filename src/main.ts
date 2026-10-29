@@ -1,3 +1,4 @@
+import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
 import { SummitReminder, REMINDER_MS } from './reminders.mjs';
 import { checkForUpdate } from './updates.mjs';
@@ -94,7 +95,7 @@ class Errand extends Phaser.Scene {
     const live=document.getElementById('live-status')!;live.dataset.level='rooftop';for(const key of ['phase','food','condition','warmth','hits'])delete live.dataset[key];
     document.getElementById('game')!.setAttribute('aria-label','Level 1 · Rooftop Beer Run platform game');
     const footer=document.querySelector('footer')!;if(footer.dataset.rooftopHtml)footer.innerHTML=footer.dataset.rooftopHtml;
-    touch.clear();(document.getElementById('touch-menu') as HTMLDialogElement).close();(document.getElementById('touch-menu-open') as HTMLButtonElement).disabled=true;resetScoreEntry();this.scorePaused=false;this.controller=new ControllerInput();
+    touch.clear();modalNavigation.reset();(document.getElementById('touch-menu') as HTMLDialogElement).close();(document.getElementById('touch-menu-open') as HTMLButtonElement).disabled=true;resetScoreEntry();this.scorePaused=false;this.controller=new ControllerInput();
     this.input.keyboard!.enabled=true;
     this.elapsedMs=0;this.lastTimerBeep=0;this.failed=false;this.cheater=false;this.riding=false;this.rideTween=undefined;
     this.jumpStarted=-1;this.megaUsed=false;this.jumpCount=0;this.paused=false;this.eggStage=0;this.eggPreviousX=75;this.eggBlocks=[];
@@ -470,8 +471,8 @@ class Errand extends Phaser.Scene {
     text(175,'You died, great sadness.',20,'#ffac8c');
     text(220,`${RUN_LIMIT_MS/1000} seconds elapsed. No score saved.\nHold R for another run.`,20,'#d5e8ec');
     screen.add(this.add.rectangle(W/2,525,W-100,3,0x537185));
-    const body=this.add.sprite(165,525,'seth-timeout','ground-2').setOrigin(.5,1).setDisplaySize(190,225).setScrollFactor(0).setDepth(43);
-    const angel=this.add.sprite(165,525,'seth-timeout','angel-0').setOrigin(.5,.9).setDisplaySize(128,190).setAlpha(0).setScrollFactor(0).setDepth(44);
+    const body=this.add.sprite(W/2,525,'seth-timeout','ground-2').setOrigin(.5,1).setDisplaySize(190,225).setScrollFactor(0).setDepth(43);
+    const angel=this.add.sprite(W/2,525,'seth-timeout','angel-0').setOrigin(.5,.9).setDisplaySize(128,190).setAlpha(0).setScrollFactor(0).setDepth(44);
     screen.add([body,angel]);this.timeoutAngel=angel;angel.play('timeout-angel');
     this.time.delayedCall(1000,()=>{
       this.failurePhase='rising';
@@ -621,7 +622,7 @@ class Errand extends Phaser.Scene {
         ?megaJumpVelocity(this.elapsedMs-this.jumpStarted,body.velocity.y):null;
       if(boost!==null){
         this.player.setVelocityY(boost);this.megaUsed=true;this.jumpUntil=0;
-        gameAudio.speak('Mega jump','mega',undefined,false,this.jumpCount%2?.97:1.04);
+        gameAudio.speak('Mega jump','mega');
       }else{
         if(jumpPressed)this.jumpUntil=time+130;
         if(this.jumpUntil>time&&time-this.lastGround<110){
@@ -777,7 +778,7 @@ async function toggleFullscreen(){
 }
 fullscreenToggle.addEventListener('click',()=>{void toggleFullscreen();});
 document.addEventListener('keydown',(event)=>{
-  if(!scoresOpen()&&event.code==='KeyV'&&!event.repeat&&!event.ctrlKey&&!event.metaKey&&!event.altKey){
+  if(!document.querySelector('dialog[open]')&&!scoresOpen()&&event.code==='KeyV'&&!event.repeat&&!event.ctrlKey&&!event.metaKey&&!event.altKey){
     event.preventDefault();void toggleFullscreen();
   }
 });
@@ -804,7 +805,7 @@ function setTouch(enabled:boolean){
   activeScene()?.refreshControlCopy();
   const radio=document.getElementById('radio')!;
   if(enabled)document.getElementById('touch-radio-slot')!.append(radio);else gameElement.insertBefore(radio,document.getElementById('game'));
-  if(!enabled)(document.getElementById('touch-menu') as HTMLDialogElement).close();
+  if(!enabled){modalNavigation.reset();(document.getElementById('touch-menu') as HTMLDialogElement).close();}
   touchToggle.textContent=`Touch controls: ${enabled?'On':'Off'}`;
   touchToggle.setAttribute('aria-pressed',String(enabled));
   requestAnimationFrame(()=>game.scale.refresh());
@@ -865,7 +866,7 @@ menuButton.addEventListener('click',event=>{event.stopPropagation();if(event.det
 document.getElementById('touch-resume')!.addEventListener('click',()=>closeTouchMenu());
 document.getElementById('touch-recall')!.addEventListener('click',()=>{closeTouchMenu();touch.edges.add('recall');});
 touchMenu.addEventListener('cancel',event=>{event.preventDefault();closeTouchMenu();});
-for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{if(touchMenu.open)event.stopPropagation();},true);
+for(const type of ['keydown','keyup'])touchMenu.addEventListener(type,event=>event.stopPropagation());
 
 // Control configuration is local to this browser and never touches scores.
 const controlSettings=document.getElementById('control-settings') as HTMLDialogElement;
@@ -886,7 +887,7 @@ function applyControls(){
 }
 function previewControls(){document.querySelectorAll<HTMLInputElement>('input[name=movement-style]').forEach(radio=>{radio.checked=radio.value===styleSelect.value;});document.getElementById('style-detail')!.textContent=styleSelect.value==='stick'?'Up/down has no game action. Jump and Action stay separate.':'Jump and Action stay separate.';document.getElementById('spacing-value')!.textContent=spacingInput.value;document.getElementById('spacing-preview')!.style.gap=`${8+(Number(spacingInput.value)-1)*8}px`;spacingInput.disabled=styleSelect.value!=='default';quickSprintInput.disabled=styleSelect.value!=='default';}
 const controlInputGuard=installOpeningGuard(controlSettings);
-function openControls(first=false){document.getElementById('controls-save')!.textContent=first?'Save and continue':'Save controls';customizeFromOffer=first;touch.clear();styleSelect.value=controlStyle;spacingInput.value=String(controlSpacing);quickSprintInput.checked=controlQuickSprint;previewControls();controlSettings.showModal();controlSettings.focus({preventScroll:true});controlInputGuard.arm();}
+function openControls(first=false){document.getElementById('controls-save')!.textContent=first?'Save and continue':'Save controls';customizeFromOffer=first;touch.clear();styleSelect.value=controlStyle;spacingInput.value=String(controlSpacing);quickSprintInput.checked=controlQuickSprint;previewControls();modalNavigation.open(controlSettings,first?null:touchMenu,controlSettings);controlInputGuard.arm();}
 document.getElementById('touch-customize-first')!.addEventListener('click',()=>{touchOffer.close();openControls(true);});
 document.getElementById('touch-customize')!.addEventListener('click',()=>openControls());
 document.querySelectorAll<HTMLInputElement>('input[name=movement-style]').forEach(radio=>radio.addEventListener('change',()=>{if(radio.checked){styleSelect.value=radio.value;previewControls();}}));
@@ -894,10 +895,12 @@ spacingInput.addEventListener('input',previewControls);styleSelect.addEventListe
 document.getElementById('controls-reset')!.addEventListener('click',()=>{styleSelect.value='default';spacingInput.value='3';quickSprintInput.checked=false;previewControls();});
 document.getElementById('controls-save')!.addEventListener('click',()=>{controlStyle=styleSelect.value;controlSpacing=Number(spacingInput.value);controlQuickSprint=quickSprintInput.checked;applyControls();try{localStorage.setItem('seth-new-adventure-touch-controls',JSON.stringify({style:controlStyle,spacing:controlSpacing,quickSprint:controlQuickSprint}));}catch{/* Session controls still work. */}controlSettings.close();if(customizeFromOffer){setTouch(true);void toggleFullscreen();}});
 controlSettings.addEventListener('cancel',()=>{if(customizeFromOffer)requestAnimationFrame(()=>touchOffer.showModal());});
+controlSettings.addEventListener('close',()=>modalNavigation.restore(controlSettings));
 const installHelp=document.getElementById('install-help') as HTMLDialogElement;
-document.querySelectorAll('[data-install-help]').forEach(button=>button.addEventListener('click',()=>{touch.clear();installHelp.showModal();}));
+installHelp.addEventListener('close',()=>modalNavigation.restore(installHelp));
+document.querySelectorAll('[data-install-help]').forEach(button=>button.addEventListener('click',()=>{touch.clear();modalNavigation.open(installHelp,touchMenu.open?touchMenu:touchOffer,document.getElementById('install-close'));}));
 document.getElementById('install-close')!.addEventListener('click',()=>installHelp.close());
-for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{if(controlSettings.open||installHelp.open||touchOffer.open)event.stopPropagation();},true);
+for(const dialog of [controlSettings,installHelp,touchOffer])for(const type of ['keydown','keyup'])dialog.addEventListener(type,event=>event.stopPropagation());
 document.getElementById('start-game')!.addEventListener('click',()=>{gameAudio.unlock();void activeScene()?.startIntro();});
 applyControls();
 
@@ -942,7 +945,7 @@ document.getElementById('level-cancel')!.addEventListener('click',closeLevelPick
 levelDialog.addEventListener('cancel',event=>{event.preventDefault();closeLevelPicker();});
 function startLevel(key:LevelKey){
  if(!levelProgress.canPlay(key)){refreshLevelLocks();return;}
- levelDialog.close();touchMenu.close();touch.clear();resetScoreEntry();resetTakeoutScores();resetScooterScores();resetAdventureScores();
+ modalNavigation.reset();levelDialog.close();touchMenu.close();touch.clear();resetScoreEntry();resetTakeoutScores();resetScooterScores();resetAdventureScores();
  const previous=activeScene();if(previous)game.scene.stop(previous.sys.settings.key);
  gameAudio.beginRun();game.scene.start(key);
  const url=new URL(location.href);url.searchParams.set('level',key);history.replaceState(null,'',url);
@@ -961,7 +964,7 @@ function finishNewLevel(level:string){
 }
 window.addEventListener('scooter-completed',()=>finishNewLevel('scooter'));
 window.addEventListener('adventure-completed',event=>finishNewLevel((event as CustomEvent).detail.level));
-for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{if(levelDialog.open)event.stopPropagation();},true);
+for(const type of ['keydown','keyup'])levelDialog.addEventListener(type,event=>event.stopPropagation());
 
 window.addEventListener('blur',clearPlayPointers);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearPlayPointers();});

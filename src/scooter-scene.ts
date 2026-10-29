@@ -1,3 +1,4 @@
+import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
 import Phaser from 'phaser';
 import {gameAudio} from './audio';
@@ -26,7 +27,7 @@ export class ScooterRide extends Phaser.Scene{
   this.paused=false;this.introActive=true;this.introStarted=false;this.won=false;this.failed=false;this.riding=false;this.scorePaused=false;this.restartSince=null;this.bubbleUntil=0;this.toastUntil=0;
   document.body.dataset.level='scooter';levelControlCopy('scooter');document.getElementById('current-level')!.textContent='Level 3 · Scooter Ride';document.getElementById('game')!.setAttribute('aria-label','Level 3 · Scooter Ride with Seth and Allison');
   const footer=document.querySelector('footer')!;footer.dataset.rooftopHtml??=footer.innerHTML;footer.textContent='AUTO RIDE → · BRAKE A / Left · ACCELERATE D / Right / Shift · HOP W / Up / Space · RISKY RAMP F / Action · PAUSE P · RESTART hold R';
-  document.getElementById('next-level')!.hidden=true;touch.clear();resetScoreEntry();resetScooterScores();(document.getElementById('touch-menu') as HTMLDialogElement).close();gameAudio.beginRun('scooter');
+  document.getElementById('next-level')!.hidden=true;touch.clear();resetScoreEntry();resetScooterScores();modalNavigation.reset();(document.getElementById('touch-menu') as HTMLDialogElement).close();gameAudio.beginRun('scooter');
   this.cameras.main.setBackgroundColor('#202738').setBounds(0,0,SCOOTER.width,1200).setZoom(this.renderScale);
   const frames=this.textures.get('thai-props');for(const [name,x,y,w,h] of [['bus',20,185,697,266],['car-left',726,263,418,192],['bin',1171,204,339,251],['car-right',497,710,550,226]] as [string,number,number,number,number][])if(!frames.has(name))frames.add(name,0,x,y,w,h);
   const riders=this.textures.get('scooter-riders');if(!riders.has('trim'))riders.add('trim',0,380,8,865,1008);

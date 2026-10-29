@@ -1,3 +1,4 @@
+import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
 import Phaser from 'phaser';
 import { gameAudio } from './audio';
@@ -52,7 +53,7 @@ export class ThaiTakeout extends Phaser.Scene {
     const footer=document.querySelector('footer')!;footer.dataset.rooftopHtml??=footer.innerHTML;
     footer.textContent='MOVE A/D or arrows · JUMP W / Up / Space · Double-tap for Mega Jump · SPRINT Shift · PICKUP / ELEVATOR F · PAUSE P · RESTART hold R';
     document.getElementById('next-level')!.hidden=true;
-    touch.clear();resetScoreEntry();resetTakeoutScores();(document.getElementById('touch-menu') as HTMLDialogElement).close();
+    touch.clear();resetScoreEntry();resetTakeoutScores();modalNavigation.reset();(document.getElementById('touch-menu') as HTMLDialogElement).close();
     this.run=newTakeoutRun();this.elapsedMs=0;this.deliveryElapsed=0;this.paused=false;this.introActive=true;this.introStarted=false;
     this.won=false;this.failed=false;this.riding=false;this.scorePaused=false;this.controller=new ControllerInput();this.photos=new Set();
     this.facing=1;this.lastGround=-1000;this.jumpUntil=0;this.jumpStarted=-1;this.megaUsed=false;this.immuneUntil=0;this.restartSince=null;this.lastBeep=0;
