@@ -37,6 +37,10 @@ export function takeoutScore(run,elapsedMs){
   return Math.max(0,1000+run.condition*10+foodWarmth(run,elapsedMs)*10+Math.max(0,180-Math.ceil(elapsedMs/1000))*10-run.hits*25);
 }
 export function trafficSpeed(returning){return returning?205:150;}
+// Roof contact takes precedence over a simultaneous front-corner contact.
+export function vehicleFrontHurts(contact,direction){
+  return !contact.up&&(direction<0?contact.left===true:direction>0?contact.right===true:false);
+}
 export const THAI_SCORE_KEY='seth-new-adventure.thai-scores.v1';
 function validRecord(s){return s&&typeof s.id==='string'&&typeof s.name==='string'&&s.name.length<=16&&Number.isFinite(Date.parse(s.date))&&Number.isInteger(s.score)&&s.score>=0&&s.score<=4800&&['condition','warmth'].every(k=>Number.isInteger(s[k])&&s[k]>=0&&s[k]<=100)&&Number.isInteger(s.hits)&&s.hits>=0&&Number.isFinite(s.elapsedMs)&&s.elapsedMs>=0&&s.elapsedMs<THAI.limitMs;}
 export function readTakeoutScores(storage){

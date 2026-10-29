@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {THAI,streetObstacles,newTakeoutRun,collectTakeout,foodWarmth,hitTakeout,canUseElevator,takeoutScore,trafficSpeed,THAI_SCORE_KEY,readTakeoutScores,saveTakeoutScore} from '../src/thai-mission.mjs';
+import {THAI,streetObstacles,newTakeoutRun,collectTakeout,foodWarmth,hitTakeout,canUseElevator,takeoutScore,trafficSpeed,vehicleFrontHurts,THAI_SCORE_KEY,readTakeoutScores,saveTakeoutScore} from '../src/thai-mission.mjs';
 import {REGULAR_JUMP_SPEED} from '../src/mission.mjs';
 
 test('takeout must be collected before elevator finish; there is no photo or soccer prerequisite',()=>{
@@ -55,4 +55,17 @@ test('Thai records are separate, deduplicated, ranked, and never overwrite corru
   for(const [key,value] of original)assert.equal(data.get(key),value);
   data.set(THAI_SCORE_KEY,'corrupt');assert.throws(()=>saveTakeoutScore(storage,entry));assert.equal(data.get(THAI_SCORE_KEY),'corrupt');
   data.set(THAI_SCORE_KEY,'[]');assert.throws(()=>saveTakeoutScore(storage,{...entry,elapsedMs:THAI.limitMs}));
+});
+
+test('moving vehicles hurt only at their front, with safe roofs and rear contacts in both directions',()=>{
+ assert.equal(vehicleFrontHurts({left:true},-1),true);
+ assert.equal(vehicleFrontHurts({right:true},-1),false);
+ assert.equal(vehicleFrontHurts({right:true},1),true);
+ assert.equal(vehicleFrontHurts({left:true},1),false);
+ for(const direction of [-1,1]){
+  assert.equal(vehicleFrontHurts({up:true,left:true,right:true},direction),false);
+  assert.equal(vehicleFrontHurts({up:true},direction),false);
+  assert.equal(vehicleFrontHurts({},direction),false);
+ }
+ assert.equal(vehicleFrontHurts({left:true,right:true},0),false);
 });

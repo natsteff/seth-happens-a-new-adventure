@@ -8,10 +8,10 @@ import { walkLayout, fallLayout } from './art-layout';
 import { REGULAR_JUMP_SPEED, SPRINT_SPEED, megaJumpVelocity, RESTART_HOLD_MS } from './mission.mjs';
 import { mobileTrackLabel } from './mobile-track.mjs';
 import { brickBuilding } from './scenery';
-import { THAI, streetObstacles, trafficZones, newTakeoutRun, collectTakeout, foodWarmth, hitTakeout, canUseElevator, takeoutScore, trafficSpeed } from './thai-mission.mjs';
+import { THAI, streetObstacles, trafficZones, newTakeoutRun, collectTakeout, foodWarmth, hitTakeout, canUseElevator, takeoutScore, trafficSpeed, vehicleFrontHurts } from './thai-mission.mjs';
 
 const W=1100,H=600;
-type Traffic={body:Phaser.GameObjects.Rectangle;art:Phaser.GameObjects.Image;left:number;right:number;waiting:boolean};
+type Traffic={body:Phaser.GameObjects.Rectangle;roof:Phaser.GameObjects.Rectangle;art:Phaser.GameObjects.Image;left:number;right:number;waiting:boolean;direction:number};
 type Pedestrian={body:Phaser.GameObjects.Rectangle;art:Phaser.GameObjects.Image;label:Phaser.GameObjects.Text;left:number;right:number;phase:number;thief:boolean};
 export class ThaiTakeout extends Phaser.Scene {
   constructor(){super({key:'thai'});}
@@ -149,11 +149,17 @@ export class ThaiTakeout extends Phaser.Scene {
   buildTraffic(){
     trafficZones.forEach((zone,index)=>{
       const x=zone.right-20-index*35;
-      const body=this.add.rectangle(x,THAI.ground-26,124,52,0xffffff,0);this.physics.add.existing(body);
+      const body=this.add.rectangle(x,THAI.ground-25,124,50,0xffffff,0);this.physics.add.existing(body);
       const physics=body.body as Phaser.Physics.Arcade.Body;physics.setAllowGravity(false).setImmovable(true);
+      const roof=this.add.rectangle(x+9,THAI.ground-59.5,68,19,0xffffff,0);this.physics.add.existing(roof);
+      const roofPhysics=roof.body as Phaser.Physics.Arcade.Body;roofPhysics.setAllowGravity(false).setImmovable(true);
+      roofPhysics.checkCollision.left=false;roofPhysics.checkCollision.right=false;roofPhysics.checkCollision.down=false;
       const art=this.add.image(x,THAI.ground,'thai-props','car-left').setOrigin(.5,1).setDisplaySize(150,69).setDepth(4);
-      const car={body,art,left:zone.left,right:zone.right,waiting:false};this.traffic.push(car);
-      this.physics.add.overlap(this.player,body,()=>this.takeHit(false,'Traffic collision — find a roof or jump clear.'));
+      const car={body,roof,art,left:zone.left,right:zone.right,waiting:false,direction:-1};this.traffic.push(car);
+      this.physics.add.collider(this.player,roof);
+      this.physics.add.collider(this.player,body,()=>{
+        if(vehicleFrontHurts(physics.touching,car.direction))this.takeHit(false,'Front bumper collision — jump onto the vehicle or clear its nose.');
+      });
     });
   }
   buildPedestrians(){
@@ -188,7 +194,7 @@ export class ThaiTakeout extends Phaser.Scene {
     for(const key of Object.values(this.keys))key.reset();
     this.physics.world.resume();gameAudio.music.startRun();
     for(const id of ['pause-toggle','restart-run','touch-menu-open'])(document.getElementById(id) as HTMLButtonElement).disabled=false;
-    this.say('Thai food is waiting → Use bins and bus roofs. Moving cars are hazards.');
+    this.say('Thai food is waiting → Land on vehicles. Watch their front bumpers.');
   }
   say(message:string){this.toast.setText(message).setVisible(true);this.toastUntil=this.elapsedMs+4200;}
   refreshControlCopy(){
@@ -220,12 +226,14 @@ export class ThaiTakeout extends Phaser.Scene {
   updateTraffic(delta:number){
     const returning=this.run.food,direction=returning?1:-1;
     for(const car of this.traffic){
-      const body=car.body.body as Phaser.Physics.Arcade.Body;
+      const body=car.body.body as Phaser.Physics.Arcade.Body,roof=car.roof.body as Phaser.Physics.Arcade.Body;
       const spawn=direction<0?car.right:car.left;
       if(car.body.x<car.left||car.body.x>car.right||car.waiting){
-        if(Math.abs(spawn-this.player.x)<225){car.waiting=true;body.enable=false;car.art.setVisible(false);continue;}
-        body.enable=true;body.reset(spawn,THAI.ground-26);car.waiting=false;car.art.setVisible(true);
+        if(Math.abs(spawn-this.player.x)<225){car.waiting=true;body.enable=false;roof.enable=false;car.art.setVisible(false);continue;}
+        body.enable=true;roof.enable=true;body.reset(spawn,THAI.ground-25);roof.reset(spawn-direction*9,THAI.ground-59.5);car.waiting=false;car.art.setVisible(true);
       }
+      if(car.direction!==direction)roof.reset(car.body.x-direction*9,THAI.ground-59.5);
+      car.direction=direction;roof.setVelocityX(direction*trafficSpeed(returning));
       body.setVelocityX(direction*trafficSpeed(returning));
       car.art.setPosition(car.body.x,THAI.ground).setFrame(returning?'car-right':'car-left');
     }
