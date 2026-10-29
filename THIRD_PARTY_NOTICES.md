@@ -37,3 +37,9 @@ These local first efforts reuse the existing street backdrop, owner-authorized c
 ## Carnival Catastrophe additions
 
 Carnival tents, string lights, Ferris-wheel structure/gondolas, moving lifts/shuttle and bumper-car texture are original code-drawn scene art. Existing street scenery, familiar character illustrations (including Allison) and unlocked music are reused unchanged. No new reference photo, external download, generated voice, paid asset or soundtrack was introduced. Existing provenance and owner release/rights-review requirements continue to apply.
+
+## October 29, 2026 release and app icons
+
+the project explicitly authorized publishing this New Adventure game and its GitHub Pages build on October 29, superseding the earlier local-only integration notes above. This approval does not assign ownership or grant a new license for third-party marks, music, effects or voices; their attributions remain unchanged. Release review checked the runtime asset inventory and retained dependency notices, isolated saves, disabled shared-score backend, and excluded private instructions/queue/logs, credentials and raw reference photos.
+
+The new app-icon master was generated with the built-in imagegen tool from the project's approved New Adventure logo. iPhone/Android/browser derivatives resize that master; maskable icons add a safe margin. The supplied logo and generated original are preserved. Exact prompt and production sizes: [app-icon notes](docs/app-icons.md).

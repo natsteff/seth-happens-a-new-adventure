@@ -1,8 +1,34 @@
+<p align="center">
+  <img src="public/assets/adventure-logo.png" alt="Seth Happens - A New Adventure" width="760">
+</p>
+
 # Seth Happens - A New Adventure
+
+<p align="center">
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><strong>▶ PLAY NOW</strong></a> · <a href="#play-on-iphone">Play on iPhone</a>
+</p>
+
+Eight unlockable platform adventures with Seth and Allison: rooftops, takeout, scooters, concerts, ghosts, zombies, blizzards and carnival chaos. **Version 0.8.1** is playable in your browser.
+
+This separate game builds on the complete **Seth Happens v0.3.12** release. The original remains a standalone game.
+
+**[Play Now](https://natsteff.github.io/seth-happens-a-new-adventure/)** · [Source on GitHub](https://github.com/natsteff/seth-happens-a-new-adventure)
+
+Complete each level to unlock the next, then replay any unlocked adventure. Progress and records are saved only in your browser. No account, backend or analytics is required.
 
 Level 1 retains the original 26-rooftop beer run, characters, two photo objectives, hazards, elevator secret, timeout sequence, scoring, keyboard/controller/mobile controls, sound effects, voices, radio and outcome music. Its scenery uses a dusk-city treatment: illustrated skyline and river, textured brick buildings, stone roof caps and decorative rooftop ventilation. Collision geometry, movement, timer and scoring rules are unchanged.
 
 The game has a separate browser-storage namespace for scores, preferences, touch controls and update guards. It never imports or clears the original game's records.
+
+## Play on iPhone
+
+1. Open [Play Now](https://natsteff.github.io/seth-happens-a-new-adventure/) in Safari.
+2. Tap **Share → Add to Home Screen**, enable **Open as Web App** if offered, then tap **Add**.
+3. Launch **New Adventure** from its new icon and rotate to landscape.
+
+If you installed an earlier prototype, remove its old Home Screen icon and add this game again to pick up the new icon and name. Browser and Home Screen installations may keep separate saves. Internet is required; offline play is not included.
+
+Desktop: use keyboard controls or an optional controller. Mobile: use the on-screen controls and game menu.
 
 ## Run locally
 
@@ -73,4 +99,7 @@ The same scenery renders in the existing game world on desktop and mobile. It sc
 Level 1 starts with the original five radio choices and Arcade Staircase as its default. Unlocking Level 2 also unlocks **Thai Food Run**, which is Level 2's default. Unlocking Level 3 also unlocks **Scooter Run**, which is Level 3's default. Each unlocked soundtrack is available on every level through the radio's Track picker (in the mobile menu), previous/next buttons, or keys **6**, **7**, and **8**. Locked tracks cannot be selected by shortcut or restored from an old preference.
 
 ## Release status
+
+This project does not replace or maintain the original standalone game. Browser checks do not certify physical iPhone/Android/controller acceptance. Supplied assets and third-party notices are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 

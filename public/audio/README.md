@@ -1,6 +1,6 @@
 # Owner-supplied voice recordings
 
-Provided directly by the project October 26, 2026; copied byte-for-byte from the named Downloads files. Originals untouched. Local prototype use only; no GitHub upload or public distribution authorized. No voice cloning or robotic browser TTS.
+Provided directly by the project October 26, 2026; copied byte-for-byte from the named Downloads files. Originals untouched. Included in the October 29, 2026 release with the project's publication approval. No voice cloning or robotic browser TTS.
 
 | Runtime file | Supplied file | Trigger | Duration |
 | --- | --- | --- | --- |
@@ -40,7 +40,7 @@ Soundtrack: owner-supplied unmodified MP3 files in music/ (Arcade Staircase, The
 
 ## New Adventure level soundtracks · October 28, 2026
 
-Owner-supplied MP3s copied byte-for-byte; supplied originals remain unchanged. Added for local review only, without push or publication. Both are stereo 48 kHz MP3. No transcoding or trimming.
+Owner-supplied MP3s copied byte-for-byte; supplied originals remain unchanged. Initially integrated for local review; included in the owner-approved October 29 release. Both are stereo 48 kHz MP3. No transcoding or trimming.
 
 | Runtime file | Supplied file | Default / unlock | Browser duration | SHA-256 |
 | --- | --- | --- | --- | --- |
@@ -49,4 +49,4 @@ Owner-supplied MP3s copied byte-for-byte; supplied originals remain unchanged. A
 
 Once unlocked, either track can be selected on any level. Tracks stream on demand through the existing radio; no backend or audio service added. Level 1's initial five tracks/order/default, countdown tracks and outcome tracks are retained. Per-level choices use seth-new-adventure.level-music.v1, separate from original-game settings and all score/progress keys.
 
-Concert Chaos soundtrack supplied by the project October28: `Eye of the Stairwell (Leads Take Me Away!).mp3`, copied unchanged into `music/concert-eye-of-the-stairwell.mp3`. Stereo48kHz MP3; estimated224.832s. SHA256 source/runtime:93885e7f101ed6b21ae79726fb43394d198129600b7121e847bb67b0979e3341. Level4 default, track8; unlocks with Concert Chaos and then selectable on any level. The existing `music/eye-of-the-stairwell.mp3` champion track is a separate supplied recording and is untouched. No transcoding or publication.
+Concert Chaos soundtrack supplied by the project October28: `Eye of the Stairwell (Leads Take Me Away!).mp3`, copied unchanged into `music/concert-eye-of-the-stairwell.mp3`. Stereo48kHz MP3; estimated224.832s. SHA256 source/runtime:93885e7f101ed6b21ae79726fb43394d198129600b7121e847bb67b0979e3341. Level4 default, track8; unlocks with Concert Chaos and then selectable on any level. The existing `music/eye-of-the-stairwell.mp3` champion track is a separate supplied recording and is untouched. No transcoding; included in the owner-approved October 29 release.
