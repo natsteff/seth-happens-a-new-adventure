@@ -17,7 +17,7 @@ music.subscribe(()=>{
  const available=music.availableTracks;
  for(const option of Array.from(trackSelect.options)){const index=Number(option.value),unlocked=available.includes(index);option.disabled=!unlocked;option.textContent=`${index+1} · ${radioTracks[index].title}${unlocked?'':` · Locked: complete Level ${radioTracks[index].unlockAfter}`}`;}
  trackSelect.value=String(music.selected);trackSelect.disabled=music.countdown||!!music.outcome;
- radio.querySelector('.radio-brand span')!.textContent=`1–${available.length} tracks · 0 off · [ previous · ] next`;
+ radio.querySelector('.radio-brand span')!.textContent=`${available.length===1?'1 track':`1–${available.length} tracks`} · 0 off · [ previous · ] next`;
 
  radio.dataset.countdown=String(music.countdown);
  radio.dataset.finished=String(!!music.outcome);

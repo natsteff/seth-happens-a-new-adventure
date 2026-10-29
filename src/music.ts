@@ -1,6 +1,7 @@
 import {loadSettings,saveSettings} from './preferences.mjs';
-import {championTracks,failureTrack,cheaterTrack,countdownTracks,radioTracks,DEFAULT_RADIO_TRACK,nextRadioTrack,unlockedRadioTracks,defaultLevelTrack} from './radio-playlist.mjs';
-const LEVEL_MUSIC_KEY='seth-new-adventure.level-music.v1';
+import {championTracks,failureTrack,cheaterTrack,countdownTracks,radioTracks,DEFAULT_RADIO_TRACK,nextRadioTrack,unlockedRadioTracks,defaultLevelTrack,legacyRadioTrack} from './radio-playlist.mjs';
+const LEVEL_MUSIC_KEY='seth-new-adventure.level-music.v2';
+const LEGACY_LEVEL_MUSIC_KEY='seth-new-adventure.level-music.v1';
 /** Stream only the selected owner-supplied MP3; no decoding/caching the whole playlist. */
 export class MusicRadio{
  audio=document.createElement('audio');
@@ -18,25 +19,37 @@ export class MusicRadio{
  private listeners=new Set<()=>void>();
  private singleDeck:boolean;
  private level='rooftop';private canPlay:(level:string)=>boolean=()=>false;
- private choices:Record<string,number>={};
+ private choices:Record<string,string>={};
  get availableTracks(){return unlockedRadioTracks(this.canPlay);}
  configureLevels(canPlay:(level:string)=>boolean){this.canPlay=canPlay;this.refreshUnlocks();}
- refreshUnlocks(){if(!this.availableTracks.includes(this.selected)){this.selected=DEFAULT_RADIO_TRACK;if(!this.countdown&&!this.outcome){this.audio.pause();this.audio.src=this.trackUrl();}}this.notify();}
- private chooseLevel(level:string){
-  if(level===this.level)return;
-  this.level=level;const choice=this.choices[level]??defaultLevelTrack(level);
-  this.selected=this.availableTracks.includes(choice)?choice:DEFAULT_RADIO_TRACK;
+ private levelChoice(){
+  const saved=radioTracks.findIndex(track=>track.file===this.choices[this.level]);
+  const available=this.availableTracks;
+  if(available.includes(saved))return saved;
+  const assigned=defaultLevelTrack(this.level);
+  return available.includes(assigned)?assigned:DEFAULT_RADIO_TRACK;
  }
+ refreshUnlocks(){if(!this.availableTracks.includes(this.selected)){this.selected=this.levelChoice();if(!this.countdown&&!this.outcome){this.audio.pause();this.audio.src=this.trackUrl();}}this.notify();}
+ private chooseLevel(level:string){this.level=level;this.selected=this.levelChoice();}
  private saveChoice(){
-  this.choices[this.level]=this.selected;
+  this.choices[this.level]=radioTracks[this.selected].file;
   try{const raw=localStorage.getItem(LEVEL_MUSIC_KEY);if(raw!==null){const value=JSON.parse(raw);if(!value||typeof value!=='object'||Array.isArray(value))return;}
    localStorage.setItem(LEVEL_MUSIC_KEY,JSON.stringify(this.choices));}catch{/* Session selection remains available; preserve corrupt saves. */}
  }
  constructor(singleDeck=(globalThis.navigator?.maxTouchPoints??0)>0){
   this.singleDeck=singleDeck;
   const settings=loadSettings();this.selected=settings.track;this.countdownSelected=settings.countdownTrack;this.championSelected=settings.championTrack;this.volume=settings.volume;this.enabled=settings.musicEnabled;this.muted=settings.muted;
-  try{const value=JSON.parse(localStorage.getItem(LEVEL_MUSIC_KEY)??'{}');if(value&&typeof value==='object'&&!Array.isArray(value))for(const level of ['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival'])if(Number.isInteger(value[level])&&value[level]>=0&&value[level]<radioTracks.length)this.choices[level]=value[level];}catch{}
-  this.selected=this.choices.rooftop??(settings.track<5?settings.track:DEFAULT_RADIO_TRACK);
+  try{
+   const raw=localStorage.getItem(LEVEL_MUSIC_KEY),legacy=raw===null;
+   const value=JSON.parse((legacy?localStorage.getItem(LEGACY_LEVEL_MUSIC_KEY):raw)??'{}');
+   if(value&&typeof value==='object'&&!Array.isArray(value))for(const level of ['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival']){
+    const file=legacy?(Number.isInteger(value[level])?radioTracks[legacyRadioTrack(value[level])]?.file:undefined):value[level];
+    if(radioTracks.some(track=>track.file===file))this.choices[level]=file;
+   }
+  }catch{}
+  // The old global selection belongs to Rooftop only, never another level.
+  this.choices.rooftop??=radioTracks[settings.track].file;
+  this.selected=radioTracks.findIndex(track=>track.file===this.choices.rooftop);
   for(const element of this.elements){
    element.hidden=true;element.preload='none';element.loop=true;
    element.addEventListener('ended',()=>{if(element===this.audio&&this.outcome==='cheater'){this.ended=true;this.notify();}});

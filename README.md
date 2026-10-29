@@ -1,18 +1,30 @@
-<p align="center">
-  <img src="public/assets/adventure-logo.png" alt="Seth Happens - A New Adventure" width="760">
-</p>
-
 # Seth Happens - A New Adventure
 
+**Version 0.8.3 · Early alpha**
+
+![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
+
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><strong>▶ PLAY NOW</strong></a> · <a href="#play-on-iphone">Play on iPhone</a> · <a href="https://github.com/natsteff/seth-happens-a-new-adventure/issues">Report a bug</a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.8.3 Early alpha"></a>
 </p>
+
+**Play version 0.8.3** — Fullscreen highly recommended.
+
+**Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
 One very ordinary guy. Eight increasingly unreasonable adventures.
 
 Run, jump, dodge and ride through a city full of familiar faces and questionable decisions. Pick up dinner, survive a scooter ride with Allison, photograph a concert, escape a haunted house, and find out just how badly a Wisconsin snow day can go.
 
-**Version 0.8.2 · Early alpha**
+🎵 **[Listen to the entire video game soundtrack](https://suno.com/playlist/0ef61d61-9481-48f2-b67f-989cffdc9cca)**.
+
+## Fun things to explore
+
+- Complete each adventure to unlock the next, then replay your favorites.
+- Unlock each level's soundtrack and try it on earlier adventures.
+- Try alternate routes, Mega Jumps and the rooftop easter egg.
+- Customize touch controls, countdown music and Champion Tracks.
+- Watch for Allison's reactions on the scooter ride.
 
 ## Your adventures
 
@@ -45,15 +57,15 @@ On the scooter and in the truck, **left brakes** and **right accelerates**. Ramp
 
 Full screen is recommended. An optional controller can be paired before play; use keyboard or touch for menus and score entry.
 
-## Play on iPhone
+## How to add as a mobile app
 
 1. Open **[Play Now](https://natsteff.github.io/seth-happens-a-new-adventure/)** in Safari.
 2. Choose **Share → Add to Home Screen**. Enable **Open as Web App** if offered, then tap **Add**.
-3. Launch **New Adventure** from its icon and rotate to landscape.
+3. Launch **Seth Happens 2** from its icon and rotate to landscape.
 
 Use the on-screen movement, Jump and Action controls. Open the game menu to adjust controls, change music, restart or choose a level.
 
-The original **Seth Happens** can stay installed separately. This game has its own icon, name and progress. If an older installation of this New Adventure URL keeps a cached icon, adding it again may be necessary; preserve important records before removing an installation.
+The original **Seth Happens** can stay installed separately. This game has its own icon, name and progress. The default Home Screen label is **Seth Happens 2**; the full game title remains **Seth Happens - A New Adventure**. Existing installations may retain their old label. You can edit the name when adding a shortcut; preserve important records before removing any installation.
 
 Android players can use the browser's **Install app / Add to Home screen** option. Internet is required; offline play is not included.
 
@@ -61,7 +73,22 @@ Android players can use the browser's **Install app / Add to Home screen** optio
 
 Sound effects and music have separate controls. Choose a track with the radio, or open the mobile game menu for music settings.
 
-The starting playlist has five tracks. Unlocking Thai Takeout Run, Scooter Ride and Concert Chaos adds their soundtracks, which can then be selected on any unlocked level. Each level remembers your music choice. Muting music or sound stays in effect when switching levels.
+New players start with **1 · Arcade Staircase**. Completing a level unlocks the next adventure and its soundtrack. Each unlocked song is selectable on any unlocked level.
+
+| Track / level | Soundtrack |
+| --- | --- |
+| 1 · Rooftop Beer Run | Arcade Staircase |
+| 2 · Thai Takeout Run | Thai Food Run |
+| 3 · Scooter Ride | Scooter Run |
+| 4 · Concert Chaos | Eye of the Stairwell (Leads Take Me Away!) |
+| 5 · Haunted House | The Haunted Happy Hour |
+| 6 · Zombie Apocalypse | The Beer of Destiny |
+| 7 · Snow Day From Hell | Twenty-Six Floors of Celts |
+| 8 · Carnival Catastrophe | Go Seth Go |
+
+Each level starts with its assigned song unless you choose another unlocked track for that level. That choice is remembered across replays and future visits, independently for every level. Existing saved choices retain their song identity where unlocked; a newly locked choice falls back to the level's assigned song. Sound/music mute and volume preferences stay in effect.
+
+Keyboard **1–8** selects the corresponding unlocked song, **0** turns music off, and **[ / ]** moves through unlocked songs. On mobile, choose music in the game menu. Countdown and outcome tracks keep their separate selections.
 
 ## Progress and records
 

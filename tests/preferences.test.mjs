@@ -15,5 +15,5 @@ test('invalid values fall back safely, unavailable/corrupt storage does not brea
 });
 
 test('legacy jump-clue setting is ignored without disturbing other saved options',()=>{
- const s=store();s.data.set(PREFERENCES_KEY,JSON.stringify({jumpClues:true,volume:.2,track:3}));const prefs=readPreferences(s);assert.equal('jumpClues' in prefs,false);assert.equal(prefs.volume,.2);assert.equal(prefs.track,3);savePreferences(s,{musicEnabled:false});assert.equal(JSON.parse(s.data.get(PREFERENCES_KEY)).jumpClues,undefined);
+ const s=store();s.data.set(PREFERENCES_KEY,JSON.stringify({jumpClues:true,volume:.2,track:3}));const prefs=readPreferences(s);assert.equal('jumpClues' in prefs,false);assert.equal(prefs.volume,.2);assert.equal(prefs.track,7);savePreferences(s,{musicEnabled:false});assert.equal(JSON.parse(s.data.get(PREFERENCES_KEY)).jumpClues,undefined);
 });

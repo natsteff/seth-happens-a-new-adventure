@@ -92,19 +92,61 @@ test('rejected second-deck playback falls back to the previously playing element
  assert.equal(m.audio,active);assert.match(active.src,/the-final-warning/);assert.equal(active.paused,false);m.endRun();
 });
 
-test('Thai soundtrack unlocks across levels, defaults on Thai entry and remembers per-level choices',()=>{
+test('level defaults, cross-level selection, replay and reload preserve independent music choices',()=>{
  const data=new Map();globalThis.localStorage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
- const m=new MusicRadio();let unlocked=false,scooter=false;m.configureLevels(level=>level==='thai'?unlocked:level==='scooter'?scooter:false);
- m.select(5);assert.equal(m.selected,0);m.step(-1);assert.equal(m.selected,4);
- unlocked=true;m.refreshUnlocks();m.beginRun('thai');assert.equal(m.selected,5);assert.match(m.audio.src,/thai-food-run/);
- m.off();m.beginRun('thai');assert.equal(m.enabled,false);assert.equal(m.selected,5);
- m.beginRun('rooftop');assert.equal(m.selected,4);m.select(5);m.beginRun('rooftop');assert.equal(m.selected,5);
- scooter=true;m.refreshUnlocks();m.beginRun('scooter');assert.equal(m.selected,6);m.select(5);m.beginRun('thai');assert.equal(m.selected,5);
- const reloaded=new MusicRadio();reloaded.configureLevels(()=>true);reloaded.beginRun('scooter');assert.equal(reloaded.selected,5);
- const locked=new MusicRadio();locked.configureLevels(()=>false);assert.equal(locked.selected,0);
+ const m=new MusicRadio();let unlocked=0;
+ const levels=['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival'];
+ m.configureLevels(level=>levels.indexOf(level)<=unlocked);
+ m.select(1);assert.equal(m.selected,0);m.step(-1);assert.equal(m.selected,0);
+ for(let i=1;i<levels.length;i++){
+  unlocked=i;m.refreshUnlocks();m.beginRun(levels[i]);assert.equal(m.selected,i);
+  m.select(i-1);m.off();m.beginRun(levels[i]);assert.equal(m.enabled,false);assert.equal(m.selected,i-1);
+ }
+ m.beginRun('rooftop');m.select(7);m.beginRun('thai');assert.equal(m.selected,0);
+ m.beginRun('rooftop');assert.equal(m.selected,7);
+ const reloaded=new MusicRadio();reloaded.configureLevels(()=>true);
+ for(let i=1;i<levels.length;i++){reloaded.beginRun(levels[i]);assert.equal(reloaded.selected,i-1);}
+ reloaded.beginRun('rooftop');assert.equal(reloaded.selected,7);
  delete globalThis.localStorage;
 });
 
-test('locked Scooter track cannot be selected by shortcut/index or remembered preference',()=>{
- const m=new MusicRadio();m.configureLevels(level=>level==='thai');m.select(6);assert.equal(m.selected,0);m.select(5);assert.equal(m.selected,5);m.step(1);assert.equal(m.selected,0);
+test('locked tracks are rejected and saved unavailable choices fall back to that level default',()=>{
+ const data=new Map([['seth-new-adventure.level-music.v2',JSON.stringify({thai:'go-seth-go.mp3',rooftop:'scooter-run.mp3'})]]);
+ globalThis.localStorage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
+ const m=new MusicRadio();m.configureLevels(level=>level==='thai');assert.equal(m.selected,0);
+ m.beginRun('thai');assert.equal(m.selected,1);m.select(2);assert.equal(m.selected,1);
+ m.beginRun('rooftop');assert.equal(m.selected,0);m.select(1);assert.equal(m.selected,1);
+ delete globalThis.localStorage;
+});
+
+test('every legacy numeric song migrates by identity, including per-level choices and global settings',()=>{
+ const legacy=['arcade-staircase.mp3','beer-of-destiny.mp3','twenty-six-floors-of-glory.mp3','go-seth-go.mp3','haunted-happy-hour.mp3','thai-food-run.mp3','scooter-run.mp3','concert-eye-of-the-stairwell.mp3'];
+ for(let i=0;i<legacy.length;i++){
+  const oldChoices=JSON.stringify({thai:i,scooter:i}),oldSettings=JSON.stringify({track:i,muted:true,musicEnabled:false,volume:.31});
+  const data=new Map([['seth-new-adventure.level-music.v1',oldChoices],['seth-new-adventure.preferences.v1',oldSettings],['seth-new-adventure.progress.v1','preserved progress'],['seth-happens.preferences.v1','original game']]);
+  globalThis.localStorage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
+  const m=new MusicRadio();m.configureLevels(()=>true);assert.equal(m.track.file,legacy[i]);
+  m.beginRun('thai');assert.equal(m.track.file,legacy[i]);m.beginRun('scooter');assert.equal(m.track.file,legacy[i]);
+  assert.equal(m.muted,true);assert.equal(m.enabled,false);assert.equal(m.volume,.31);
+  m.setVolume(.42);m.select(m.selected);m.off();
+  assert.equal(JSON.parse(data.get('seth-new-adventure.level-music.v2')).scooter,legacy[i]);
+  assert.equal(data.get('seth-new-adventure.level-music.v1'),oldChoices);
+  assert.equal(data.get('seth-new-adventure.progress.v1'),'preserved progress');
+  assert.equal(data.get('seth-happens.preferences.v1'),'original game');
+  const again=new MusicRadio();again.configureLevels(()=>true);again.beginRun('thai');assert.equal(again.track.file,legacy[i]);
+  again.beginRun('scooter');assert.equal(again.track.file,legacy[i]);assert.equal(again.volume,.42);assert.equal(again.enabled,false);assert.equal(again.muted,true);
+ }
+ delete globalThis.localStorage;
+});
+
+test('corrupt or unavailable per-level storage survives selection without breaking session choices',()=>{
+ for(const raw of ['corrupt','[]','null']){
+  const data=new Map([['seth-new-adventure.level-music.v2',raw]]);
+  globalThis.localStorage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
+  const m=new MusicRadio();m.configureLevels(()=>true);m.beginRun('thai');m.select(3);m.beginRun('scooter');m.beginRun('thai');assert.equal(m.selected,3);
+  assert.equal(data.get('seth-new-adventure.level-music.v2'),raw);
+ }
+ globalThis.localStorage={getItem(){throw Error('unavailable');},setItem(){throw Error('unavailable');}};
+ const m=new MusicRadio();m.configureLevels(()=>true);m.beginRun('thai');m.select(2);m.beginRun('rooftop');m.beginRun('thai');assert.equal(m.selected,2);
+ delete globalThis.localStorage;
 });
