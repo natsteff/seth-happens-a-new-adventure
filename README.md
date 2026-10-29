@@ -8,8 +8,6 @@
   <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><strong>▶ PLAY NOW</strong></a> · <a href="#play-on-iphone">Play on iPhone</a>
 </p>
 
-Eight unlockable platform adventures with Seth and Allison: rooftops, takeout, scooters, concerts, ghosts, zombies, blizzards and carnival chaos. **Version 0.8.1** is playable in your browser.
-
 This separate game builds on the complete **Seth Happens v0.3.12** release. The original remains a standalone game.
 
 **[Play Now](https://natsteff.github.io/seth-happens-a-new-adventure/)** · [Source on GitHub](https://github.com/natsteff/seth-happens-a-new-adventure)
@@ -26,7 +24,7 @@ The game has a separate browser-storage namespace for scores, preferences, touch
 2. Tap **Share → Add to Home Screen**, enable **Open as Web App** if offered, then tap **Add**.
 3. Launch **New Adventure** from its new icon and rotate to landscape.
 
-If you installed an earlier prototype, remove its old Home Screen icon and add this game again to pick up the new icon and name. Browser and Home Screen installations may keep separate saves. Internet is required; offline play is not included.
+Keep the original Seth Happens installed separately; this URL installs New Adventure. If an earlier installation of this New Adventure URL keeps its old icon, iOS may require removing and adding that installation again; preserve any important local records first. Browser and Home Screen installations may keep separate saves. Internet is required; offline play is not included.
 
 Desktop: use keyboard controls or an optional controller. Mobile: use the on-screen controls and game menu.
 
