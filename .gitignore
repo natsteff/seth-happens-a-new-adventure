@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+
+data/
+.env
+.env.*
+.pnpm-store/
+AGENTS.md
+WORK-QUEUE.md
+docs/WORK-LOG.md
+docs/qa/
