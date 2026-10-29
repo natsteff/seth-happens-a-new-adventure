@@ -13,6 +13,7 @@ import { ConcertChaos } from './concert-scene';
 import { HauntedHouse } from './haunted-scene';
 import { ZombieApocalypse } from './zombie-scene';
 import { SnowDay } from './snow-scene';
+import { CarnivalCatastrophe } from './carnival-scene';
 import { resetAdventureScores } from './adventure-scoreboard';
 import { resetScooterScores } from './scooter-scoreboard';
 import { resetTakeoutScores } from './thai-scoreboard';
@@ -741,13 +742,13 @@ class Errand extends Phaser.Scene {
   }
 }
 const requestedLevel=new URLSearchParams(location.search).get('level');
-const levelDefinitions=[{key:'rooftop',title:'Rooftop Beer Run',scene:Errand},{key:'thai',title:'Thai Takeout Run',scene:ThaiTakeout},{key:'scooter',title:'Scooter Ride',scene:ScooterRide},{key:'concert',title:'Concert Chaos',scene:ConcertChaos},{key:'haunted',title:'Haunted House',scene:HauntedHouse},{key:'zombie',title:'Zombie Apocalypse',scene:ZombieApocalypse},{key:'snow',title:'Snow Day From Hell',scene:SnowDay}];
-type LevelKey='rooftop'|'thai'|'scooter'|'concert'|'haunted'|'zombie'|'snow';
+const levelDefinitions=[{key:'rooftop',title:'Rooftop Beer Run',scene:Errand},{key:'thai',title:'Thai Takeout Run',scene:ThaiTakeout},{key:'scooter',title:'Scooter Ride',scene:ScooterRide},{key:'concert',title:'Concert Chaos',scene:ConcertChaos},{key:'haunted',title:'Haunted House',scene:HauntedHouse},{key:'zombie',title:'Zombie Apocalypse',scene:ZombieApocalypse},{key:'snow',title:'Snow Day From Hell',scene:SnowDay},{key:'carnival',title:'Carnival Catastrophe',scene:CarnivalCatastrophe}];
+type LevelKey='rooftop'|'thai'|'scooter'|'concert'|'haunted'|'zombie'|'snow'|'carnival';
 const scenes=levelDefinitions.map(level=>level.scene);
 const first=levelDefinitions.find(level=>level.key===requestedLevel&&levelProgress.canPlay(level.key))?.scene??Errand;
 const initialScenes=[first,...scenes.filter(scene=>scene!==first)];
 const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W*RENDER_SCALE,height:H*RENDER_SCALE,physics:{default:'arcade',arcade:{gravity:{x:0,y:1050},debug:false}},scene:initialScenes,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true}});
-function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout|ScooterRide|ConcertChaos|HauntedHouse|ZombieApocalypse|SnowDay;}
+function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout|ScooterRide|ConcertChaos|HauntedHouse|ZombieApocalypse|SnowDay|CarnivalCatastrophe;}
 
 const soundToggle=document.getElementById('sound-toggle');
 soundToggle?.addEventListener('click',()=>{void gameAudio.unlock();gameAudio.toggle();(soundToggle as HTMLButtonElement).blur();});
@@ -921,7 +922,7 @@ function refreshLevelLocks(){
  for(const [index,level] of levelDefinitions.entries()){
   const button=document.querySelector<HTMLButtonElement>(`[data-start-level="${level.key}"]`)!;
   button.disabled=!levelProgress.canPlay(level.key);
-  if(index>0)button.querySelector('span')!.textContent=button.disabled?`Locked · Complete Level ${index} to unlock`:level.key==='thai'?'Collect dinner, dodge traffic, bring it home hot':level.key==='scooter'?'Ride with Allison · Big ramps, bigger regrets':level.key==='concert'?'Climb for credentials · Get to the photo pit':level.key==='haunted'?'Haunted rooms, four floors and an attic escape':level.key==='zombie'?'Survive the neighborhood · Find the truck':'Ice, snowplows and a Wisconsin blizzard';
+  if(index>0)button.querySelector('span')!.textContent=button.disabled?`Locked · Complete Level ${index} to unlock`:level.key==='thai'?'Collect dinner, dodge traffic, bring it home hot':level.key==='scooter'?'Ride with Allison · Big ramps, bigger regrets':level.key==='concert'?'Climb for credentials · Get to the photo pit':level.key==='haunted'?'Haunted rooms, four floors and an attic escape':level.key==='zombie'?'Survive the neighborhood · Find the truck':level.key==='snow'?'Ice, snowplows and a Wisconsin blizzard':'Moving rides, runaway bumper cars and finding Allison';
  }
  const count=levelDefinitions.filter(level=>levelProgress.canPlay(level.key)).length;
  document.getElementById('level-progress')!.textContent=`${count} of ${levelDefinitions.length} levels unlocked. Complete each level to unlock the next; replay unlocked levels anytime.`+(count>1&&!levelProgress.persistent?' Browser progress could not be saved; unlocks last this session.':' Progress is saved in this browser.');

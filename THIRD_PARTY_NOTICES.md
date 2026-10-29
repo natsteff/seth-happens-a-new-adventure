@@ -33,3 +33,7 @@ The mansion-wall scenery was generated with the built-in imagegen tool and copie
 ## Zombie Apocalypse and Snow Day additions
 
 These local first efforts reuse the existing street backdrop, owner-authorized character art and unlocked music. Zombie coloration, truck and plow art, buses/bins, snowbanks, snow/ice effects and icicles are generated in code within the scenes. No new third-party download, likeness reference, paid asset or audio was introduced. Existing asset permissions still require the same owner review before public distribution.
+
+## Carnival Catastrophe additions
+
+Carnival tents, string lights, Ferris-wheel structure/gondolas, moving lifts/shuttle and bumper-car texture are original code-drawn scene art. Existing street scenery, familiar character illustrations (including Allison) and unlocked music are reused unchanged. No new reference photo, external download, generated voice, paid asset or soundtrack was introduced. Existing provenance and owner release/rights-review requirements continue to apply.

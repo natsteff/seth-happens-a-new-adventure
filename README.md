@@ -56,6 +56,12 @@ Complete Haunted House to unlock Zombie Apocalypse. Survive a close-building nei
 
 Complete Zombie Apocalypse to unlock Snow Day. Reach the warming shelter and press **F / Action**. Blue strips mark ice: releasing movement leaves a slide, while steering against it brakes faster. Snowbanks provide stepped high routes. Snowplow roofs and rear contacts are safe; directional front impacts and periodic thrown snow walls hurt. Yellow warnings precede falling icicles. Two warm bus stops automatically restore stamina and save checkpoints. Snow and periodic haze preserve visibility of platform tops and hazards. Score: 6,500 − 8 per whole run second − 125 per hit, floored at zero.
 
+## Level 8 · Carnival Catastrophe
+
+Complete Snow Day From Hell to unlock Carnival. Ask the ticket-booth attendant about Allison with **F / Action**, then cross the ride works using a rising lift, fixed landings, a horizontal shuttle and a final lift. Wait for the first lift to lower, jump aboard, and ride up before jumping to the landing. Cream-colored edges mark playable surfaces; tents, lights and ride supports are decorative. Falling returns Seth to the booth checkpoint, or the ride-exit checkpoint after reaching the far side.
+
+The rotating Ferris-wheel gondolas are rideable optional platforms; reaching the top awards a single 1,000-point sky bonus. The later raised coaster route awards a single 500-point bonus and has a moving car to dodge or ride. The ground route remains available there. Crowds slow Seth, while runaway bumper cars have safe roofs/rears and damaging front contacts. Allison is calmly enjoying the snack stand at the far end: press **F / Action** beside her to reunite and finish. She was never a rescue objective. Score: 6,500 + optional bonuses − 6 per whole run second − 100 per mishap, floored at zero.
+
 ## Computer and mobile
 
 The same scenery renders in the existing game world on desktop and mobile. It scales with the canvas and leaves the existing responsive touch controls intact. Landscape Home Screen app play remains the inherited recommended mobile path. Browser viewport checks do not establish physical iOS, Android or controller acceptance. No new mobile-browser fixes are included.

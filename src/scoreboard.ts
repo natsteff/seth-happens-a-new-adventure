@@ -124,7 +124,7 @@ function render(){
   });
 }
 async function openScores(){
-  if(['concert','haunted','zombie','snow'].includes(document.body.dataset.level??'')){window.dispatchEvent(new Event('open-adventure-scores'));return;}
+  if(['concert','haunted','zombie','snow','carnival'].includes(document.body.dataset.level??'')){window.dispatchEvent(new Event('open-adventure-scores'));return;}
   if(document.body.dataset.level==='scooter'){window.dispatchEvent(new Event('open-scooter-scores'));return;}
   if(document.body.dataset.level==='thai'){window.dispatchEvent(new Event('open-thai-scores'));return;}
   returnFocus=document.activeElement as HTMLElement;

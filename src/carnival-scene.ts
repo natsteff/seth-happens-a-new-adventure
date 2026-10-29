@@ -1,0 +1,57 @@
+import Phaser from 'phaser';
+import {FootAdventure} from './foot-adventure';
+import {CARNIVAL,carnivalLandings,carnivalRides,ridePosition,gondolaPosition,newCarnivalRun,carnivalAction,carnivalBonus,carnivalScore} from './carnival-mission.mjs';
+import {vehicleFrontHurts} from './thai-mission.mjs';
+import {gameAudio} from './audio';
+type MovingDeck={art:Phaser.GameObjects.Rectangle;body:Phaser.Physics.Arcade.Body;kind:string;index:number;trim:Phaser.GameObjects.Rectangle;label:Phaser.GameObjects.Text};
+type ParkCar={art:Phaser.Physics.Arcade.Sprite;left:number;right:number;direction:number;speed:number};
+export class CarnivalCatastrophe extends FootAdventure{
+ constructor(){super({key:'carnival',number:8,title:'Carnival Catastrophe',...CARNIVAL,startY:CARNIVAL.ground,instructions:'Find Allison. F / Action at the ticket booth asks where she went.\nCross the ride works: wait for the lift, ride the shuttle, jump to each landing.\nThe Ferris wheel is an optional high route. Bright cream edges are safe platforms.\nDodge bumper cars and concertgoers. Find Allison at the snack stand.'});}
+ mission=newCarnivalRun();decks:MovingDeck[]=[];cars:ParkCar[]=[];gate?:Phaser.GameObjects.Rectangle;gateSign!:Phaser.GameObjects.Text;ally!:Phaser.GameObjects.Image;seatSupport:number|null=null;seatOffset=0;bonusArt!:Phaser.GameObjects.Star;wheelArt!:Phaser.GameObjects.Graphics;
+ resetMission(){this.mission=newCarnivalRun();this.decks=[];this.cars=[];this.seatSupport=null;this.seatOffset=0;}
+ buildWorld(){
+  const g=this.add.graphics().setDepth(-20);g.fillStyle(0x252541).fillRect(0,0,CARNIVAL.width,1100);g.fillStyle(0x66506c).fillRect(0,360,CARNIVAL.width,440);g.fillStyle(0x171f33).fillRect(2050,815,1600,285);
+  for(let x=0;x<CARNIVAL.width;x+=150){g.fillStyle(0xffdf9b,.6).fillCircle(x+47,320+(x%7)*16,2);}
+  this.add.tileSprite(0,580,CARNIVAL.width,220,'thai-street').setOrigin(0).setTileScale(.45).setTint(0x8983ac).setAlpha(.35).setDepth(-18);
+  for(let x=0;x<CARNIVAL.width;x+=620){this.tent(x+260,800,290,x%1240?0xb35e8d:0x558aa1);g.lineStyle(3,0xf7cf88,.7).lineBetween(x,505,x+620,545);for(let i=0;i<10;i++)g.fillStyle(i%2?0xffbc84:0x99dcca).fillCircle(x+i*62,505+i*4,5);}
+  for(const p of carnivalLandings)this.platform(p.x,p.y,p.width,p.x===2400||p.x===3100?24:200,0x56516b);
+  for(const [x,y] of [[600,750],[900,710],[1180,750],[4020,730],[4200,660],[4400,590],[5900,660],[6100,730]])this.platform(x,y,170,22,0x7f6075);
+  this.platform(4550,590,1320,22,0x8c7182);g.lineStyle(3,0x364053).lineBetween(4550,650,5870,650);for(let x=4560;x<5870;x+=100)g.lineBetween(x,612,x,800);
+  this.text(4600,530,'COASTER TRACK · OPTIONAL HIGH ROUTE · WATCH THE CAR',16,'#ffe3a0');
+  this.text(250,620,'CARNIVAL CATASTROPHE',32,'#ffe1a0');this.text(1150,640,'MISSING: ONE ALLISON\nASK AT THE TICKET BOOTH →',18,'#e0edda');
+  this.tent(CARNIVAL.boothX,800,230,0xb26479);this.text(CARNIVAL.boothX,594,'INFORMATION\nF / ACTION',23,'#ffdf98').setOrigin(.5).setAlign('center');this.add.image(CARNIVAL.boothX+40,800,'clown').setOrigin(.5,1).setDisplaySize(48,70).setDepth(5);
+  this.gate=this.platform(1860,250,20,550,0x9c7a89);this.gateSign=this.text(1840,565,'RIDE WORKS\nASK AT BOOTH FIRST',16,'#ffe3ad').setOrigin(.5).setAlign('center');
+  this.text(1990,665,'WAIT FOR LOW LIFT →\nJUMP, THEN RIDE UP',16,'#d7f3da').setOrigin(.5).setAlign('center');this.text(2500,548,'LANDING\nSHUTTLE BELOW →',16,'#d7f3da').setOrigin(.5).setAlign('center');this.text(3190,637,'LANDING →\nNEXT LIFT',15,'#d7f3da').setOrigin(.5).setAlign('center');
+  g.lineStyle(7,0xaab8ba).strokeCircle(2820,510,170);g.lineStyle(4,0x8d9ba6).strokeCircle(2820,510,151);g.lineStyle(12,0xa58b98).lineBetween(2690,800,2820,510).lineBetween(2950,800,2820,510);g.fillStyle(0xffd69a).fillCircle(2820,510,18);
+  this.wheelArt=this.add.graphics().setDepth(-6);
+  this.bonusArt=this.add.star(2820,300,5,10,22,0xffd26d).setStrokeStyle(2,0xfff0bc).setDepth(5);this.text(2820,248,'OPTIONAL · SKY BONUS',16,'#ffe5ad').setOrigin(.5);
+  for(const [i,x] of [420,1050,1430,3930,5150,6260,6580].entries())this.hazard(i%3?'concert-fans':'scruffy',x,765,50,2400+i*170,35,68).setTint(i%2?0xddd0de:0xc6dfd9);
+  this.text(3770,680,'RIDE EXIT · CHECKPOINT\nSNACK STANDS →',20,'#c6eed7');this.tent(CARNIVAL.exitX,800,340,0x568e82);this.text(CARNIVAL.exitX,588,'PRETZELS · FUNNEL CAKES\nALLISON IS RIGHT HERE',23,'#ffdf9c').setOrigin(.5).setAlign('center');
+  this.ally=this.add.image(CARNIVAL.exitX,800,'allison').setOrigin(.5,1).setDisplaySize(66,96).setDepth(8);this.text(CARNIVAL.exitX,658,'Allison: “You could have just texted.”',17,'#f2e3b5').setOrigin(.5).setDepth(10);
+ }
+ tent(x:number,bottom:number,width:number,color:number){const g=this.add.graphics().setDepth(-8);g.fillStyle(0x293447).fillRect(x-width/2,bottom-145,width,145);g.fillStyle(color).fillTriangle(x-width/2-18,bottom-145,x,bottom-265,x+width/2+18,bottom-145);g.fillStyle(0xf1c998).fillTriangle(x-width*.15,bottom-145,x,bottom-265,x+width*.15,bottom-145);g.lineStyle(5,0xd9b2a1).lineBetween(x-width/2,bottom-145,x-width/2,bottom).lineBetween(x+width/2,bottom-145,x+width/2,bottom);g.fillStyle(0x7c5963).fillRect(x-width/2,bottom-38,width,38);}
+ movingDeck(x:number,y:number,width:number,kind:string,index:number){const art=this.add.rectangle(x,y+9,width,18,kind==='gondola'?0xb97186:0x609ca6).setStrokeStyle(2,0x28374b).setDepth(3);this.physics.add.existing(art);const body=art.body as Phaser.Physics.Arcade.Body;body.setAllowGravity(false).setImmovable(true);if(kind==='gondola')body.friction.x=0;body.checkCollision.left=false;body.checkCollision.right=false;body.checkCollision.down=false;const trim=this.add.rectangle(x,y,width,4,0xffe7b1).setDepth(4),label=this.text(x,y+16,kind==='gondola'?'':kind==='shuttle'?'SHUTTLE':'LIFT',12,'#e4f5df').setOrigin(.5).setDepth(4);this.decks.push({art,body,kind,index,trim,label});// Upward platform velocity must not launch the rider away between contact frames.
+  this.physics.add.collider(this.player,art,()=>{const rider=this.player.body as Phaser.Physics.Arcade.Body;if(body.touching.up&&rider.velocity.y<0)rider.setVelocityY(0);});}
+ afterPlayer(){carnivalRides.forEach((r,i)=>{const p=ridePosition(r,0);this.movingDeck(p.x,p.y,r.width,r.kind,i);});for(let i=0;i<8;i++){const p=gondolaPosition(i,0);this.movingDeck(p.x,p.y,110,'gondola',i);}
+  this.createCarTexture();for(const [left,right,speed] of [[600,1390,140],[3960,4380,190],[6040,6660,210],[4610,5780,230]]){const track=left===4610,art=this.physics.add.sprite(left,track?565:775,'carnival-car').setImmovable(true).setDepth(6);const b=art.body as Phaser.Physics.Arcade.Body;b.setAllowGravity(false).setSize(96,46);const car={art,left,right,speed,direction:1};this.cars.push(car);this.physics.add.collider(this.player,art,()=>{if(vehicleFrontHurts(b.touching,car.direction))this.takeHit(track?'Coaster coming through! Jump its nose or land on the car.':'Runaway bumper car! Jump onto its roof or let it pass.');});}
+ }
+ createCarTexture(){if(this.textures.exists('carnival-car'))return;const g=this.add.graphics();g.fillStyle(0x283245).fillRoundedRect(0,21,100,26,10);g.fillStyle(0xc46b91).fillRoundedRect(5,12,88,28,9);g.fillStyle(0x83c4d3).fillRect(50,5,24,16);g.lineStyle(3,0xf2d5b1).lineBetween(30,18,30,0).lineBetween(30,0,67,0);g.fillStyle(0xffdb8f).fillCircle(90,23,5);g.fillStyle(0x202e40).fillCircle(21,43,7).fillCircle(78,43,7);g.generateTexture('carnival-car',100,50);g.destroy();}
+ objectiveText(){return this.mission.complete?'ALLISON FOUND · She was having a lovely time.':this.mission.crossed?`Find Allison at the snack stands → · ${this.mission.coasterBonus?'Coaster bonus ✓':'Optional coaster shortcut above'}`:this.mission.clue?`Allison went for snacks → Cross the moving rides · ${this.mission.wheelBonus?'Sky bonus ✓':'Optional Ferris-wheel sky bonus'}`:'Find Allison · F / Action at the ticket booth →';}
+ tick(delta:number,action:boolean){const body=this.player.body as Phaser.Physics.Arcade.Body,r=carnivalAction(this.mission,{x:this.player.x,bottom:body.bottom,action});this.mission=r.state;
+  if(r.event==='clue'){this.gate?.destroy();this.gateSign.setVisible(false);this.checkpoint={x:1770,bottom:800};this.say('Attendant: “Allison? Snacks, far end. You took the scenic panic route.”');gameAudio.play('pickup');}
+  if(r.event==='checkpoint'){this.checkpoint={x:3800,bottom:800};this.stamina=100;this.say('Ride exit checkpoint. Seth: “I have aged an entire carnival.”');gameAudio.play('pickup');}
+  if(r.event==='reunion'){this.finish('ALLISON WAS NEVER LOST.',`“I got a pretzel. What did YOU do?”\nReunited, slightly dizzy, still together.`,carnivalScore(this.mission,this.elapsedMs,this.hits));return;}
+  const bonus=carnivalBonus(this.mission,this.player.x,body.bottom);this.mission=bonus.state;if(bonus.event){this.say(bonus.event==='wheel'?'SKY BONUS +1,000 · Excellent view. Terrible search strategy.':'COASTER BONUS +500 · Please keep your limbs inside the shortcut.');gameAudio.play('pickup');}this.bonusArt.setVisible(!this.mission.wheelBonus);
+  if(!this.mission.clue&&Math.abs(this.player.x-CARNIVAL.boothX)<90&&Math.abs(body.bottom-800)<25)this.prompt.setVisible(true).setText('F / Action · Ask about Allison');else if(this.mission.crossed&&Math.abs(this.player.x-CARNIVAL.exitX)<90&&Math.abs(body.bottom-800)<25)this.prompt.setVisible(true).setText('F / Action · Reunite with Allison');
+  this.wheelArt.clear().lineStyle(3,0xd7b7ab,.8);for(let i=0;i<8;i++){const p=gondolaPosition(i,this.elapsedMs);this.wheelArt.lineBetween(2820,510,p.x,p.y);}
+  // Keep a rider's offset on a rotating seat through its vertical turnaround. Jumping or
+  // walking past the seat edge releases support; ordinary shuttles retain Arcade carrying.
+  let seat=this.seatSupport===null?undefined:this.decks.find(d=>d.kind==='gondola'&&d.index===this.seatSupport);
+  if(seat&&(body.velocity.y < -180||Math.abs(body.bottom-seat.body.top)>16||Math.abs(this.seatOffset)>seat.body.width/2+10)){seat=undefined;this.seatSupport=null;}
+  if(!seat&&body.velocity.y>=-180){seat=this.decks.find(d=>d.kind==='gondola'&&Math.abs(body.bottom-d.body.top)<8&&Math.abs(body.center.x-d.body.center.x)<d.body.width/2+10);if(seat){this.seatSupport=seat.index;this.seatOffset=body.center.x-seat.body.center.x;}}
+  if(seat){this.seatOffset+=body.velocity.x*delta/1000;body.position.x=seat.body.center.x+this.seatOffset-body.halfWidth;body.position.y=seat.body.top-body.height;body.setVelocityY(Math.max(0,seat.body.velocity.y));body.blocked.down=true;body.blocked.none=false;body.updateCenter();}
+  for(const d of this.decks){const p=d.kind==='gondola'?gondolaPosition(d.index,this.elapsedMs):ridePosition(carnivalRides[d.index],this.elapsedMs);d.body.setVelocity((p.x-d.art.x)*1000/Math.max(delta,1),(p.y+9-d.art.y)*1000/Math.max(delta,1));d.trim.setPosition(d.art.x,d.art.y-9);d.label.setPosition(d.art.x,d.art.y+16);}
+  for(const c of this.cars){if(c.art.x>=c.right)c.direction=-1;if(c.art.x<=c.left)c.direction=1;c.art.setFlipX(c.direction<0).setVelocityX(c.direction*c.speed);}
+ }
+ publishStatus(){super.publishStatus({phase:this.mission.phase,clue:String(this.mission.clue),crossed:String(this.mission.crossed),wheelBonus:String(this.mission.wheelBonus),coasterBonus:String(this.mission.coasterBonus),liftY:String(Math.round((this.decks[0]?.art.y??9)-9)),shuttleX:String(Math.round(this.decks[1]?.art.x??0)),exitLiftY:String(Math.round((this.decks[2]?.art.y??9)-9)),checkpoint:this.mission.crossed?'ride-exit':this.mission.clue?'ticket-booth':'entrance'});}
+}
