@@ -25,3 +25,7 @@ Thai Food Run and Scooter Run were supplied directly by the project for Levels 2
 ## Concert Chaos and supplied logo
 
 The new adventure logo was supplied directly by the project and copied unchanged into public/assets/adventure-logo.png; the original supplied file and prior game logo are preserved. Concert stage art was generated using the built-in imagegen tool, with fictional performers and no band branding; see docs/concert-art.md for the exact prompt and provenance. Existing game character, vehicle and scenery assets are reused under the existing owner authorization and pre-release rights-review requirements. No public distribution authorized by this local implementation.
+
+## Haunted House additions
+
+The mansion-wall scenery was generated with the built-in imagegen tool and copied unchanged into public/assets/haunted/mansion-wall-v1.png; exact prompt/provenance in docs/haunted-art.md. Existing character art is reused as tinted translucent spectral visitors, alongside the existing street/brick scenery and The Haunted Happy Hour soundtrack. Original assets and generated originals remain preserved. No new audio generation or public distribution.

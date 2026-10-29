@@ -11,7 +11,7 @@ export const radioTracks=[
 export const DEFAULT_RADIO_TRACK=0;
 /** @param {(level: string) => boolean} canPlay */
 export function unlockedRadioTracks(canPlay=()=>false){return radioTracks.map((track,index)=>({track,index})).filter(({track})=>!track.unlockLevel||canPlay(track.unlockLevel)).map(({index})=>index);}
-export function defaultLevelTrack(level){const index=radioTracks.findIndex(track=>track.unlockLevel===level);return index<0?DEFAULT_RADIO_TRACK:index;}
+export function defaultLevelTrack(level){const index=radioTracks.findIndex(track=>track.unlockLevel===level);return index<0?(level==='haunted'?4:DEFAULT_RADIO_TRACK):index;}
 export function nextRadioTrack(index,step,available=unlockedRadioTracks()){
  const position=available.indexOf(index),base=position<0?0:position;
  return available[((base+step)%available.length+available.length)%available.length];

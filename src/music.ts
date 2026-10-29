@@ -35,7 +35,7 @@ export class MusicRadio{
  constructor(singleDeck=(globalThis.navigator?.maxTouchPoints??0)>0){
   this.singleDeck=singleDeck;
   const settings=loadSettings();this.selected=settings.track;this.countdownSelected=settings.countdownTrack;this.championSelected=settings.championTrack;this.volume=settings.volume;this.enabled=settings.musicEnabled;this.muted=settings.muted;
-  try{const value=JSON.parse(localStorage.getItem(LEVEL_MUSIC_KEY)??'{}');if(value&&typeof value==='object'&&!Array.isArray(value))for(const level of ['rooftop','thai','scooter','concert'])if(Number.isInteger(value[level])&&value[level]>=0&&value[level]<radioTracks.length)this.choices[level]=value[level];}catch{}
+  try{const value=JSON.parse(localStorage.getItem(LEVEL_MUSIC_KEY)??'{}');if(value&&typeof value==='object'&&!Array.isArray(value))for(const level of ['rooftop','thai','scooter','concert','haunted'])if(Number.isInteger(value[level])&&value[level]>=0&&value[level]<radioTracks.length)this.choices[level]=value[level];}catch{}
   this.selected=this.choices.rooftop??(settings.track<5?settings.track:DEFAULT_RADIO_TRACK);
   for(const element of this.elements){
    element.hidden=true;element.preload='none';element.loop=true;

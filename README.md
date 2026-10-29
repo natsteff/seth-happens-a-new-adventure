@@ -42,6 +42,12 @@ Allison's grip starts at 100%. Walker, bird, sign and front-obstacle impacts cos
 
 Regular jumps, double-tap Mega Jump, sprint, controller/touch controls, pause, restart and music are reused. Street vehicles remain landable and damage only at their front bumper. Concertgoers, spilled drinks and a crowd surfer provide obstacles. Losing stamina returns Seth to the current checkpoint; a full restart clears the pass and photographs. Three successful shots finish with **SETH GOT THE SHOT!** and a separate local record book. Score: 4,000 + 750 per saved shot − 5 per rounded-up run second − 80 per mishap − 100 per missed photo, floored at zero. **Eye of the Stairwell (Leads Take Me Away!)** is the Level4 default, unlocked with Concert Chaos and then selectable on every level as track8. It is separate from the existing champion-track recording.
 
+## Level 5 · Haunted House
+
+Complete Concert Chaos to unlock Haunted House. Cross the dark neighborhood and press **F / Action** at the mansion door. Climb four floors using the east, west and attic staircases. The landing bell sets a checkpoint; the attic key sets another checkpoint and wakes a pursuing ghost. Escape down the long east staircase to the exit door within 90 active seconds, then press **F / Action** to leave. Running out of escape time returns Seth to the attic checkpoint with another attempt; losing stamina returns him to the current checkpoint. A full restart clears entry, key and checkpoints.
+
+Ghosts disappear, glow as a harmless warning, become solid hazards, then fade harmlessly. Warning marks precede falling books; landed books are harmless. Familiar characters appear as spectral visitors, with the larger landlord ghost joining the escape. Platforms have clearly highlighted wood tops; mansion treads and floor sections use one-way support, allowing upward jumps through them. Controls, Mega Jump, sprint, pause, touch/controller input and independent records are reused. Score: 5,000 + 20 per rounded-up escape second remaining − 100 per scare − 3 per rounded-up total run second, floored at zero.
+
 ## Computer and mobile
 
 The same scenery renders in the existing game world on desktop and mobile. It scales with the canvas and leaves the existing responsive touch controls intact. Landscape Home Screen app play remains the inherited recommended mobile path. Browser viewport checks do not establish physical iOS, Android or controller acceptance. No new mobile-browser fixes are included.

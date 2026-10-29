@@ -2,7 +2,7 @@ import {readScores} from './scores.mjs';
 import {readTakeoutScores} from './thai-mission.mjs';
 import {readScooterScores} from './scooter-mission.mjs';
 export const PROGRESS_KEY='seth-new-adventure.progress.v1';
-export const LEVEL_ORDER=['rooftop','thai','scooter','concert'];
+export const LEVEL_ORDER=['rooftop','thai','scooter','concert','haunted'];
 function valid(v){if(!v||v.version!==1||typeof v.level1Completed!=='boolean')return false;let previous=true;for(let i=1;i<=LEVEL_ORDER.length;i++){const value=v[`level${i}Completed`];if(value!==undefined&&typeof value!=='boolean'||value&&!previous)return false;previous=!!value;}return true;}
 export function createLevelProgress(storage){
  const completed=new Set();let persistent=false;
@@ -13,7 +13,7 @@ export function createLevelProgress(storage){
  function canPlay(level){const i=LEVEL_ORDER.indexOf(level);return i===0||i>0&&completed.has(i-1);}
  function completeLevel(level){const i=LEVEL_ORDER.indexOf(level);if(i<0||!canPlay(level))return false;completed.add(i);persistent=save();return persistent;}
  return{
-  get unlocked(){return canPlay('thai');},get scooterUnlocked(){return canPlay('scooter');},get concertUnlocked(){return canPlay('concert');},get persistent(){return persistent;},canPlay,completeLevel,
+  get unlocked(){return canPlay('thai');},get scooterUnlocked(){return canPlay('scooter');},get concertUnlocked(){return canPlay('concert');},get hauntedUnlocked(){return canPlay('haunted');},get persistent(){return persistent;},canPlay,completeLevel,
   completeRooftop(){return completeLevel('rooftop');},completeTakeout(){return completeLevel('thai');},completeScooter(){return completeLevel('scooter');}
  };
 }
