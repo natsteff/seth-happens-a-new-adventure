@@ -38,6 +38,10 @@ Seth drives a stand-up electric scooter with Allison behind him on the same deck
 
 Allison's grip starts at 100%. Walker, bird, sign and front-obstacle impacts cost 18; exceptionally hard landings cost 10, with 1.5 seconds of recovery between hits. Roof landings and rear contacts are safe. Zero grip or a 120-second rental expiry fails the ride without a record. Finish with Allison aboard to score: 2,000 + 20 × grip + sky bonus + 10 × whole seconds remaining below 120 − 100 × bumps. The first route takes roughly 16–35 seconds depending on speed; this is an initial gameplay pass for tuning.
 
+## Level 4 · Concert Chaos
+
+Regular jumps, double-tap Mega Jump, sprint, controller/touch controls, pause, restart and music are reused. Street vehicles remain landable and damage only at their front bumper. Concertgoers, spilled drinks and a crowd surfer provide obstacles. Losing stamina returns Seth to the current checkpoint; a full restart clears the pass and photographs. Three successful shots finish with **SETH GOT THE SHOT!** and a separate local record book. Score: 4,000 + 750 per saved shot − 5 per rounded-up run second − 80 per mishap − 100 per missed photo, floored at zero. **Eye of the Stairwell (Leads Take Me Away!)** is the Level4 default, unlocked with Concert Chaos and then selectable on every level as track8. It is separate from the existing champion-track recording.
+
 ## Computer and mobile
 
 The same scenery renders in the existing game world on desktop and mobile. It scales with the canvas and leaves the existing responsive touch controls intact. Landscape Home Screen app play remains the inherited recommended mobile path. Browser viewport checks do not establish physical iOS, Android or controller acceptance. No new mobile-browser fixes are included.
@@ -46,7 +50,7 @@ The same scenery renders in the existing game world on desktop and mobile. It sc
 
 ## Unlockable level music
 
-Level 1 starts with the original five radio choices and Arcade Staircase as its default. Unlocking Level 2 also unlocks **Thai Food Run**, which is Level 2's default. Unlocking Level 3 also unlocks **Scooter Run**, which is Level 3's default. Each unlocked soundtrack is available on every level through the radio's Track picker (in the mobile menu), previous/next buttons, or keys **6** and **7**. Locked tracks cannot be selected by shortcut or restored from an old preference.
+Level 1 starts with the original five radio choices and Arcade Staircase as its default. Unlocking Level 2 also unlocks **Thai Food Run**, which is Level 2's default. Unlocking Level 3 also unlocks **Scooter Run**, which is Level 3's default. Each unlocked soundtrack is available on every level through the radio's Track picker (in the mobile menu), previous/next buttons, or keys **6**, **7**, and **8**. Locked tracks cannot be selected by shortcut or restored from an old preference.
 
 ## Release status
 

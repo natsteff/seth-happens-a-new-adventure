@@ -89,6 +89,7 @@ export class ScooterRide extends Phaser.Scene{
   this.bubble.setVisible(false);this.toast.setVisible(false);
   const score=scooterScore(this.run),line=this.won?reactions.finish:reactions.fail;
   this.ui.add(this.add.container(0,0,[this.add.rectangle(W/2,H/2,960,400,0x12263b,.98).setStrokeStyle(2,0xa7e6cb),this.text(W/2,175,this.won?'TWO RIDERS. ONE SURVIVOR OF A SCOOTER.':(this.run.grip<=0?'ALLISON HAS LEFT THE SCOOTER.':'RENTAL EXPIRED. WALK OF SHAME.'),28,'#ffd08b').setOrigin(.5),this.text(W/2,290,this.won?`SCORE ${score.toLocaleString()} · Grip ${this.run.grip}%\n${this.run.jumps} jumps · ${this.run.hits} bumps · ${(this.run.elapsedMs/1000).toFixed(1)}s\n\nAllison: “${line}”`:`${line}\n\nGrip reached zero or the rental expired.\nRestart to ride together again.`,21).setOrigin(.5).setAlign('center').setWordWrapWidth(870),this.text(W/2,455,touch.enabled?'Menu → Restart / Choose Level':'Hold R to restart · Choose Level to replay',17,'#b2e6d0').setOrigin(.5)]));
+  if(this.won)window.dispatchEvent(new Event('scooter-completed'));
   if(this.won)openScooterScores({score,grip:this.run.grip,hits:this.run.hits,elapsedMs:Math.round(this.run.elapsedMs)});
  }
  updateHud(){this.hud.setText(`LEVEL 3 · SCOOTER RIDE   Allison’s grip ${this.run.grip}%`);this.objective.setText(`${Math.min(100,Math.round(this.run.x/SCOOTER.finish*100))}% of route · ${this.run.jumps} jumps · ${this.run.hits} bumps · High ramp ${this.run.risky?'ON':'OFF'} · Bonus ${this.run.bonus}`);this.progress.setSize((W-36)*Math.min(1,this.run.x/SCOOTER.finish),3);this.refreshControlCopy();}

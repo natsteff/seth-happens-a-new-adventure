@@ -11,7 +11,7 @@ let scope:'server'|'local'='local';
 let notice='';
 let returnFocus:HTMLElement|null=null;
 let nameDraft='';
-export function scoresOpen(){return dialog.open||!!document.querySelector('#thai-scores[open], #scooter-scores[open]');}
+export function scoresOpen(){return dialog.open||!!document.querySelector('#thai-scores[open], #scooter-scores[open], #adventure-scores[open]');}
 // Prevent Phaser's window listeners from capturing letters while a dialog is open.
 for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{
   if(scoresOpen())event.stopPropagation();
@@ -124,6 +124,7 @@ function render(){
   });
 }
 async function openScores(){
+  if(['concert'].includes(document.body.dataset.level??'')){window.dispatchEvent(new Event('open-adventure-scores'));return;}
   if(document.body.dataset.level==='scooter'){window.dispatchEvent(new Event('open-scooter-scores'));return;}
   if(document.body.dataset.level==='thai'){window.dispatchEvent(new Event('open-thai-scores'));return;}
   returnFocus=document.activeElement as HTMLElement;

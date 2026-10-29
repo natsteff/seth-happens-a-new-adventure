@@ -48,3 +48,5 @@ Owner-supplied MP3s copied byte-for-byte; supplied originals remain unchanged. A
 | music/scooter-run.mp3 | Scooter Run.mp3 | Level 3; unlocks with Level 3 | 132.20s | 5e0863db44880a8fe8b78dafa4a0b924dcf5b24424269aa0c3b2613d5d3823b2 |
 
 Once unlocked, either track can be selected on any level. Tracks stream on demand through the existing radio; no backend or audio service added. Level 1's initial five tracks/order/default, countdown tracks and outcome tracks are retained. Per-level choices use seth-new-adventure.level-music.v1, separate from original-game settings and all score/progress keys.
+
+Concert Chaos soundtrack supplied by the project October28: `Eye of the Stairwell (Leads Take Me Away!).mp3`, copied unchanged into `music/concert-eye-of-the-stairwell.mp3`. Stereo48kHz MP3; estimated224.832s. SHA256 source/runtime:93885e7f101ed6b21ae79726fb43394d198129600b7121e847bb67b0979e3341. Level4 default, track8; unlocks with Concert Chaos and then selectable on any level. The existing `music/eye-of-the-stairwell.mp3` champion track is a separate supplied recording and is untouched. No transcoding or publication.

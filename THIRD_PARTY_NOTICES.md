@@ -21,3 +21,7 @@ Level 2 Thai Takeout Run adds a close-street backdrop and alpha-transparent prop
 ## Additional New Adventure music
 
 Thai Food Run and Scooter Run were supplied directly by the project for Levels 2 and 3. Runtime MP3s preserve supplied bytes; no external download or audio generation was used. See [audio provenance](public/audio/README.md) for filenames and hashes. Local integration is owner-authorized; new public distribution still requires the release/rights review described above.
+
+## Concert Chaos and supplied logo
+
+The new adventure logo was supplied directly by the project and copied unchanged into public/assets/adventure-logo.png; the original supplied file and prior game logo are preserved. Concert stage art was generated using the built-in imagegen tool, with fictional performers and no band branding; see docs/concert-art.md for the exact prompt and provenance. Existing game character, vehicle and scenery assets are reused under the existing owner authorization and pre-release rights-review requirements. No public distribution authorized by this local implementation.

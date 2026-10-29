@@ -4,8 +4,9 @@ export const radioTracks=[
  {title:'Twenty-Six Floors of Celts',description:'Celtic punk & folk metal',file:'twenty-six-floors-of-glory.mp3'},
  {title:'Go Seth Go',description:'Gothic Americana & punk',file:'go-seth-go.mp3'},
  {title:'The Haunted Happy Hour',description:'Dark swing & gothic cabaret',file:'haunted-happy-hour.mp3'},
- {title:'Thai Food Run',description:'Level 2 · Thai Takeout Run soundtrack',file:'thai-food-run.mp3',unlockLevel:'thai'},
- {title:'Scooter Run',description:'Level 3 · Scooter Ride soundtrack',file:'scooter-run.mp3',unlockLevel:'scooter'}
+ {title:'Thai Food Run',description:'Level 2 · Thai Takeout Run soundtrack',file:'thai-food-run.mp3',unlockLevel:'thai',unlockAfter:1},
+ {title:'Scooter Run',description:'Level 3 · Scooter Ride soundtrack',file:'scooter-run.mp3',unlockLevel:'scooter',unlockAfter:2},
+ {title:'Eye of the Stairwell (Leads Take Me Away!)',description:'Level 4 · Concert Chaos soundtrack',file:'concert-eye-of-the-stairwell.mp3',unlockLevel:'concert',unlockAfter:3}
 ];
 export const DEFAULT_RADIO_TRACK=0;
 /** @param {(level: string) => boolean} canPlay */
@@ -17,7 +18,7 @@ export function nextRadioTrack(index,step,available=unlockedRadioTracks()){
 }
 export function radioShortcut(code){
  if(code==='Digit0'||code==='Numpad0')return {off:true};
- const digit=/^(?:Digit|Numpad)([1-7])$/.exec(code);
+ const digit=/^(?:Digit|Numpad)([1-8])$/.exec(code);
  if(digit)return {track:Number(digit[1])-1};
  if(code==='BracketLeft')return {step:-1};
  if(code==='BracketRight')return {step:1};

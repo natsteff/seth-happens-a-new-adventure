@@ -16,7 +16,7 @@ test('radio shortcuts select 1–5, zero means off, Tab stays available for focu
  assert.equal(radioShortcut('Digit0').off,true);assert.equal(radioShortcut('Numpad0').off,true);
  assert.equal(radioShortcut('BracketLeft').step,-1);assert.equal(radioShortcut('BracketRight').step,1);
  assert.equal(radioShortcut('Backslash'),null);assert.equal(radioShortcut('Slash'),null);
- for(const key of ['Tab','Digit8','KeyP','KeyF','KeyS','KeyV'])assert.equal(radioShortcut(key),null);
+ for(const key of ['Tab','Digit9','KeyP','KeyF','KeyS','KeyV'])assert.equal(radioShortcut(key),null);
 });
 
 test('new level soundtrack is gated while the five starting tracks remain unchanged',()=>{
@@ -25,4 +25,8 @@ test('new level soundtrack is gated while the five starting tracks remain unchan
  assert.equal(nextRadioTrack(4,1),0);assert.equal(nextRadioTrack(4,1,[0,1,2,3,4,5]),5);assert.equal(radioShortcut('Digit6').track,5);
 });
 
-test('Scooter soundtrack unlocks only with Level 3 and extends the shared radio',()=>{assert.deepEqual(unlockedRadioTracks(()=>true),[0,1,2,3,4,5,6]);assert.equal(defaultLevelTrack('scooter'),6);assert.equal(radioShortcut('Digit7').track,6);assert.equal(nextRadioTrack(5,1,[0,1,2,3,4,5,6]),6);});
+test('Scooter soundtrack unlocks only with Level 3 and extends the shared radio',()=>{assert.deepEqual(unlockedRadioTracks(level=>level!=='concert'),[0,1,2,3,4,5,6]);assert.equal(defaultLevelTrack('scooter'),6);assert.equal(radioShortcut('Digit7').track,6);assert.equal(nextRadioTrack(5,1,[0,1,2,3,4,5,6]),6);});
+
+test('Concert soundtrack defaults to the supplied variant and unlocks with Concert access',()=>{
+ assert.equal(defaultLevelTrack('concert'),7);assert.equal(unlockedRadioTracks(level=>level!=='concert').includes(7),false);assert.equal(unlockedRadioTracks(()=>true).includes(7),true);assert.equal(radioShortcut('Digit8').track,7);assert.notEqual(radioTracks[7].file,'eye-of-the-stairwell.mp3');
+});
