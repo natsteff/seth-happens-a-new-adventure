@@ -19,8 +19,8 @@ export function photoIndicator(x, photos) {
   return photoStops.map((stop, i) => photos.has(i) ? `✓ ${stop.short}` : x > stop.x + 115 ? `! MISSED ${stop.short} ←` : `○ ${stop.short} →`).join('     ');
 }
 
-/** @returns {'ouch'|'ahh'|'grunt'|'boing'} */
-export function objectImpactReaction(randomValue) { return (['ouch','ahh','grunt','boing'])[Math.max(0,Math.min(3,Math.floor(randomValue*4)))]; }
+/** @returns {'ouch'|'ahh'|'grunt'} */
+export function objectImpactReaction(randomValue) { return (['ouch','ahh','grunt'])[Math.max(0,Math.min(2,Math.floor(randomValue*3)))]; }
 
 export function runScore(beer, photos, mishaps, latePhotos = new Set()) {
   const photoPoints = photoStops.reduce((points, _, i) => points + (photos.has(i) ? (latePhotos.has(i) ? 125 : 250) : 0), 0);

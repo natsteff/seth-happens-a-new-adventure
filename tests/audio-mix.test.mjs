@@ -31,10 +31,10 @@ test('real effect/voice/location paths never automate music or master gain or pa
 });
 
 
-test('Mega Jump uses the new WAV; prior boing and grunt remain collision reactions with mute/priority',async()=>{
+test('Mega Jump uses the new WAV, old boing is absent, and approved collision priorities remain',async()=>{
+ const {recordedClips}=await import(clips);assert.equal('boing' in recordedClips,false);assert.ok(!Object.values(recordedClips).some(url=>url.includes('spring-boing')));
  const {gameAudio}=await import(data(source));await gameAudio.unlock();gameAudio.beginRun();
  gameAudio.speak('Mega jump','mega');assert.match(sources.at(-1).buffer.url,/mega-jump-v2\.wav$/);
- gameAudio.speak('Boing!','boing');assert.match(sources.at(-1).buffer.url,/spring-boing\.wav$/);
  gameAudio.speak('Ugh!','grunt');assert.match(sources.at(-1).buffer.url,/grunt\.wav$/);
  const count=sources.length;gameAudio.speak('Mega jump','mega');assert.equal(sources.length,count,'jump must not interrupt a collision reaction');
  gameAudio.toggle();gameAudio.speak('Mega jump','mega');assert.equal(sources.length,count,'muted jumps must stay silent');
