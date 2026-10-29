@@ -24,7 +24,8 @@ export class ThaiTakeout extends Phaser.Scene {
   ui!:Phaser.GameObjects.Container;introOverlay?:Phaser.GameObjects.Container;pauseOverlay?:Phaser.GameObjects.Container;
   hud!:Phaser.GameObjects.Text;objective!:Phaser.GameObjects.Text;timerText!:Phaser.GameObjects.Text;radioLabel!:Phaser.GameObjects.Text;
   prompt!:Phaser.GameObjects.Text;toast!:Phaser.GameObjects.Text;progress!:Phaser.GameObjects.Rectangle;
-  order!:Phaser.GameObjects.Image;elevator!:Phaser.GameObjects.Container;
+  order!:Phaser.GameObjects.Image;allison!:Phaser.GameObjects.Image;
+  homePier!:Phaser.GameObjects.Image;
   traffic:Traffic[]=[];pedestrians:Pedestrian[]=[];
   run=newTakeoutRun();elapsedMs=0;paused=false;pauseStarted=0;introActive=true;introStarted=false;won=false;failed=false;riding=false;
   photos=new Set<number>(); // Shared menu contract; Level 2 has no photo objectives.
@@ -34,6 +35,7 @@ export class ThaiTakeout extends Phaser.Scene {
   preload(){
     const image=(key:string,path:string)=>{if(!this.textures.exists(key))this.load.image(key,path);};
     image('thai-street','./assets/thai/street-backdrop-v1.png');image('thai-props','./assets/thai/street-props-v1.png');
+    image('thai-home','./assets/thai/home-lower-facade-v1.png');
     image('adventure-brick','./assets/scenery/brick-facade-v1.png');
     image('scruffy','./assets/scruffy-pedestrian.png');image('clown','./assets/clown.png');
     image('allison','./assets/allison.png');image('concert-fans','./assets/concert-fans.png');image('seth-timeout','./assets/seth-timeout-v1.png');
@@ -51,7 +53,7 @@ export class ThaiTakeout extends Phaser.Scene {
     document.body.dataset.level='thai';levelControlCopy('thai');for(const key of ['grip','jumps','speed','biggest','bonus','risky','reaction'])delete document.getElementById('live-status')!.dataset[key];document.getElementById('current-level')!.textContent='Level 2 · Thai Takeout Run';
     document.getElementById('game')!.setAttribute('aria-label','Level 2 · Thai Takeout Run platform game');
     const footer=document.querySelector('footer')!;footer.dataset.rooftopHtml??=footer.innerHTML;
-    footer.textContent='MOVE A/D or arrows · JUMP W / Up / Space · Double-tap for Mega Jump · SPRINT Shift · PICKUP / ELEVATOR F · PAUSE P · RESTART hold R';
+    footer.textContent='MOVE A/D or arrows · JUMP W / Up / Space · Double-tap for Mega Jump · SPRINT Shift · PICKUP / FRONT DOOR F · PAUSE P · RESTART hold R';
     document.getElementById('next-level')!.hidden=true;
     touch.clear();resetScoreEntry();resetTakeoutScores();modalNavigation.reset();(document.getElementById('touch-menu') as HTMLDialogElement).close();
     this.run=newTakeoutRun();this.elapsedMs=0;this.deliveryElapsed=0;this.paused=false;this.introActive=true;this.introStarted=false;
@@ -127,13 +129,8 @@ export class ThaiTakeout extends Phaser.Scene {
     g.lineStyle(1,0x78717a,.4);for(let x=0;x<THAI.width;x+=46)g.lineBetween(x,THAI.ground+3,x,THAI.ground+14);
     for(let x=0;x<THAI.width;x+=115)g.fillStyle(0xc2a765,.7).fillRect(x,THAI.ground+55,52,4);
     // Clear foreground destinations, separate from the repeating background storefronts.
-    brickBuilding(this,25,205,285,THAI.ground,2);
-    this.text(55,223,'SETH & ALLISON',19,'#ffe2a4');this.text(75,253,'APARTMENTS',15);
-    this.elevator=this.add.container(THAI.homeX,THAI.ground,[
-      this.add.rectangle(0,-49,72,98,0x343e4c).setStrokeStyle(3,0xb7a982),
-      this.add.rectangle(0,-49,2,91,0xa7babf),this.text(-21,-86,'↑  HOME',11,'#ffe2a4')
-    ]).setDepth(0);
-    this.add.image(80,THAI.ground,'allison').setOrigin(.5,1).setDisplaySize(62,100).setDepth(3);
+    this.drawHomeBuilding();
+    this.allison=this.add.image(80,THAI.ground,'allison').setOrigin(.5,1).setDisplaySize(62,100).setDepth(3);
     this.text(42,THAI.ground-127,'Allison: “Dinner is your mission.”',13,'#ffe2a4').setBackgroundColor('#172638').setPadding(4,3);
     brickBuilding(this,5160,235,290,THAI.ground,3);
     this.add.rectangle(THAI.restaurantX,293,253,56,0x76382f).setStrokeStyle(2,0xe8bd78).setDepth(0);
@@ -147,6 +144,40 @@ export class ThaiTakeout extends Phaser.Scene {
     }
     this.text(900,THAI.ground-155,'PARKED BUS · ROOF ROUTE',12,'#ffe0a1');
     this.text(2940,THAI.ground-211,'UP AND OVER THE BLOCK →',13,'#ffe0a1');
+  }
+  drawHomeBuilding(){
+    // The tower continues above the street camera. Reuse small vector floor
+    // sections rather than allocating a thirty-story bitmap or TileSprite.
+    // The entrance in the supplied facade stays centered on the home trigger.
+    const width=500,left=THAI.homeX-185,facadeHeight=820*width/1485;
+    const seam=THAI.ground-facadeHeight;
+    const tower=this.add.graphics().setDepth(-1);
+    const floorHeight=42,upperFloors=27,top=seam-upperFloors*floorHeight;
+    tower.fillStyle(0x99472e).fillRect(left,top,width,seam-top+2);
+    // Brick/tan piers and dark teal glazing echo the lower facade. The cropped
+    // upper edge is a continuation, never a low-building roof/collision ledge.
+    for(let y=top;y<seam;y+=floorHeight){
+      tower.fillStyle(0x273544).fillRect(left+4,y+5,width-8,34);
+      for(let x=left+16;x<left+width-10;x+=29){
+        tower.fillStyle(0x126174).fillRect(x,y+8,18,26);
+        tower.fillStyle(0x338698).fillRect(x+2,y+9,4,22);
+        tower.fillStyle(0x9c472d).fillRect(x+19,y+4,8,36);
+      }
+      tower.fillStyle(0xc47745).fillRect(left,y+38,width,4);
+      for(const [offset,pierWidth] of [[0,60],[150,44],[215,44],[410,60],[478,22]]){
+        tower.fillStyle(0xc36938).fillRect(left+offset,y,pierWidth,floorHeight);
+        tower.fillStyle(0xe7954f).fillRect(left+offset+2,y+2,3,floorHeight-2);
+      }
+      tower.fillStyle(0xe3bb78).fillRect(left,y,width,3);
+    }
+    const texture=this.textures.get('thai-home');
+    if(!texture.has('lower'))texture.add('lower',0,30,100,1485,820);
+    this.add.image(left,THAI.ground,'thai-home','lower').setOrigin(0,1)
+      .setDisplaySize(width,facadeHeight).setDepth(-1);
+    // Foreground middle pier hides the pair as they enter the left-hand door.
+    if(!texture.has('entry-pier'))texture.add('entry-pier',0,480,220,145,680);
+    this.homePier=this.add.image(left+450*width/1485,THAI.ground-20*width/1485,'thai-home','entry-pier')
+      .setOrigin(0,1).setDisplaySize(145*width/1485,680*width/1485).setDepth(5);
   }
   buildTraffic(){
     trafficZones.forEach((zone,index)=>{
@@ -181,7 +212,7 @@ export class ThaiTakeout extends Phaser.Scene {
     const title=this.text(W/2,172,'THAI TAKEOUT RUN',42,'#ffcf8a').setOrigin(.5).setFontStyle('bold');
     const level=this.text(W/2,119,'LEVEL 2 · DINNER WON’T FETCH ITSELF',17,'#abe3cf').setOrigin(.5);
     const art=this.add.image(W/2,280,'thai-props','bag').setDisplaySize(92,106);
-    const instructions=this.text(W/2,381,`Head right to the Thai restaurant. Press ${touch.enabled?'Action':'F / Action'} to collect dinner.\nClimb bins, buses and low roofs to avoid traffic.\nBring the food LEFT to the apartment elevator. Protect its condition and warmth.`,20).setOrigin(.5).setAlign('center').setWordWrapWidth(930);
+    const instructions=this.text(W/2,381,`Head right to the Thai restaurant. Press ${touch.enabled?'Action':'F / Action'} to collect dinner.\nClimb bins, buses and low roofs to avoid traffic.\nBring the food LEFT to the apartment front door. Protect its condition and warmth.`,20).setOrigin(.5).setAlign('center').setWordWrapWidth(930);
     this.introOverlay.add([panel,level,title,art,instructions]);
     document.getElementById('start-game')!.hidden=false;(document.getElementById('touch-menu-open') as HTMLButtonElement).disabled=false;
     window.dispatchEvent(new Event('game-layout'));
@@ -205,7 +236,7 @@ export class ThaiTakeout extends Phaser.Scene {
     this.radioLabel.setText(`SETH FM · MUSIC\n${mobileTrackLabel(gameAudio.music)}\nChange music: Menu`);
   }
   togglePause(){
-    if(this.introActive||this.won||this.failed||scoresOpen())return;
+    if(this.introActive||this.won||this.failed||this.riding||scoresOpen())return;
     this.paused=!this.paused;touch.clear();this.controller.armed=false;this.player.setVelocityX(0);this.jumpStarted=-1;this.megaUsed=false;
     const button=document.getElementById('pause-toggle')!;button.textContent=this.paused?'Resume · P':'Pause · P';button.setAttribute('aria-pressed',String(this.paused));
     if(this.paused){
@@ -248,17 +279,27 @@ export class ThaiTakeout extends Phaser.Scene {
       person.art.setFlipX(x<person.body.x);body.reset(x,THAI.ground-33);person.art.setX(x);person.label.setX(x);
     }
   }
-  async enterElevator(){
+  enterHome(){
     if(this.riding||!canUseElevator(this.run,this.player.x,(this.player.body as Phaser.Physics.Arcade.Body).bottom))return;
-    this.riding=true;this.deliveryElapsed=this.elapsedMs;this.run={...this.run,phase:'elevator'};touch.clear();
-    this.player.setVelocity(0,0);this.physics.world.pause();this.prompt.setVisible(false);this.say('HOME. Dinner is secured. This elevator actually works.');
+    this.riding=true;this.deliveryElapsed=this.elapsedMs;this.run={...this.run,phase:'entering'};touch.clear();
+    (document.getElementById('pause-toggle') as HTMLButtonElement).disabled=true;
+    this.player.setVelocity(0,0);this.physics.world.pause();this.prompt.setVisible(false);this.say('HOME. Dinner is secured. Let’s eat.');
     const version=this.runVersion;
-    await gameAudio.unlock();if(version!==this.runVersion||!this.sys.isActive())return;
-    this.player.setPosition(THAI.homeX,THAI.ground-24);
-    this.rideTween=this.tweens.add({targets:this.player,y:THAI.ground-175,duration:gameAudio.duration('elevator'),ease:'Sine.easeInOut'});
-    await gameAudio.playRide();
-    if(version!==this.runVersion||!this.sys.isActive())return;
-    this.rideTween?.stop();this.finishRun();
+    this.facing=-1;this.portrait.setFlipX(true).play('walk-empty',true);
+    this.homePier.setDepth(10);
+    this.allison.setFlipX(false);
+    // Both approach the pedestrian door behind the middle pier. No lift/audio.
+    this.rideTween=this.tweens.add({targets:[this.player,this.allison],x:170,duration:1200,ease:'Sine.easeInOut',
+      onUpdate:()=>{
+        const fade=(x:number)=>Phaser.Math.Clamp(Math.abs(x-170)/30,0,1);
+        this.portrait.setPosition(this.player.x,THAI.ground).setAlpha(fade(this.player.x));
+        this.bag.setPosition(this.player.x-25,THAI.ground-20).setAlpha(fade(this.player.x));
+        this.allison.setAlpha(fade(this.allison.x));
+      },
+      onComplete:()=>{
+        if(version!==this.runVersion||!this.sys.isActive())return;
+        this.portrait.setVisible(false);this.bag.setVisible(false);this.allison.setVisible(false);this.finishRun();
+      }});
   }
   finishRun(){
     if(this.won)return;
@@ -285,7 +326,7 @@ export class ThaiTakeout extends Phaser.Scene {
     const remaining=Math.max(0,Math.ceil((THAI.limitMs-this.elapsedMs)/1000));
     const heat=foodWarmth(this.run,this.riding||this.won?this.deliveryElapsed:this.elapsedMs);
     this.hud.setText(this.run.food?`LEVEL 2 · HOMEWARD ←   Food ${this.run.condition}% · Warmth ${heat}%`:'LEVEL 2 · THAI TAKEOUT RUN →   Collect dinner');
-    this.objective.setText(this.run.food?`Protect the food · ${this.run.hits} hits · Return to the apartment elevator`:'Restaurant ahead → · Bins, buses and roofs are safe routes');
+    this.objective.setText(this.run.food?`Protect the food · ${this.run.hits} hits · Return to the apartment front door`:'Restaurant ahead → · Bins, buses and roofs are safe routes');
     this.timerText.setText(`${remaining}s`).setColor(remaining<=30?'#ff8e82':'#ffd08b');
     const distance=Phaser.Math.Clamp((this.player.x-THAI.homeX)/(THAI.restaurantX-THAI.homeX),0,1);
     this.progress.setSize((W-36)*(this.run.food ? .5+(1-distance)/2 : distance/2),3);
@@ -320,7 +361,7 @@ export class ThaiTakeout extends Phaser.Scene {
     if(!this.won&&!this.failed&&!this.riding)this.elapsedMs+=Math.min(delta,250);
     if(!this.won&&!this.failed&&this.elapsedMs>=THAI.limitMs)this.failRun();
     if(this.won||this.failed){this.publishStatus();return;}
-    if(this.riding){this.drawPlayer();this.updateHud();this.publishStatus();return;}
+    if(this.riding){this.updateHud();this.publishStatus();return;}
     const remaining=Math.ceil((THAI.limitMs-this.elapsedMs)/1000);
     if(remaining<=30&&remaining>0&&remaining!==this.lastBeep){this.lastBeep=remaining;gameAudio.play('timer',remaining<=10);}
     const body=this.player.body as Phaser.Physics.Arcade.Body;
@@ -336,12 +377,12 @@ export class ThaiTakeout extends Phaser.Scene {
     const atHome=canUseElevator(this.run,this.player.x,body.bottom);
     this.prompt.setVisible(atRestaurant||atHome);
     if(atRestaurant)this.prompt.setText(touch.enabled?'[ Action ] Collect Thai takeout':'[ F / Action ] Collect Thai takeout');
-    if(atHome)this.prompt.setText(touch.enabled?'[ Action ] Enter elevator · deliver dinner':'[ F / Action ] Enter elevator · deliver dinner');
+    if(atHome)this.prompt.setText(touch.enabled?'[ Action ] Enter front door · deliver dinner':'[ F / Action ] Enter front door · deliver dinner');
     if(action||Phaser.Input.Keyboard.JustDown(this.keys.F)){
       if(atRestaurant){
         this.run=collectTakeout(this.run,this.elapsedMs);this.order.setVisible(false);this.immuneUntil=time+1800;gameAudio.play('takeout');
         this.say('DINNER SECURED. Head LEFT to the apartment. Traffic is faster; watch for food snatchers.');
-      }else if(atHome)void this.enterElevator();
+      }else if(atHome)this.enterHome();
     }
     this.toast.setVisible(this.elapsedMs<this.toastUntil);
     this.drawPlayer();this.updateHud();this.publishStatus();
