@@ -26,8 +26,8 @@ test('each sequential level completion unlocks exactly its next soundtrack',asyn
  const data=new Map(),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
  const progress=createLevelProgress(storage);
  for(let i=0;i<LEVEL_ORDER.length;i++){
-  assert.deepEqual(unlockedRadioTracks(progress.canPlay),Array.from({length:i+1},(_,j)=>j));
-  assert.equal(defaultLevelTrack(LEVEL_ORDER[i]),i);
+  assert.deepEqual(unlockedRadioTracks(progress.canPlay),Array.from({length:Math.min(i+1,radioTracks.length)},(_,j)=>j));
+  assert.equal(defaultLevelTrack(LEVEL_ORDER[i]),i<8?i:0);
   assert.equal(progress.canPlay(LEVEL_ORDER[i]),true);
   progress.completeLevel(LEVEL_ORDER[i]);
  }

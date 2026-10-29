@@ -160,3 +160,11 @@ test('saved alternate countdown/champion choices cannot change the fixed music d
  assert.equal(m.volume,.36);assert.equal(m.enabled,false);assert.equal(m.muted,true);
  delete globalThis.localStorage;
 });
+
+test('Cabin reuses Arcade Staircase and remembers its own choice without changing Carnival',()=>{
+ const data=new Map();globalThis.localStorage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
+ const m=new MusicRadio();m.configureLevels(()=>true);m.beginRun('carnival');assert.equal(m.selected,7);
+ m.beginRun('cabin');assert.equal(m.selected,0);m.select(5);m.beginRun('carnival');assert.equal(m.selected,7);
+ const reloaded=new MusicRadio();reloaded.configureLevels(()=>true);reloaded.beginRun('cabin');assert.equal(reloaded.selected,5);
+ delete globalThis.localStorage;
+});

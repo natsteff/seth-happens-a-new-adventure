@@ -1,3 +1,5 @@
+import {CabinFever} from './cabin-scene';
+import {localReviewLevel,canEnterLevel} from './review-entry.mjs';
 import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
 import { SummitReminder, REMINDER_MS } from './reminders.mjs';
@@ -33,8 +35,11 @@ import { REGULAR_JUMP_SPEED, megaJumpVelocity, countdownLabel, formatRunSeconds,
 
 const W = 1100, H = 600;
 let progressStorage:Storage|null=null;try{progressStorage=localStorage;}catch{/* Session unlock remains available. */}
-const levelProgress=createLevelProgress(progressStorage);
-gameAudio.music.configureLevels(level=>levelProgress.canPlay(level));
+const reviewLevel=localReviewLevel({dev:import.meta.env.DEV,hostname:location.hostname,search:location.search});
+const levelProgress=createLevelProgress(reviewLevel?null:progressStorage);
+const canPlayLevel=(level:string)=>canEnterLevel(level,levelProgress.canPlay,reviewLevel);
+if(reviewLevel){const note=document.createElement('p');note.id='local-review-notice';note.className='note';note.textContent='LOCAL REVIEW · Cabin Fever is available without unlocks. Level completions are not saved in this review session.';document.querySelector('header')!.after(note);}
+gameAudio.music.configureLevels(level=>canPlayLevel(level));
 // Render at display density, retaining the same logical play area and physics.
 const RENDER_SCALE = Math.min(3, Math.max(1, Math.ceil(
   Math.min(screen.width / W, screen.height / H) * window.devicePixelRatio)));
@@ -743,13 +748,13 @@ class Errand extends Phaser.Scene {
   }
 }
 const requestedLevel=new URLSearchParams(location.search).get('level');
-const levelDefinitions=[{key:'rooftop',title:'Rooftop Beer Run',scene:Errand},{key:'thai',title:'Thai Takeout Run',scene:ThaiTakeout},{key:'scooter',title:'Scooter Ride',scene:ScooterRide},{key:'concert',title:'Concert Chaos',scene:ConcertChaos},{key:'haunted',title:'Haunted House',scene:HauntedHouse},{key:'zombie',title:'Zombie Apocalypse',scene:ZombieApocalypse},{key:'snow',title:'Snow Day From Hell',scene:SnowDay},{key:'carnival',title:'Carnival Catastrophe',scene:CarnivalCatastrophe}];
-type LevelKey='rooftop'|'thai'|'scooter'|'concert'|'haunted'|'zombie'|'snow'|'carnival';
+const levelDefinitions=[{key:'rooftop',title:'Rooftop Beer Run',scene:Errand},{key:'thai',title:'Thai Takeout Run',scene:ThaiTakeout},{key:'scooter',title:'Scooter Ride',scene:ScooterRide},{key:'concert',title:'Concert Chaos',scene:ConcertChaos},{key:'haunted',title:'Haunted House',scene:HauntedHouse},{key:'zombie',title:'Zombie Apocalypse',scene:ZombieApocalypse},{key:'snow',title:'Snow Day From Hell',scene:SnowDay},{key:'carnival',title:'Carnival Catastrophe',scene:CarnivalCatastrophe},{key:'cabin',title:'Cabin Fever',scene:CabinFever}];
+type LevelKey='rooftop'|'thai'|'scooter'|'concert'|'haunted'|'zombie'|'snow'|'carnival'|'cabin';
 const scenes=levelDefinitions.map(level=>level.scene);
-const first=levelDefinitions.find(level=>level.key===requestedLevel&&levelProgress.canPlay(level.key))?.scene??Errand;
+const first=levelDefinitions.find(level=>level.key===requestedLevel&&canPlayLevel(level.key))?.scene??Errand;
 const initialScenes=[first,...scenes.filter(scene=>scene!==first)];
 const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W*RENDER_SCALE,height:H*RENDER_SCALE,physics:{default:'arcade',arcade:{gravity:{x:0,y:1050},debug:false}},scene:initialScenes,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true}});
-function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout|ScooterRide|ConcertChaos|HauntedHouse|ZombieApocalypse|SnowDay|CarnivalCatastrophe;}
+function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout|ScooterRide|ConcertChaos|HauntedHouse|ZombieApocalypse|SnowDay|CarnivalCatastrophe|CabinFever;}
 
 const soundToggle=document.getElementById('sound-toggle');
 soundToggle?.addEventListener('click',()=>{void gameAudio.unlock();gameAudio.toggle();(soundToggle as HTMLButtonElement).blur();});
@@ -924,11 +929,11 @@ function refreshLevelLocks(){
  gameAudio.music.refreshUnlocks();
  for(const [index,level] of levelDefinitions.entries()){
   const button=document.querySelector<HTMLButtonElement>(`[data-start-level="${level.key}"]`)!;
-  button.disabled=!levelProgress.canPlay(level.key);
-  if(index>0)button.querySelector('span')!.textContent=button.disabled?`Locked · Complete Level ${index} to unlock`:level.key==='thai'?'Collect dinner, dodge traffic, bring it home hot':level.key==='scooter'?'Ride with Allison · Big ramps, bigger regrets':level.key==='concert'?'Climb for credentials · Get to the photo pit':level.key==='haunted'?'Haunted rooms, four floors and an attic escape':level.key==='zombie'?'Survive the neighborhood · Find the truck':level.key==='snow'?'Ice, snowplows and a Wisconsin blizzard':'Moving rides, runaway bumper cars and finding Allison';
+  button.disabled=!canPlayLevel(level.key);
+  if(index>0)button.querySelector('span')!.textContent=button.disabled?`Locked · Complete Level ${index} to unlock`:level.key==='thai'?'Collect dinner, dodge traffic, bring it home hot':level.key==='scooter'?'Ride with Allison · Big ramps, bigger regrets':level.key==='concert'?'Climb for credentials · Get to the photo pit':level.key==='haunted'?'Haunted rooms, four floors and an attic escape':level.key==='zombie'?'Survive the neighborhood · Find the truck':level.key==='snow'?'Ice, snowplows and a Wisconsin blizzard':level.key==='carnival'?'Moving rides, runaway bumper cars and finding Allison':'Cross the lake · Collect the beer · Bring it back';
  }
- const count=levelDefinitions.filter(level=>levelProgress.canPlay(level.key)).length;
- document.getElementById('level-progress')!.textContent=`${count} of ${levelDefinitions.length} levels unlocked. Complete each level to unlock the next; replay unlocked levels anytime.`+(count>1&&!levelProgress.persistent?' Browser progress could not be saved; unlocks last this session.':' Progress is saved in this browser.');
+ const count=levelDefinitions.filter(level=>canPlayLevel(level.key)).length;
+ document.getElementById('level-progress')!.textContent=reviewLevel?'Local review: Cabin Fever is available directly. Completion flags are not saved.':`${count} of ${levelDefinitions.length} levels unlocked. Complete each level to unlock the next; replay unlocked levels anytime.`+(count>1&&!levelProgress.persistent?' Browser progress could not be saved; unlocks last this session.':' Progress is saved in this browser.');
 }
 refreshLevelLocks();
 let levelPickerWasRunning=false,levelPickerFromMenu=false;
@@ -944,7 +949,7 @@ function closeLevelPicker(){levelDialog.close();if(levelPickerFromMenu)openTouch
 document.getElementById('level-cancel')!.addEventListener('click',closeLevelPicker);
 levelDialog.addEventListener('cancel',event=>{event.preventDefault();closeLevelPicker();});
 function startLevel(key:LevelKey){
- if(!levelProgress.canPlay(key)){refreshLevelLocks();return;}
+ if(!canPlayLevel(key)){refreshLevelLocks();return;}
  modalNavigation.reset();levelDialog.close();touchMenu.close();touch.clear();resetScoreEntry();resetTakeoutScores();resetScooterScores();resetAdventureScores();
  const previous=activeScene();if(previous)game.scene.stop(previous.sys.settings.key);
  gameAudio.beginRun();game.scene.start(key);

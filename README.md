@@ -1,18 +1,18 @@
 # Seth Happens - A New Adventure
 
-**Version 0.8.5 · Early alpha**
+**Version 0.9.0 · Early alpha**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.8.5 Early alpha"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.9.0 Early alpha"></a>
 </p>
 
-**Play version 0.8.5** — Fullscreen highly recommended.
+**Play version 0.9.0** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
-One very ordinary guy. Eight increasingly unreasonable adventures.
+One very ordinary guy. Nine increasingly unreasonable adventures.
 
 Run, jump, dodge and ride through a city full of familiar faces and questionable decisions. Pick up dinner, survive a scooter ride with Allison, photograph a concert, escape a haunted house, and find out just how badly a Wisconsin snow day can go.
 
@@ -38,6 +38,7 @@ Run, jump, dodge and ride through a city full of familiar faces and questionable
 | 6 | Zombie Apocalypse | Survive the neighborhood, find a truck and drive to safety. |
 | 7 | Snow Day From Hell | Cross icy streets and dodge snowplows to reach warmth. |
 | 8 | Carnival Catastrophe | Search for Allison across moving rides and a chaotic midway. |
+| 9 | Cabin Fever | Cross the lake, collect the beer and bring it back to the cabin. |
 
 Complete each level to unlock the next. Once unlocked, replay any adventure from **Choose Level** in the desktop controls or mobile game menu.
 
@@ -85,6 +86,8 @@ New players start with **1 · Arcade Staircase**. Completing a level unlocks the
 | 6 · Zombie Apocalypse | The Beer of Destiny |
 | 7 · Snow Day From Hell | Twenty-Six Floors of Celts |
 | 8 · Carnival Catastrophe | Go Seth Go |
+
+Cabin Fever reuses **Arcade Staircase** by default; it has no additional soundtrack unlock.
 
 Each level starts with its assigned song unless you choose another unlocked track for that level. That choice is remembered across replays and future visits, independently for every level. Existing saved choices retain their song identity where unlocked; a newly locked choice falls back to the level's assigned song. Sound/music mute and volume preferences stay in effect.
 

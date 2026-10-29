@@ -24,3 +24,5 @@ Build-tool and transitive dependency notices are included with their installed p
 ## Artwork references
 
 Technical descriptions of runtime artwork and icon sizes are available in [scenery notes](docs/scenery.md), [Thai Takeout art](docs/thai-art.md), [Scooter Ride art](docs/scooter-art.md), [Concert Chaos art](docs/concert-art.md), [Haunted House art](docs/haunted-art.md) and [app icons](docs/app-icons.md).
+
+Cabin Fever woods, cabin, lake, boats, docks, cooler and wildlife are drawn in scene code; existing Seth/Allison art and audio are reused. See [Cabin Fever art](docs/cabin-art.md).
