@@ -15,13 +15,13 @@ Music is by **[BT-AI](https://suno.com/@bt_ai)**. Selected sound effects are cre
 | 7 · Twenty-Six Floors of Celts | Unlock Snow Day From Hell |
 | 8 · Go Seth Go | Unlock Carnival Catastrophe |
 
-Unlocked tracks can be selected on any level. Countdown and outcome recordings include The Final Warning, System Failure Imminent, Failure - Twenty-Six Floors for Nothing, Big Stupid Cheater, 26 Floors of Glory and Eye of the Stairwell. The champion recording Eye of the Stairwell is separate from the Concert Chaos song.
+Unlocked tracks can be selected on any level. The fixed countdown is **The Final Warning**, and the fixed champion track is **26 Floors of Glory**. Alternate recordings remain in the project but have no choice buttons. Countdown and outcome recordings include The Final Warning, System Failure Imminent, Failure - Twenty-Six Floors for Nothing, Big Stupid Cheater, 26 Floors of Glory and Eye of the Stairwell. The champion recording Eye of the Stairwell is separate from the Concert Chaos song.
 
 ## Effects and voices
 
 The WAV recordings cover jumping, falls, collision reactions, pickups, intro, completion, location cues and special interactions. Master mute controls voices and effects; the radio also has independent music controls. Browsers require a player gesture to start audio.
 
-The supplied `spring-boing.wav` plays on Mega Jump. The previous Mega Jump recording, `grunt.wav`, remains unchanged and joins `ouch.wav` and `ahh.wav` in the random rooftop object-collision reaction pool. Normal jump and person/fall/squish reactions remain distinct.
+The supplied `spring-boing.wav` plays on Mega Jump at its original playback rate. The previous Mega Jump recording, `grunt.wav`, remains unchanged and joins `ouch.wav` and `ahh.wav` in the random rooftop object-collision reaction pool. Normal jump and person/fall/squish reactions remain distinct.
 
 ## Music file integrity
 
