@@ -386,7 +386,7 @@ class Errand extends Phaser.Scene {
     this.mishaps=recordMishap(this.mishaps,reaction);
     this.jumpStarted=-1;this.megaUsed=false;
     this.retries++;(this.player.body as Phaser.Physics.Arcade.Body).reset(this.checkpoint.x,this.checkpoint.y);this.player.setVelocity(0,0);this.immuneUntil=time+1400;this.lastGround=-1000;this.jumpUntil=0;
-    gameAudio.play('impact');if(reaction==='fall'&&!this.fallSoundPlayed)gameAudio.speak('Aaaaaah!','fall');if(reaction==='squish')gameAudio.speak('Squish!','squish');if(reaction==='person')gameAudio.speak('Well, excuse you.','person');if(reaction==='object'){const kind=objectImpactReaction(Math.random());gameAudio.speak(kind==='ouch'?'Ouch!':'Ahh!',kind);}this.cameras.main.shake(100,.003);this.say(reason+' Beer and photos saved.');this.fallSoundPlayed=false;
+    gameAudio.play('impact');if(reaction==='fall'&&!this.fallSoundPlayed)gameAudio.speak('Aaaaaah!','fall');if(reaction==='squish')gameAudio.speak('Squish!','squish');if(reaction==='person')gameAudio.speak('Well, excuse you.','person');if(reaction==='object'){const kind=objectImpactReaction(Math.random());gameAudio.speak(kind==='ouch'?'Ouch!':kind==='ahh'?'Ahh!':'Ugh!',kind);}this.cameras.main.shake(100,.003);this.say(reason+' Beer and photos saved.');this.fallSoundPlayed=false;
   }
   mobileTrack!:Phaser.GameObjects.Text;
   keyboardHint!:Phaser.GameObjects.Text;
@@ -621,7 +621,7 @@ class Errand extends Phaser.Scene {
         ?megaJumpVelocity(this.elapsedMs-this.jumpStarted,body.velocity.y):null;
       if(boost!==null){
         this.player.setVelocityY(boost);this.megaUsed=true;this.jumpUntil=0;
-        gameAudio.speak('Mega jump','grunt',undefined,false,this.jumpCount%2?.97:1.04);
+        gameAudio.speak('Mega jump','mega',undefined,false,this.jumpCount%2?.97:1.04);
       }else{
         if(jumpPressed)this.jumpUntil=time+130;
         if(this.jumpUntil>time&&time-this.lastGround<110){

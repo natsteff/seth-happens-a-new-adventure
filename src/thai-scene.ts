@@ -328,7 +328,7 @@ export class ThaiTakeout extends Phaser.Scene {
     if(body.blocked.down){this.lastGround=time;if(body.velocity.y>=0){this.jumpStarted=-1;this.megaUsed=false;}}
     const pressed=jump||['W','UP','SPACE'].some(k=>Phaser.Input.Keyboard.JustDown(this.keys[k]));
     const boost=pressed&&!this.megaUsed&&this.jumpStarted>=0?megaJumpVelocity(this.elapsedMs-this.jumpStarted,body.velocity.y):null;
-    if(boost!==null){this.player.setVelocityY(boost);this.megaUsed=true;this.jumpUntil=0;gameAudio.speak('Mega jump','grunt');}
+    if(boost!==null){this.player.setVelocityY(boost);this.megaUsed=true;this.jumpUntil=0;gameAudio.speak('Mega jump','mega');}
     else{if(pressed)this.jumpUntil=time+130;if(this.jumpUntil>time&&time-this.lastGround<110){this.player.setVelocityY(-REGULAR_JUMP_SPEED);this.jumpUntil=0;this.lastGround=-1000;this.jumpStarted=this.elapsedMs;this.megaUsed=false;gameAudio.play('jump');gameAudio.speak('Quick hop','quick');}}
     this.updateTraffic(Math.min(delta,50));
     const atRestaurant=this.run.phase==='outbound'&&Math.abs(this.player.x-THAI.restaurantX)<65&&Math.abs(body.bottom-THAI.ground)<18;
