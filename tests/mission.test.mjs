@@ -37,15 +37,16 @@ test('exactly 26 numbered roofs start at the former first-roof height and remain
   assert.equal(floors.at(-1).x + floors.at(-1).width, LEVEL_WIDTH);
 });
 
-test('object impacts randomly select all three supplied reactions', async () => {
+test('object impacts randomly select all four supplied reactions', async () => {
   const { objectImpactReaction } = await import('../src/mission.mjs');
   assert.equal(objectImpactReaction(0.1), 'ouch');
-  assert.equal(objectImpactReaction(0.5), 'ahh');
-  assert.equal(objectImpactReaction(0.9), 'grunt');
+  assert.equal(objectImpactReaction(0.3), 'ahh');
+  assert.equal(objectImpactReaction(0.6), 'grunt');
   assert.equal(objectImpactReaction(0), 'ouch');
-  assert.equal(objectImpactReaction(1/3), 'ahh');
-  assert.equal(objectImpactReaction(2/3), 'grunt');
-  assert.equal(objectImpactReaction(1), 'grunt');
+  assert.equal(objectImpactReaction(1/4), 'ahh');
+  assert.equal(objectImpactReaction(1/2), 'grunt');
+  assert.equal(objectImpactReaction(3/4), 'boing');
+  assert.equal(objectImpactReaction(1), 'boing');
 });
 
 test('lower rooftops are safe; only missing roofs toward road triggers a fall', async () => {

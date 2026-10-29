@@ -21,7 +21,7 @@ Unlocked tracks can be selected on any level. The fixed countdown is **The Final
 
 The WAV recordings cover jumping, falls, collision reactions, pickups, intro, completion, location cues and special interactions. Master mute controls voices and effects; the radio also has independent music controls. Browsers require a player gesture to start audio.
 
-The supplied `spring-boing.wav` plays on Mega Jump at its original playback rate. The previous Mega Jump recording, `grunt.wav`, remains unchanged and joins `ouch.wav` and `ahh.wav` in the random rooftop object-collision reaction pool. Normal jump and person/fall/squish reactions remain distinct.
+The supplied `mega-jump-v2.wav` plays on Mega Jump at its original playback rate. The previous Mega Jump boing, `spring-boing.wav`, joins `grunt.wav`, `ouch.wav` and `ahh.wav` in the random rooftop object-collision reaction pool (equal chances). Normal jump and person/fall/squish reactions remain distinct. All supplied originals are preserved.
 
 ## Music file integrity
 
@@ -33,4 +33,6 @@ The supplied `spring-boing.wav` plays on Mega Jump at its original playback rate
 
 Audio files retain their recorded bytes. Provider credits do not transfer copyright or grant additional rights to redistribute recordings.
 
-Supplied Mega Jump WAV SHA-256: `6706096d1e187e72827a0068e02fe2cbb9ddd90c8f106773d14600066c81d435`.
+Previous boing WAV SHA-256: `6706096d1e187e72827a0068e02fe2cbb9ddd90c8f106773d14600066c81d435`.
+
+Current Mega Jump WAV (`mega-jump-v2.wav`) SHA-256: `e77207ec9982433161823dd32da2ed761795e5d77fa01a7a43ade68affda6556`.
