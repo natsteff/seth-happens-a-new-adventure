@@ -39,8 +39,11 @@ Run, jump, dodge and ride through a city full of familiar faces and questionable
 | 7 | Snow Day From Hell | Cross icy streets and dodge snowplows to reach warmth. |
 | 8 | Carnival Catastrophe | Search for Allison across moving rides and a chaotic midway. |
 | 9 | Cabin Fever | Cross the lake, collect the beer and bring it back to the cabin. |
+| 10 | Grocery Store Gauntlet | **COMING SOON!** Dodge runaway carts, collect three shopping-list items and make it through checkout. |
+| 11 | Soccer Game Hijinx | **COMING SOON!** Navigate the stadium, reach the sidelines and photograph the players, tunnel entrance and two big goals. |
+| 12 | Last Call | **COMING SOON!** Cross a packed bar, dodge rolling kegs and slippery spills, and reach the exit before closing time. |
 
-Complete each level to unlock the next. Once unlocked, replay any adventure from **Choose Level** in the desktop controls or mobile game menu.
+Levels 1–9 are playable now; Levels 10–12 are coming soon. Complete each available level to unlock the next. Once unlocked, replay any adventure from **Choose Level** in the desktop controls or mobile game menu.
 
 ## Controls
 
