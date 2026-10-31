@@ -1,11 +1,12 @@
-# Playtest any level
+# Level selection and developer playtesting
 
-Use **Playtest any level** in the desktop controls or mobile menu, then **Choose Level**. No earlier completion is required. The visible PLAYTEST MODE notice distinguishes review from normal progression; completions and scores are not saved. **Exit playtest mode** returns to normal play and your existing unlocks.
+**Choose Level** changes the adventure. The radio’s **Music track** selector changes music only. Normal players must complete each mission to unlock the next. Encore is a view-only finale unlocked by Last Call.
 
-Direct links work on GitHub Pages and the local development server. Add `?review=all&level=KEY` to the game's URL. For example:
+Developer review is deliberately absent from ordinary public navigation. An owner-provided hidden developer URL enables a visibly labelled PLAYTEST MODE. Select **Choose playtest level**, then the level’s named button. Both desktop controls and the mobile menu include **Choose Level**. The direct `level=KEY` parameter selects an adventure, while the approved developer entry enables review of locked levels. Without that entry, the level parameter respects normal unlocks. Old public `review=all` URLs no longer bypass locks on the release site.
 
-- Published: https://natsteff.github.io/seth-happens-a-new-adventure/?review=all&level=thai
-- Local (`./dev.sh` prints the actual port): http://127.0.0.1:5174/?review=all&level=thai
+This is a static, client-side convenience, **not authentication**. Anyone who learns the developer URL or inspects the public source can use it. No password protection or backend is provided. The owner’s exact links are kept in local review notes rather than public navigation/documentation.
+
+Local development supports `?review=all&level=KEY` on loopback. Run `./dev.sh` and use its printed port. Review mode suppresses saved completions and score entries, uses session-only progression, and offers an Exit link back to normal play. Existing records and unlocks are preserved. Music/input preferences still work normally.
 
 | Level | Key | Adventure |
 | --- | --- | --- |
@@ -20,5 +21,5 @@ Direct links work on GitHub Pages and the local development server. Add `?review
 | 9 | cabin | Cabin Fever |
 | 10 | grocery | Grocery Store Gauntlet |
 | 11 | soccer | Soccer Game Hijinx |
-
-`level=KEY` without `review=all` respects normal locks. Levels 12–13 are not implemented. The previous local-only `?level=cabin&review=cabin` shortcut still works on a local development server.
+| 12 | lastcall | Last Call |
+| 13 | encore | Encore · View-only prototype |

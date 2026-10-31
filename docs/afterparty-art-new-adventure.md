@@ -13,3 +13,5 @@ Art loads on first opening only. The fixed 1100×600 scene is fitted uniformly, 
 Active venue: `venue-band-v3.png`, owner-approved generated band scene with six musicians, raised drums, centered BT-AI booth art and printed fabric New Adventure drape. The earlier venue remains preserved. Crowd includes non-Allison ghost/zombie variants and cabin wildlife; regular Allison is unchanged.
 
 The ghost dancers now use original `haunted/ghosts-v1.png` wraith/skull artwork shared with Haunted House, replacing temporary familiar-character ghost variants. No Allison ghost is used.
+
+The v0.13.0 cast audit centralizes all34 current roster entries in `src/curtain-cast.mjs`, including the new Cabin/Winter/Thai/Scooter neighbors. Eight rotating guest positions cover the complete guest roster before departure without crowding the dance floor. Regular Allison and Seth remain central; no Allison ghost is used. The static jukebox finale releases unneeded images, and Close releases the rest. See [cast art](cast-art.md) and [performance review](performance-review.md).

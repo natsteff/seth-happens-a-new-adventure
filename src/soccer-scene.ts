@@ -5,7 +5,7 @@ import {gameAudio} from './audio';
 export class SoccerHijinx extends FootAdventure{
  constructor(){super({key:'soccer',number:11,title:'Soccer Game Hijinx',...SOCCER,instructions:'A Minnesota United Loons match. Allison is saving your season-ticket seat.\nUp the stands → food / bathroom concourse → down to the locker corridor.\nPhotograph the locker-room players, the team in the tunnel, then TWO big goals.\nF / Action at each marked camera position when READY. Missed moments always repeat.'});}
  mission=newSoccerRun();photoMs=0;photoCue!:Phaser.GameObjects.Text;photoBar!:Phaser.GameObjects.Rectangle;lockerGate?:Phaser.GameObjects.Rectangle;tunnelGate?:Phaser.GameObjects.Rectangle;ball!:Phaser.GameObjects.Container;team:Phaser.GameObjects.Image[]=[];goalPlayers:Phaser.GameObjects.Image[]=[];station=0;enteredConcourse=false;
- preload(){super.preload();if(!this.textures.exists('soccer-star'))this.load.image('soccer-star','./assets/soccer-star.png');}
+ preload(){super.preload();if(!this.textures.exists('soccer-star'))this.load.image('soccer-star','./assets/runtime/soccer-star.png');}
  resetMission(){this.mission=newSoccerRun();this.photoMs=0;this.station=0;this.team=[];this.goalPlayers=[];this.enteredConcourse=false;}
  oneWay(x:number,y:number,w:number){const p=this.platform(x,y,w,20,0x6b8183);const b=p.body as Phaser.Physics.Arcade.StaticBody;b.checkCollision.left=false;b.checkCollision.right=false;b.checkCollision.down=false;return p;}
  placard(x:number,y:number,copy:string){this.add.rectangle(x,y,330,60,0x244751).setStrokeStyle(2,0x9ccbc4).setDepth(-3);this.text(x,y,copy,19,'#d7eee0').setOrigin(.5).setAlign('center').setDepth(-2);}

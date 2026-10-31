@@ -1,3 +1,3 @@
-export const walkLayout = { frameWidth: 384, frameHeight: 512 };
+export const walkLayout = { frameWidth: 192, frameHeight: 256 };
 
-export const fallLayout = { frameWidth: 384, frameHeight: 512 };
+export const fallLayout = { frameWidth: 192, frameHeight: 256 };

@@ -2,7 +2,7 @@ import {readScores} from './scores.mjs';
 import {readTakeoutScores} from './thai-mission.mjs';
 import {readScooterScores} from './scooter-mission.mjs';
 export const PROGRESS_KEY='seth-new-adventure.progress.v1';
-export const LEVEL_ORDER=['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival','cabin','grocery','soccer'];
+export const LEVEL_ORDER=['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival','cabin','grocery','soccer','lastcall','encore'];
 function valid(v){if(!v||v.version!==1||typeof v.level1Completed!=='boolean')return false;let previous=true;for(let i=1;i<=LEVEL_ORDER.length;i++){const value=v[`level${i}Completed`];if(value!==undefined&&typeof value!=='boolean'||value&&!previous)return false;previous=!!value;}return true;}
 export function createLevelProgress(storage){
  const completed=new Set();let persistent=false;

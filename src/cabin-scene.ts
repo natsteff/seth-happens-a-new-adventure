@@ -1,3 +1,4 @@
+import {loadCast,castPerson} from './cast';
 import Phaser from 'phaser';
 import {FootAdventure} from './foot-adventure';
 import {gameAudio} from './audio';
@@ -5,6 +6,7 @@ import {CABIN,cabinLandings,cabinBoats,cabinBoatPosition,newCabinRun,cabinAction
 type Deck={art:Phaser.GameObjects.Rectangle;body:Phaser.Physics.Arcade.Body;trim:Phaser.GameObjects.Rectangle;hull:Phaser.GameObjects.Graphics;label:Phaser.GameObjects.Text};
 export class CabinFever extends FootAdventure{
  constructor(){super({key:'cabin',number:9,title:'Cabin Fever',...CABIN,startY:CABIN.ground,instructions:'A cooler full of beer. Naturally, it is on the OTHER shore.\nHead right through the woods. Jump between boats, islands and the wobbly dock.\nCream edges are landing surfaces. Wait for boats to come closer.\nF / Action at the cooler, then bring the beer LEFT to the cabin. Water returns you to a checkpoint.'});}
+ preload(){super.preload();loadCast(this,'cabin');}
  mission=newCabinRun();decks:Deck[]=[];support:number|null=null;supportOffset=0;returnHazards=false;beerArt!:Phaser.GameObjects.Container;coolerLid!:Phaser.GameObjects.Rectangle;
  resetMission(){this.mission=newCabinRun();this.decks=[];this.support=null;this.supportOffset=0;this.returnHazards=false;}
  buildWorld(){
@@ -24,6 +26,7 @@ export class CabinFever extends FootAdventure{
   const cooler=this.add.graphics().setDepth(4);cooler.fillStyle(0xe5e1c9).fillRoundedRect(CABIN.coolerX-43,751,86,49,7);cooler.fillStyle(0x498a8d).fillRect(CABIN.coolerX-38,762,76,30);cooler.lineStyle(4,0xe9dfb4).strokeRoundedRect(CABIN.coolerX-48,760,96,25,7);
   this.coolerLid=this.add.rectangle(CABIN.coolerX,749,94,10,0xf2e8c6).setDepth(5);this.text(CABIN.coolerX,655,'THE COOLER\nF / ACTION · PICK UP BEER',21,'#ffe0a0').setOrigin(.5).setAlign('center');
   this.add.image(CABIN.homeX+75,800,'allison').setOrigin(.5,1).setDisplaySize(58,84).setDepth(6);
+  for(const [i,x] of [600,1290,5480,6100].entries()){castPerson(this,'cabin',i,x,800,90).setDepth(5);this.text(x,680,['“Fish are judging you.”','“Bring the cooler back!”','“Other shore, son.”','“Geese own this dock.”'][i],13,'#f2dfb2').setOrigin(.5);}
   this.animalTextures();for(const [i,x] of [750,1240,1830,5320,5740].entries())this.hazard(i%2?'cabin-raccoon':'cabin-goose',x,784,60+i*9,2500+i*210,38,32);
  }
  tree(x:number,bottom:number,scale=1){const g=this.add.graphics().setDepth(-8);g.fillStyle(0x5c493e).fillRect(x-12*scale,bottom-210*scale,24*scale,210*scale);for(let i=0;i<3;i++)g.fillStyle(i%2?0x3f654f:0x294c43).fillTriangle(x-95*scale,bottom-(65+i*55)*scale,x,bottom-(240+i*35)*scale,x+95*scale,bottom-(65+i*55)*scale);}

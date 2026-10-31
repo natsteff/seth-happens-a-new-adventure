@@ -1,3 +1,4 @@
+import {loadCast,castFrames,castPerson} from './cast';
 import {startupLoader} from './startup';
 import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
@@ -20,7 +21,7 @@ export class ScooterRide extends Phaser.Scene{
  bubble!:Phaser.GameObjects.Container;bubbleText!:Phaser.GameObjects.Text;progress!:Phaser.GameObjects.Rectangle;
  controller=new ControllerInput();run=newScooterRun();hazards:Hazard[]=[];photos=new Set<number>();
  introActive=true;introStarted=false;paused=false;won=false;failed=false;riding=false;renderScale=1;runVersion=0;restartSince:number|null=null;scorePaused=false;bubbleUntil=0;toastUntil=0;
- preload(){startupLoader(this);for(const [key,path] of [['scooter-riders','scooter/seth-allison-v1.png'],['thai-street','thai/street-backdrop-v1.png'],['thai-props','thai/street-props-v1.png'],['adventure-brick','scenery/brick-facade-v1.png'],['scruffy','scruffy-pedestrian.png'],['clown','clown.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/'+path);}
+ preload(){startupLoader(this);loadCast(this,'scooter');for(const [key,path] of [['scooter-riders','scooter/seth-allison-v1.png'],['thai-street','thai/street-backdrop-v1.png'],['thai-props','thai/street-props-v1.png'],['adventure-brick','scenery/brick-facade-v1.png'],['scruffy','runtime/scruffy-pedestrian.png'],['clown','runtime/clown.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/'+path);}
  text(x:number,y:number,value:string,size=16,color='#f5e4c8'){return this.add.text(x,y,value,{fontFamily:'Arial',fontSize:`${size}px`,color,stroke:'#132436',strokeThickness:3}).setResolution(this.renderScale);}
  screenText(x:number,y:number,value:string,size=16,color='#f5e4c8'){const t=this.text(x,y,value,size,color);this.ui.add(t);return t;}
  create(){
@@ -67,7 +68,8 @@ export class ScooterRide extends Phaser.Scene{
    if(r.optional)this.text(r.x-190,SCOOTER.ground-120,'F / Action: toggle HIGH ramp · +750 sky bonus',14,'#f6c3ea').setBackgroundColor('#182e40').setPadding(5,4);
   }
   this.text(100,SCOOTER.ground-190,'RIDE TOGETHER →',25,'#b9eacb');this.text(120,SCOOTER.ground-152,'Left = brake · Right = accelerate · Jump = hop',15);
-  for(const [x,kind] of [[1580,'scruffy'],[3070,'clown'],[5790,'scruffy']] as [number,string][]){const art=this.add.image(x,SCOOTER.ground,kind).setOrigin(.5,1).setDisplaySize(46,85).setDepth(4);this.hazards.push({art,x,y:SCOOTER.ground-42,kind:'person',radius:30});this.text(x-80,SCOOTER.ground-112,'WATCH THE WALKER',12,'#ffd398');}
+  castPerson(this,'scooter',3,4250,SCOOTER.ground,85).setDepth(4);
+  castFrames(this,'scooter');for(const [x,kind] of [[1580,'0'],[3070,'1'],[5790,'2']] as [number,string][]){const art=castPerson(this,'scooter',Number(kind),x,SCOOTER.ground,85).setDepth(4);this.hazards.push({art,x,y:SCOOTER.ground-42,kind:'person',radius:30});this.text(x-80,SCOOTER.ground-112,'WATCH THE WALKER',12,'#ffd398');}
   for(const [x,y] of [[2810,710],[4110,545],[5250,515],[6830,510]]){
    const bird=this.add.container(x,y,[this.add.arc(-8,0,11,190,350,false,0xd7d1bd),this.add.arc(10,0,11,190,350,false,0xd7d1bd)]).setDepth(5);this.hazards.push({art:bird,x,y,kind:'bird',radius:24});
   }

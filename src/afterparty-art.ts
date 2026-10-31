@@ -1,22 +1,28 @@
+import {curtainCast} from './curtain-cast.mjs';
 import {AFTERPARTY_TIMES} from './afterparty-model.mjs';
 type Crop=[number,number,number,number];
 type Art={image:HTMLImageElement;crop?:Crop};
 /** Generated venue and whole-body dance atlases; other characters reuse shipped art. */
 export class AfterpartyArt{
+ private loadToken=0;
  private images=new Map<string,HTMLImageElement>();
  private ctx:CanvasRenderingContext2D;
  private width=1100;private height=600;
  private frames=new Map<string,{crop:Crop;scale:number}[]>();
  constructor(private canvas:HTMLCanvasElement){this.ctx=canvas.getContext('2d')!;}
  async load(){
-  const files=['allison','clown','scruffy-pedestrian','soccer-star','concert-fans','cats','ghosts','title-logo','venue-dj','dance-air-guitar','dance-moonwalk','dance-headspin','dance-shuffle','dance-standing'];
-  const results=await Promise.allSettled(files.map(async key=>{
-   const path=key==='ghosts'?'haunted/ghosts-v1':key==='title-logo'?'adventure-logo':key.startsWith('dance-')?`afterparty/seth-${key.slice(6)}-v1`:key.startsWith('venue-')?'afterparty/venue-band-v3':key;
-   const img=new Image();img.src=new URL(`./assets/${path}.png`,document.baseURI).href;
-   await img.decode();this.images.set(key,img);if(key.startsWith('dance-'))this.prepareFrames(key,img);
-  }));
-  return results.every(result=>result.status==='fulfilled');
+  const token=++this.loadToken,files=['allison','clown','scruffy-pedestrian','soccer-star','concert-fans','cats','title-logo','venue-dj','dance-air-guitar','dance-moonwalk','dance-headspin','dance-shuffle','dance-standing'];
+  const sources=new Map<string,string[]>();
+  const add=(key:string,path:string)=>sources.set(path,[...(sources.get(path)??[]),key]);
+  for(const key of files){const path=key==='title-logo'?'runtime/adventure-logo':key.startsWith('dance-')?`afterparty/seth-${key.slice(6)}-v1`:key==='venue-dj'?'afterparty/venue-band-v3':['allison','clown','scruffy-pedestrian','soccer-star'].includes(key)?`runtime/${key}`:key;add(key,path+'.png');}
+  for(const entry of curtainCast)if(entry.path)add(entry.path,entry.path);
+  const results=await Promise.allSettled([...sources].map(async([path,keys])=>{
+   const img=new Image();img.src=new URL(`./assets/${path}`,document.baseURI).href;await img.decode();
+   if(token!==this.loadToken){img.removeAttribute('src');return;}
+   for(const key of keys){this.images.set(key,img);if(key.startsWith('dance-'))this.prepareFrames(key,img);}
+  }));return results.every(r=>r.status==='fulfilled');
  }
+ dispose(){this.loadToken++;for(const img of this.images.values())img.removeAttribute('src');this.images.clear();this.frames.clear();this.canvas.width=this.canvas.height=1;}
  resize(){
   const rect=this.canvas.getBoundingClientRect(),density=Math.min(2,window.devicePixelRatio||1);
   this.canvas.width=Math.max(1,Math.round(rect.width*density));this.canvas.height=Math.max(1,Math.round(rect.height*density));
@@ -60,39 +66,31 @@ export class AfterpartyArt{
   const top=(h-height)/2;c.drawImage(img,(w-width)/2,top,width,height);
   this.text('THE AFTERPARTY NEVER REALLY ENDS',w/2,Math.max(40,top-24),32,'#c7a9ff');this.text('PICK A TRACK. STAY A WHILE.',w/2,Math.min(h-18,top+height+47),32,'#a4f4df');
  }
- private animal(kind:'goose'|'raccoon',x:number,y:number,t:number){
+ private animal(kind:'goose'|'raccoon'|'pigeon',x:number,y:number,t:number){
   const c=this.ctx;c.save();c.translate(x,y-Math.abs(Math.sin(t*4))*5);c.scale(.9,.9);
   c.fillStyle=kind==='goose'?'#e5e2d5':'#8a8c8b';c.beginPath();c.ellipse(0,-20,25,14,0,0,Math.PI*2);c.fill();
   c.fillRect(13,-45,11,25);c.beginPath();c.arc(22,-44,11,0,Math.PI*2);c.fill();
   if(kind==='goose'){c.fillStyle='#e5a35d';c.beginPath();c.moveTo(31,-48);c.lineTo(47,-42);c.lineTo(31,-38);c.fill();}
+  else if(kind==='pigeon'){c.fillStyle='#91a4b2';c.beginPath();c.ellipse(0,-22,25,17,0,0,Math.PI*2);c.fill();c.fillStyle='#cfb77b';c.fillRect(31,-45,12,5);}
   else{c.fillStyle='#25313b';c.fillRect(12,-48,24,8);c.beginPath();c.moveTo(12,-51);c.lineTo(13,-62);c.lineTo(22,-53);c.fill();c.beginPath();c.moveTo(25,-54);c.lineTo(33,-62);c.lineTo(35,-50);c.fill();c.lineWidth=10;c.strokeStyle='#657074';c.beginPath();c.moveTo(-21,-22);c.lineTo(-39,-33);c.stroke();}
   c.fillStyle='#172530';c.fillRect(24,-47,3,3);c.strokeStyle=kind==='goose'?'#e5a35d':'#25313b';c.lineWidth=3;c.beginPath();c.moveTo(-10,-8);c.lineTo(-13,0);c.moveTo(10,-8);c.lineTo(14,0);c.stroke();c.restore();
  }
  private crowd(t:number,y:number,depart:number,reduced:boolean){
-  // Three clowns and four drunks total, plus the soccer star and both fans.
-  const people:[string,Crop|undefined,number,number,number][]=[
-   ['clown',undefined,140,155,-85],['scruffy-pedestrian',undefined,245,145,-80],
-   ['clown',undefined,905,155,-85],['scruffy-pedestrian',undefined,1020,145,-75],
-   ['scruffy-pedestrian',undefined,805,145,-75],
-   ['scruffy-pedestrian',undefined,85,155,0],['clown',undefined,285,180,5],
-   ['soccer-star',undefined,850,167,25],['concert-fans',[180,9,525,979],985,175,25],
-   ['concert-fans',[851,11,448,985],755,165,10]
-  ];
-  // Original wraiths and zombie variants join the party; regular Allison is never a ghost.
-  people.push(['ghosts',[0,0,627,627],380,125,-90],['ghosts',[627,0,627,627],680,125,-90],['clown',undefined,440,140,-35],['scruffy-pedestrian',undefined,625,140,-35]);
-  for(let i=0;i<people.length;i++){
-   const [key,crop,base,h,offset]=people[i],s=reduced?0:Math.sin(t*3+i);
-   const x=base+(base<550?-1:1)*depart*700+s*13;
-   const c=this.ctx;c.save();if(i===10||i===11)c.globalAlpha=.8;if(i===12||i===13)c.filter='sepia(1) hue-rotate(65deg)';
-   this.sprite(this.image(key,crop),x,y+offset-Math.abs(s)*5,key==='ghosts'?h:h*.58,h,s*.035,i%2===1);c.restore();
+  const cast=curtainCast.filter(entry=>!['allison','seth'].includes(entry.id)),page=Math.floor(t/6),positions=[110,265,410,800,180,350,865,1015];
+  for(let i=0;i<8;i++){
+   const entry=cast[(page*8+i)%cast.length],base=positions[i],s=reduced?0:Math.sin(t*3+i),x=base+(base<550?-1:1)*depart*700+s*10,bottom=y+(i<4?-85:15)-Math.abs(s)*4;
+   if(entry.animal){this.animal(entry.animal as 'goose'|'raccoon'|'pigeon',x,bottom,t);continue;}
+   const art=entry.path?this.image(entry.path,entry.crop as Crop|undefined):undefined;if(!art)continue;
+   const height=entry.id==='oakey'||entry.id==='ellowyn'?65:entry.id.startsWith('ghost')?125:i<4?140:160,crop=art.crop??[0,0,art.image.width,art.image.height];
+   const c=this.ctx;c.save();if(entry.tint)c.filter='sepia(1) hue-rotate(65deg)';
+   this.sprite(art,x,bottom,height*crop[2]/crop[3],height,s*.035,i%2===1);c.restore();
   }
-  this.animal('goose',345-depart*700,y+24,t);this.animal('raccoon',715+depart*700,y+28,t);
  }
  render(ms:number,phase:string,dance:string,reduced:boolean){
   const c=this.ctx,w=this.width,h=this.height,t=(reduced?0:ms)/1000;
   c.setTransform(1,0,0,1,0,0);c.fillStyle='#000';c.fillRect(0,0,this.canvas.width,this.canvas.height);
   const scale=Math.min(this.canvas.width/w,this.canvas.height/h);c.setTransform(scale,0,0,scale,(this.canvas.width-w*scale)/2,(this.canvas.height-h*scale)/2);
-  if(phase==='jukebox'){this.finalLogo();return;}
+  if(phase==='jukebox'){this.finalLogo();const logo=this.images.get('title-logo');for(const img of new Set(this.images.values()))if(img!==logo)img.removeAttribute('src');this.images.clear();if(logo)this.images.set('title-logo',logo);this.frames.clear();return;}
   const lit=phase!=='spotlight';
   if(lit){
    const bg=this.images.get('venue-dj');

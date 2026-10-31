@@ -62,3 +62,15 @@ test('music off and master mute are honored, visibility pauses, and a late autop
 });
 
 test('jukebox grants the default concert track independently of gameplay locks',async()=>{const {availableJukeboxTrack}=await import('../src/afterparty-model.mjs');assert.equal(availableJukeboxTrack(DEFAULT_JUKEBOX_TRACK,()=>false),true);assert.equal(availableJukeboxTrack(1,()=>false),false);assert.equal(availableJukeboxTrack(1,()=>true),true);assert.equal(availableJukeboxTrack(99,()=>true),false);});
+
+test('closing lazy art rejects late decodes and releases image/frame/canvas allocations',async()=>{
+ let text=stripTypeScriptTypes(readFileSync(new URL('../src/afterparty-art.ts',import.meta.url),'utf8'),{mode:'transform'});
+ for(const name of ['afterparty-model','curtain-cast'])text=text.replace(`'./${name}.mjs'`,JSON.stringify(new URL(`../src/${name}.mjs`,import.meta.url).href));
+ const {AfterpartyArt}=await import('data:text/javascript;base64,'+Buffer.from(text).toString('base64'));
+ const pending=[];globalThis.Image=class{width=16;height=12;src='';decode(){return new Promise(resolve=>pending.push(resolve));}removeAttribute(){this.src='';}};
+ const context=new Proxy({getImageData:()=>({data:new Uint8ClampedArray(16*12*4).fill(255)})},{get:(obj,key)=>key in obj?obj[key]:()=>{}});
+ globalThis.document={baseURI:'http://localhost/',createElement:()=>({width:16,height:12,getContext:()=>context})};
+ const canvas={width:1100,height:600,getContext:()=>context},art=new AfterpartyArt(canvas),loading=art.load();art.dispose();pending.splice(0).forEach(resolve=>resolve());await loading;
+ assert.equal(art.images.size,0);assert.equal(art.frames.size,0);assert.deepEqual([canvas.width,canvas.height],[1,1]);
+ const again=art.load();pending.splice(0).forEach(resolve=>resolve());await again;assert.ok(art.images.size>1);art.render(50000,'jukebox','standing',false);assert.deepEqual([...art.images.keys()],['title-logo']);assert.equal(art.frames.size,0);art.dispose();
+});

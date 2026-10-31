@@ -5,7 +5,7 @@ import {stripTypeScriptTypes} from 'node:module';
 import {floors, ROAD} from '../src/mission.mjs';
 
 const source=stripTypeScriptTypes(readFileSync(new URL('../src/scenery.ts',import.meta.url),'utf8'))
-  .replace("import Phaser from 'phaser';",'');
+  .replace("import Phaser from 'phaser';",'').replace("import {homeTower} from './home-building';",'');
 const {brickBuilding}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 
 test('26 rooftop facades keep fill textures below 16 MiB and preserve roof geometry/repeat spacing',()=>{

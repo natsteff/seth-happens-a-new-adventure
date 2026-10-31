@@ -15,7 +15,7 @@ export const legacyRadioFiles=['arcade-staircase.mp3','beer-of-destiny.mp3','twe
 export function legacyRadioTrack(index){return radioTracks.findIndex(track=>track.file===legacyRadioFiles[index]);}
 /** @param {(level: string) => boolean} canPlay */
 export function unlockedRadioTracks(canPlay=()=>false){return radioTracks.flatMap((track,index)=>index===0||canPlay(track.unlockLevel)?[index]:[]);}
-export function defaultLevelTrack(level){return Math.max(0,radioTracks.findIndex(track=>track.unlockLevel===level));}
+export function defaultLevelTrack(level){if(level==='encore')return 3;return Math.max(0,radioTracks.findIndex(track=>track.unlockLevel===level));}
 export function nextRadioTrack(index,step,available=unlockedRadioTracks()){
  const position=available.indexOf(index),base=position<0?0:position;
  return available[((base+step)%available.length+available.length)%available.length];

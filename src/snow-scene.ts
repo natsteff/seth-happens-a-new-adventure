@@ -1,3 +1,4 @@
+import {loadCast,castFrames} from './cast';
 import Phaser from 'phaser';
 import {FootAdventure} from './foot-adventure';
 import {SNOW,icePatches,onIce,winterVelocity,blizzardAlpha,snowScore} from './snow-mission.mjs';
@@ -7,6 +8,7 @@ type Plow={sprite:Phaser.Physics.Arcade.Sprite;left:number;right:number;directio
 type Icicle={x:number;floor:number;y:number;vy:number;phase:string;at:number;art:Phaser.GameObjects.Triangle;warning:Phaser.GameObjects.Text};
 export class SnowDay extends FootAdventure{
  constructor(){super({key:'snow',number:7,title:'Snow Day From Hell',...SNOW,startY:SNOW.ground,instructions:'A Wisconsin blizzard. Reach the warming shelter at the far end of town.\nBlue pavement is ice: release early and steer against a slide to brake.\nJump onto plow roofs; only their front bumpers hurt. Watch thrown snow!\nYellow ! warns of falling icicles. Bus stops save your checkpoint.'});}
+ preload(){super.preload();loadCast(this,'winter');}
  plows:Plow[]=[];icicles:Icicle[]=[];flakes!:Phaser.GameObjects.Graphics;whiteout!:Phaser.GameObjects.Rectangle;checkpointIndex=0;previousVelocity=0;
  resetMission(){this.plows=[];this.icicles=[];this.checkpointIndex=0;this.previousVelocity=0;}
  buildWorld(){
@@ -17,7 +19,7 @@ export class SnowDay extends FootAdventure{
   for(const x of [500,2050,4270]){for(let i=0;i<3;i++){const width=360-i*110;this.platform(x+i*55,750-i*50,width,50,0xd6e8ed);}this.text(x+65,563,'SNOWBANK\nHIGH ROUTE',15,'#e3f5ff');}
   for(const x of [2450,4600]){this.add.rectangle(x,760,170,80,0x334e63).setStrokeStyle(4,0xe5f3f8);this.add.rectangle(x,713,190,14,0xedf7fa);this.text(x,666,'WARM BUS STOP\nCHECKPOINT',16,'#f7ddb0').setOrigin(.5).setAlign('center');}
   for(const x of [1120,1740,3260,3870,5290,5820]){const warning=this.text(x,610,'!',32,'#ffda76').setOrigin(.5).setVisible(false).setDepth(12);const art=this.add.triangle(x,600,0,0,18,0,9,42,0xd8faff).setStrokeStyle(2,0x6b9cb6).setDepth(7);this.icicles.push({x,floor:800,y:600,vy:0,phase:'waiting',at:0,art,warning});this.add.rectangle(x,573,85,12,0xf0f7f8).setDepth(3);}
-  for(const [i,x] of [350,2280,4440,6040].entries()){this.hazard(i%2?'clown':'scruffy',x,762,35,3200,28,60).setTint(0xb8d2e4);this.text(x-50,676,i%2?'“Still shorts weather!”':'“Where is my car?”',12,'#e9e7c8');}
+  castFrames(this,'winter');for(const [i,x] of [350,2280,4440,6040].entries()){this.hazard('cast-winter',x,762,35,3200,28,60).setFrame(String(i)).setDisplaySize(52,85);this.text(x-50,676,i%2?'“Still shorts weather!”':'“Where is my car?”',12,'#e9e7c8');}
   this.createPlowTexture();this.flakes=this.add.graphics().setDepth(20);this.whiteout=this.add.rectangle(0,0,1100,600,0xdfedf5,.04).setOrigin(0).setDepth(22);
   this.add.rectangle(SNOW.exitX,730,150,140,0x635949).setStrokeStyle(5,0xeaf7f4);this.add.rectangle(SNOW.exitX,700,62,70,0xffd28d);this.text(SNOW.exitX,600,'WARMING SHELTER\nF / ACTION',24,'#ffdfa3').setOrigin(.5).setAlign('center');
  }

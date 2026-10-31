@@ -287,3 +287,5 @@ header .adventure-logo{display:block;width:min(340px,65vw);height:auto;border-ra
 /* Center all three bars as a group, independent of inherited button padding. */
 #touch-menu-open{padding:0!important;line-height:0;align-content:center;justify-content:center}
 #touch-menu-open::before{margin:0;align-self:center;justify-self:center}
+
+.party-track-controls{gap:6px}.party-track-controls select{min-width:0;flex:1}

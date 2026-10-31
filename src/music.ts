@@ -42,7 +42,7 @@ export class MusicRadio{
   try{
    const raw=localStorage.getItem(LEVEL_MUSIC_KEY),legacy=raw===null;
    const value=JSON.parse((legacy?localStorage.getItem(LEGACY_LEVEL_MUSIC_KEY):raw)??'{}');
-   if(value&&typeof value==='object'&&!Array.isArray(value))for(const level of ['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival','cabin','grocery','soccer']){
+   if(value&&typeof value==='object'&&!Array.isArray(value))for(const level of ['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival','cabin','grocery','soccer','lastcall','encore']){
     const file=legacy?(Number.isInteger(value[level])?radioTracks[legacyRadioTrack(value[level])]?.file:undefined):value[level];
     if(radioTracks.some(track=>track.file===file))this.choices[level]=file;
    }

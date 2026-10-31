@@ -1,3 +1,4 @@
+import {homeTower} from './home-building';
 import Phaser from 'phaser';
 
 // Scenery never creates physics bodies. The existing mission owns all collision geometry.
@@ -6,6 +7,7 @@ export function cityBackdrop(scene: Phaser.Scene, width: number, height: number)
     .setOrigin(.5, 1).setScrollFactor(0).setDepth(-30);
   const scale = Math.max(width / sky.width, height / sky.height);
   sky.setScale(scale);
+  const home=homeTower(scene,65,height*.28,60,height*.58,26,-29);home.setScrollFactor(0);
   // Keep the vivid distant windows behind the readable, warmer foreground buildings.
   scene.add.rectangle(width / 2, height / 2, width, height, 0x172039, .22)
     .setScrollFactor(0).setDepth(-29);

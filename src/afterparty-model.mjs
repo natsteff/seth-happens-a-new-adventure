@@ -21,6 +21,7 @@ export const afterpartyCredits=[
  ['label','ORIGINAL MUSIC'],['name','BT-AI'],
  ['label','SPECIAL THANKS'],['name','Seth & Allison'],
  ['text','And the cats, for inspiration, likenesses, and putting up with this nonsense.'],
+ ['label','THE WHOLE NEIGHBORHOOD'],['text','Cabin crew · Winter walkers · Thai neighbors · Scooter neighbors'],['text','Regulars · Fans · Players · Ghosts · Zombies · Cats · Wildlife'],
  ['label','ADDITIONAL SOUND & VOICE ASSETS'],
  ['text','See the GitHub repository for source credits and attribution.'],
  ['name','THANKS FOR PLAYING!'],['text','No Seths were harmed in the making of this game. Probably.']

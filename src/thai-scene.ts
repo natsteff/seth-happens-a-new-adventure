@@ -1,3 +1,4 @@
+import {loadCast,castPerson} from './cast';
 import {startupLoader} from './startup';
 import {carryAnchor} from './carry-anchor.mjs';
 import {modalNavigation} from './modal-navigation.mjs';
@@ -34,16 +35,16 @@ export class ThaiTakeout extends Phaser.Scene {
   renderScale=1;facing=1;lastGround=-1000;jumpUntil=0;jumpStarted=-1;megaUsed=false;immuneUntil=0;restartSince:number|null=null;
   toastUntil=0;lastBeep=0;runVersion=0;scorePaused=false;deliveryElapsed=0;rideTween?:Phaser.Tweens.Tween;
 
-  preload(){startupLoader(this);
+  preload(){startupLoader(this);loadCast(this,'thai');
     const image=(key:string,path:string)=>{if(!this.textures.exists(key))this.load.image(key,path);};
     image('thai-street','./assets/thai/street-backdrop-v1.png');image('thai-props','./assets/thai/street-props-v1.png');
     image('adventure-skyline','./assets/scenery/sunset-skyline-v1.png');
     image('thai-home','./assets/thai/home-lower-facade-v1.png');
     image('adventure-brick','./assets/scenery/brick-facade-v1.png');
-    image('scruffy','./assets/scruffy-pedestrian.png');image('clown','./assets/clown.png');
-    image('allison','./assets/allison.png');image('concert-fans','./assets/concert-fans.png');image('seth-timeout','./assets/seth-timeout-v1.png');
-    if(!this.textures.exists('seth-walk'))this.load.spritesheet('seth-walk','./assets/seth-walk.png',walkLayout);
-    if(!this.textures.exists('seth-fall'))this.load.spritesheet('seth-fall','./assets/seth-fall-v1.png',fallLayout);
+    image('scruffy','./assets/runtime/scruffy-pedestrian.png');image('clown','./assets/runtime/clown.png');
+    image('allison','./assets/runtime/allison.png');image('concert-fans','./assets/concert-fans.png');image('seth-timeout','./assets/seth-timeout-v1.png');
+    if(!this.textures.exists('seth-walk'))this.load.spritesheet('seth-walk','./assets/runtime/seth-walk.png',walkLayout);
+    if(!this.textures.exists('seth-fall'))this.load.spritesheet('seth-fall','./assets/runtime/seth-fall-v1.png',fallLayout);
   }
   text(x:number,y:number,value:string,size=16,color='#f1e0c5'){
     return this.add.text(x,y,value,{fontFamily:'Arial',fontSize:`${size}px`,color,stroke:'#17202d',strokeThickness:3}).setResolution(this.renderScale);
@@ -92,7 +93,7 @@ export class ThaiTakeout extends Phaser.Scene {
     }
     this.bag=this.add.image(0,0,'thai-props','bag').setOrigin(.5,.03).setDisplaySize(25,31).setDepth(8).setVisible(false);
     this.order=this.add.image(THAI.restaurantX,THAI.ground-52,'thai-props','bag').setDisplaySize(35,41).setDepth(6);
-    this.add.image(THAI.restaurantX-110,THAI.ground,'concert-fans').setOrigin(.5,1).setDisplaySize(76,91).setDepth(3);
+    castPerson(this,'thai',0,THAI.restaurantX+90,THAI.ground,90).setDepth(4);
     this.buildTraffic();this.buildPedestrians();
     this.cameras.main.startFollow(this.player,true,.13,.13,-100,0);
     this.ui=this.add.container((W*this.renderScale-W)/2,(H*this.renderScale-H)/2).setScrollFactor(0).setDepth(20);
@@ -213,6 +214,8 @@ export class ThaiTakeout extends Phaser.Scene {
     });
   }
   buildPedestrians(){
+    for(const [i,x] of [[1,4990],[2,2350],[3,4380]])castPerson(this,'thai',i,x,THAI.ground,84).setDepth(4);
+    this.text(THAI.restaurantX+90,THAI.ground-120,'“Dinner’s ready!”',15,'#ffe0ad').setOrigin(.5);
     for(const [index,left,right,texture,thief] of [[0,1740,2190,'scruffy',false],[1,4470,4840,'clown',false],[2,1830,2310,'scruffy',true],[3,5120,5205,'clown',false]] as [number,number,number,string,boolean][]){
       const body=this.add.rectangle(left+80,THAI.ground-33,30,66,0xffffff,0);this.physics.add.existing(body);
       (body.body as Phaser.Physics.Arcade.Body).setAllowGravity(false).setImmovable(true);

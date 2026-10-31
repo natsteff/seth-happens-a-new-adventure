@@ -9,7 +9,7 @@ export function createAfterparty(onClose:()=>void,canPlay:(level:string)=>boolea
  dialog.innerHTML=`<header class="party-header"><div><span class="party-eyebrow">SETH HAPPENS!</span><h2 id="afterparty-title">Credits / Jukebox</h2></div><button id="party-close" type="button">Close</button></header>
  <div class="party-stage"><canvas aria-label="Rave afterparty: Seth dances with Allison, the cats and the game's characters in front of the BT-AI DJ booth."></canvas><p class="party-loading" role="status">Loading the afterparty…</p><div class="party-credits" aria-label="Game credits"></div></div>
  <section class="party-deck" aria-label="Jukebox controls"><div class="party-now"><span class="party-eyebrow">BT-AI · JUKEBOX</span><strong id="party-track-title"></strong><span id="party-status" role="status"></span></div>
- <div class="party-track-controls"><button id="party-prev" aria-label="Previous jukebox track">◀</button><label for="party-track">Track</label><select id="party-track"></select><button id="party-next" aria-label="Next jukebox track">▶</button></div>
+ <div class="party-track-controls"><button id="party-prev" aria-label="Previous jukebox track">◀</button><select id="party-track" aria-label="Jukebox track"></select><button id="party-next" aria-label="Next jukebox track">▶</button></div>
  <div class="party-mix"><button id="party-play"></button><button id="party-mute"></button><label for="party-volume">Volume <output id="party-volume-value"></output></label><input id="party-volume" type="range" min="0" max="100" step="1"></div></section>`;
  document.getElementById('play-area')!.append(dialog);
  const credits=dialog.querySelector<HTMLDivElement>('.party-credits')!;
@@ -54,7 +54,7 @@ export function createAfterparty(onClose:()=>void,canPlay:(level:string)=>boolea
  function close(){
   if(!dialog.open)return;
   loadVersion++;cancelAnimationFrame(frame);frame=0;observer?.disconnect();observer=undefined;unsubscribe?.();unsubscribe=undefined;
-  player.close();dialog.close();onClose();
+  player.close();art.dispose();assetsReady=false;dialog.close();onClose();
  }
  const allowed=(i:number)=>availableJukeboxTrack(i,canPlay);
  const change=()=>{if(allowed(Number(select.value)))player.select(Number(select.value));};select.addEventListener('change',change);

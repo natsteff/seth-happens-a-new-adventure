@@ -1,9 +1,12 @@
+import {LastCall} from './lastcall-scene';
+import {Encore} from './encore-scene';
+import {homeTower} from './home-building';
 import {GroceryGauntlet} from './grocery-scene';
 import {SoccerHijinx} from './soccer-scene';
 import {startupLoader} from './startup';
 import {standaloneLaunch,readMobileSetup,saveMobileSetup,mobileStartup} from './mobile-setup.mjs';
 import {CabinFever} from './cabin-scene';
-import {localReviewLevel,canEnterLevel} from './review-entry.mjs';
+import {localReviewLevel,canEnterLevel,reviewAllowed} from './review-entry.mjs';
 import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
 import { SummitReminder, REMINDER_MS } from './reminders.mjs';
@@ -39,16 +42,18 @@ import { REGULAR_JUMP_SPEED, megaJumpVelocity, countdownLabel, formatRunSeconds,
 
 const W = 1100, H = 600;
 let progressStorage:Storage|null=null;try{progressStorage=localStorage;}catch{/* Session unlock remains available. */}
+const normalGameUrl='./';
 const reviewLevel=localReviewLevel({dev:import.meta.env.DEV,hostname:location.hostname,search:location.search});
+const reviewAvailable=!!reviewLevel||reviewAllowed({dev:import.meta.env.DEV,hostname:location.hostname});
 const levelProgress=createLevelProgress(reviewLevel?null:progressStorage);
 const canPlayLevel=(level:string)=>canEnterLevel(level,levelProgress.canPlay,reviewLevel);
 if(reviewLevel){const note=document.createElement('p');note.id='local-review-notice';note.className='note';note.textContent=`PLAYTEST MODE · ${reviewLevel==='all'?'All implemented levels':'Cabin Fever'} available. Completions and scores are not saved. Exit with the link below.`;document.querySelector('header')!.after(note);}
 document.body.dataset.review=reviewLevel?'true':'false';
 const reviewButton=document.createElement('button');reviewButton.textContent=reviewLevel?'Exit playtest mode':'Playtest any level';
-reviewButton.onclick=()=>{location.href=reviewLevel?'./':'?review=all&level=rooftop';};
-document.querySelector('.sound-row')!.append(reviewButton);
-const reviewMenuButton=reviewButton.cloneNode(true) as HTMLButtonElement;reviewMenuButton.onclick=reviewButton.onclick;document.getElementById('touch-menu')!.append(reviewMenuButton);
-if(reviewLevel){const exit=document.createElement('a');exit.href='./';exit.textContent='Exit playtest mode';document.getElementById('local-review-notice')!.append(' ',exit);}
+reviewButton.onclick=()=>{location.href=reviewLevel?normalGameUrl:'?review=all&level=rooftop';};
+if(reviewAvailable)document.querySelector('.sound-row')!.append(reviewButton);
+const reviewMenuButton=reviewButton.cloneNode(true) as HTMLButtonElement;reviewMenuButton.onclick=reviewButton.onclick;if(reviewAvailable)document.getElementById('touch-menu')!.append(reviewMenuButton);
+if(reviewLevel){const choose=document.createElement('button');choose.textContent='Choose playtest level';choose.onclick=()=>document.getElementById('choose-level')!.click();document.querySelector('.sound-row')!.append(choose);const hint=document.createElement('span');hint.textContent='Choose playtest level changes the adventure. The music selector changes songs only.';document.getElementById('local-review-notice')!.append(' ',hint);const exit=document.createElement('a');exit.href=normalGameUrl;exit.textContent='Exit playtest mode';document.getElementById('local-review-notice')!.append(' ',exit);}
 gameAudio.music.configureLevels(level=>canPlayLevel(level));
 // Render at display density, retaining the same logical play area and physics.
 const RENDER_SCALE = Math.min(3, Math.max(1, Math.ceil(
@@ -88,22 +93,22 @@ class Errand extends Phaser.Scene {
   hazards: Hazard[] = []; floor = 0; checkpoint = {x:75,y:ROAD.y-24};
   lastGround = -1000; jumpUntil = 0; immuneUntil = 0; facing = 1; walking = false;
   preload(){startupLoader(this);
-    this.load.image('adventure-skyline','./assets/scenery/sunset-skyline-v1.png');
-    this.load.image('adventure-brick','./assets/scenery/brick-facade-v1.png');
-    this.load.image('seth-timeout','./assets/seth-timeout-v1.png');
-    this.load.spritesheet('seth-walk','./assets/seth-walk.png',walkLayout);
-    this.load.spritesheet('seth-fall','./assets/seth-fall-v1.png',fallLayout);
-    this.load.spritesheet('seth-carry-directions','./assets/seth-carry-directions-v1.png',walkLayout);
-    this.load.spritesheet('seth-fall-carry-directions','./assets/seth-fall-carry-directions-v1.png',fallLayout);
-    this.load.image('allison','./assets/allison.png');
-    this.load.image('beer-pickup','./assets/beer-pickup.png');
-    this.load.image('title-logo','./assets/adventure-logo.png');
-    this.load.image('clown','./assets/clown.png');
-    this.load.image('scruffy','./assets/scruffy-pedestrian.png');
-    this.load.image('soccer-star','./assets/soccer-star.png');
-    this.load.image('concert-fans','./assets/concert-fans.png');
-    this.load.image('loons-logo','./assets/minnesota-united-user-supplied.png');
-    this.load.image('cats','./assets/cats.png');
+    if(!this.textures.exists('adventure-skyline'))this.load.image('adventure-skyline','./assets/scenery/sunset-skyline-v1.png');
+    if(!this.textures.exists('adventure-brick'))this.load.image('adventure-brick','./assets/scenery/brick-facade-v1.png');
+    if(!this.textures.exists('seth-timeout'))this.load.image('seth-timeout','./assets/seth-timeout-v1.png');
+    if(!this.textures.exists('seth-walk'))this.load.spritesheet('seth-walk','./assets/runtime/seth-walk.png',walkLayout);
+    if(!this.textures.exists('seth-fall'))this.load.spritesheet('seth-fall','./assets/runtime/seth-fall-v1.png',fallLayout);
+    if(!this.textures.exists('seth-carry-directions'))this.load.spritesheet('seth-carry-directions','./assets/runtime/seth-carry-directions-v1.png',walkLayout);
+    if(!this.textures.exists('seth-fall-carry-directions'))this.load.spritesheet('seth-fall-carry-directions','./assets/runtime/seth-fall-carry-directions-v1.png',fallLayout);
+    if(!this.textures.exists('allison'))this.load.image('allison','./assets/runtime/allison.png');
+    if(!this.textures.exists('beer-pickup'))this.load.image('beer-pickup','./assets/beer-pickup.png');
+    if(!this.textures.exists('adventure-logo'))this.load.image('adventure-logo','./assets/runtime/adventure-logo.png');
+    if(!this.textures.exists('clown'))this.load.image('clown','./assets/runtime/clown.png');
+    if(!this.textures.exists('scruffy'))this.load.image('scruffy','./assets/runtime/scruffy-pedestrian.png');
+    if(!this.textures.exists('soccer-star'))this.load.image('soccer-star','./assets/runtime/soccer-star.png');
+    if(!this.textures.exists('concert-fans'))this.load.image('concert-fans','./assets/concert-fans.png');
+    if(!this.textures.exists('loons-logo'))this.load.image('loons-logo','./assets/runtime/minnesota-united-user-supplied.png');
+    if(!this.textures.exists('cats'))this.load.image('cats','./assets/cats.png');
   }
   create() {
     document.body.dataset.level='rooftop';levelControlCopy('rooftop');for(const key of ['grip','jumps','speed','biggest','bonus','risky','reaction'])delete document.getElementById('live-status')!.dataset[key];document.getElementById('current-level')!.textContent='Level 1 · Rooftop Beer Run';document.getElementById('next-level')!.hidden=true;
@@ -135,7 +140,7 @@ class Errand extends Phaser.Scene {
     this.label(12,ROAD.y+98,'Jump onto floor 01 →','#aec3d0',10);
     for(const f of floors.slice(1)){
       const facadeHeight=f.floor===1?ROAD.y-f.y:Math.max(14,Math.min(132,ROAD.y-f.y-86));
-      brickBuilding(this,f.x,f.y,f.width,ROAD.y,f.floor);
+      if(f.floor===26)homeTower(this,f.x,f.y,f.width,ROAD.y);else brickBuilding(this,f.x,f.y,f.width,ROAD.y,f.floor);
       const ledge=this.add.rectangle(f.x+f.width/2,f.y+4,f.width,8,0x78dbc3,0);
       platforms.add(ledge);
       const ledgeBody=ledge.body as Phaser.Physics.Arcade.StaticBody;
@@ -229,7 +234,7 @@ class Errand extends Phaser.Scene {
   showIntro(){
     this.physics.world.pause();
     const backdrop=this.add.rectangle(W/2,H/2,W,H,0x102137,.97);
-    const logo=this.add.image(W/2,242,'title-logo').setDisplaySize(620,413);
+    const logo=this.add.image(W/2,242,'adventure-logo').setDisplaySize(620,413);
     const subtitle=this.add.text(W/2,476,'LEVEL 1 · ROOFTOP BEER RUN',{fontFamily:'Arial',fontSize:'25px',fontStyle:'bold',color:'#ffe0a3',backgroundColor:'#102137',padding:{x:20,y:8}}).setOrigin(.5);
     this.introCaption=this.add.text(W/2,560,'',{fontFamily:'Arial',fontSize:'16px',fontStyle:'bold',color:'#ffe2aa',backgroundColor:'#102137',padding:{x:12,y:7}}).setOrigin(.5);
     this.introOverlay=this.add.container(0,0,[backdrop,logo,subtitle,this.introCaption]).setScrollFactor(0).setDepth(50);
@@ -255,27 +260,6 @@ class Errand extends Phaser.Scene {
   }
   drawCity(){
     cityBackdrop(this,W,H);
-    // A quiet, uninterrupted orange-and-blue tower behind the final platform.
-    const home=floors[26],tower=this.add.graphics().setDepth(-12).setAlpha(.24);
-    const top=home.y-92,bottom=ROAD.y,height=bottom-top;
-    tower.fillStyle(0xc47d37).fillRect(home.x,top,home.width,height);
-    tower.fillStyle(0xedb44b).fillRect(home.x+22,top+30,home.width-65,height-30);
-    tower.fillStyle(0x955332).fillRect(home.x+home.width-43,top+10,43,height-10);
-    tower.fillStyle(0x2877a6).fillPoints([
-      {x:home.x+12,y:top+28},{x:home.x+12,y:top-33},
-      {x:home.x+55,y:top-56},{x:home.x+55,y:top-75},
-      {x:home.x+110,y:top-98},{x:home.x+154,y:top-77},
-      {x:home.x+154,y:top-52},{x:home.x+home.width-13,y:top-30},
-      {x:home.x+home.width-13,y:top+28}
-    ],true);
-    for(let xx=home.x+28;xx<home.x+home.width-20;xx+=29){
-      tower.lineStyle(1,0x7cc7e1,.5).lineBetween(xx,top-28,xx,top+26);
-      for(let yy=top+47;yy<bottom-12;yy+=32){
-        tower.fillStyle(xx>home.x+home.width-60?0x16486c:0x1e6593).fillRect(xx,yy,11,19);
-        tower.fillStyle(0x74bed4,.5).fillRect(xx+1,yy+1,3,16);
-      }
-    }
-    tower.lineStyle(2,0x6ab9d0,.5).lineBetween(EGG.elevatorX,home.y,EGG.elevatorX,ROAD.y);
     this.add.rectangle(LEVEL_WIDTH/2,ROAD.y+85,LEVEL_WIDTH,170,0x172131);
     this.add.rectangle(LEVEL_WIDTH/2,ROAD.y+2,LEVEL_WIDTH,4,0x687b85);
     for(let x=0;x<LEVEL_WIDTH;x+=120)this.add.rectangle(x,ROAD.y+40,58,5,0xd4b169,.4);
@@ -326,8 +310,10 @@ class Errand extends Phaser.Scene {
       this.label(s.x-90,s.y-44,'Don’t walk past the shot!','#b6f7e7',11);
       this.add.line(0,0,s.x-25,s.y-47,s.x-25,s.y+25,0x93cabb).setOrigin(0);
     }
-    const home=at(26);this.add.rectangle(home.x+190,home.y-68,90,136,0x435a72).setStrokeStyle(2,0x9bb7c7);
-    this.label(home.x+190,home.y-120,"Seth's Apt",'#ffcd87',15).setOrigin(.5,0);
+    const home=at(26);this.add.rectangle(home.x+190,home.y-59,76,118,0xc18a56).setStrokeStyle(3,0xe0c292);
+    this.add.rectangle(home.x+190,home.y-54,52,108,0x183f4c).setStrokeStyle(3,0x6da7b2);
+    this.add.rectangle(home.x+190,home.y-54,3,108,0xbfac85);this.add.rectangle(home.x+190,home.y-37,52,3,0xbfac85);
+    this.label(home.x+190,home.y-120,"G · HOME",'#ffcd87',15).setOrigin(.5,0);
     this.label(home.x+5,home.y-218,'HOME. FINALLY.', '#7ce2c7',23);
     this.add.image(home.x+76,home.y,'allison').setOrigin(.5,1).setDisplaySize(54,82);
     this.label(home.x+28,home.y-102,'Allison','#f6c9d5',13);
@@ -768,13 +754,13 @@ class Errand extends Phaser.Scene {
   }
 }
 const requestedLevel=new URLSearchParams(location.search).get('level');
-const levelDefinitions=[{key:'rooftop',title:'Rooftop Beer Run',scene:Errand},{key:'thai',title:'Thai Takeout Run',scene:ThaiTakeout},{key:'scooter',title:'Scooter Ride',scene:ScooterRide},{key:'concert',title:'Concert Chaos',scene:ConcertChaos},{key:'haunted',title:'Haunted House',scene:HauntedHouse},{key:'zombie',title:'Zombie Apocalypse',scene:ZombieApocalypse},{key:'snow',title:'Snow Day From Hell',scene:SnowDay},{key:'carnival',title:'Carnival Catastrophe',scene:CarnivalCatastrophe},{key:'cabin',title:'Cabin Fever',scene:CabinFever},{key:'grocery',title:'Grocery Store Gauntlet',scene:GroceryGauntlet},{key:'soccer',title:'Soccer Game Hijinx',scene:SoccerHijinx}];
-type LevelKey='rooftop'|'thai'|'scooter'|'concert'|'haunted'|'zombie'|'snow'|'carnival'|'cabin'|'grocery'|'soccer';
+const levelDefinitions=[{key:'rooftop',title:'Rooftop Beer Run',scene:Errand},{key:'thai',title:'Thai Takeout Run',scene:ThaiTakeout},{key:'scooter',title:'Scooter Ride',scene:ScooterRide},{key:'concert',title:'Concert Chaos',scene:ConcertChaos},{key:'haunted',title:'Haunted House',scene:HauntedHouse},{key:'zombie',title:'Zombie Apocalypse',scene:ZombieApocalypse},{key:'snow',title:'Snow Day From Hell',scene:SnowDay},{key:'carnival',title:'Carnival Catastrophe',scene:CarnivalCatastrophe},{key:'cabin',title:'Cabin Fever',scene:CabinFever},{key:'grocery',title:'Grocery Store Gauntlet',scene:GroceryGauntlet},{key:'soccer',title:'Soccer Game Hijinx',scene:SoccerHijinx},{key:'lastcall',title:'Last Call',scene:LastCall},{key:'encore',title:'Encore · View-only finale',scene:Encore}];
+type LevelKey='rooftop'|'thai'|'scooter'|'concert'|'haunted'|'zombie'|'snow'|'carnival'|'cabin'|'grocery'|'soccer'|'lastcall'|'encore';
 const scenes=levelDefinitions.map(level=>level.scene);
 const first=levelDefinitions.find(level=>level.key===requestedLevel&&canPlayLevel(level.key))?.scene??Errand;
 const initialScenes=[first,...scenes.filter(scene=>scene!==first)];
 const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W*RENDER_SCALE,height:H*RENDER_SCALE,physics:{default:'arcade',arcade:{gravity:{x:0,y:1050},debug:false}},scene:initialScenes,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true}});
-function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout|ScooterRide|ConcertChaos|HauntedHouse|ZombieApocalypse|SnowDay|CarnivalCatastrophe|CabinFever|GroceryGauntlet|SoccerHijinx;}
+function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout|ScooterRide|ConcertChaos|HauntedHouse|ZombieApocalypse|SnowDay|CarnivalCatastrophe|CabinFever|GroceryGauntlet|SoccerHijinx|LastCall|Encore;}
 
 const soundToggle=document.getElementById('sound-toggle');
 soundToggle?.addEventListener('click',()=>{void gameAudio.unlock();gameAudio.toggle();(soundToggle as HTMLButtonElement).blur();});
@@ -980,10 +966,10 @@ function refreshLevelLocks(){
  for(const [index,level] of levelDefinitions.entries()){
   const button=document.querySelector<HTMLButtonElement>(`[data-start-level="${level.key}"]`)!;
   button.disabled=!canPlayLevel(level.key);
-  if(index>0)button.querySelector('span')!.textContent=button.disabled?`Locked · Complete Level ${index} to unlock`:level.key==='thai'?'Collect dinner, dodge traffic, bring it home hot':level.key==='scooter'?'Ride with Allison · Big ramps, bigger regrets':level.key==='concert'?'Climb for credentials · Get to the photo pit':level.key==='haunted'?'Haunted rooms, four floors and an attic escape':level.key==='zombie'?'Survive the neighborhood · Find the truck':level.key==='snow'?'Ice, snowplows and a Wisconsin blizzard':level.key==='carnival'?'Moving rides, runaway bumper cars and finding Allison':level.key==='grocery'?'Milk, bread, eggs · Checkout · Exit':level.key==='soccer'?'Locker room · Tunnel · Two big goals':'Cross the lake · Collect the beer · Bring it back';
+  if(index>0)button.querySelector('span')!.textContent=button.disabled?`Locked · Complete Level ${index} to unlock`:level.key==='thai'?'Collect dinner, dodge traffic, bring it home hot':level.key==='scooter'?'Ride with Allison · Big ramps, bigger regrets':level.key==='concert'?'Climb for credentials · Get to the photo pit':level.key==='haunted'?'Haunted rooms, four floors and an attic escape':level.key==='zombie'?'Survive the neighborhood · Find the truck':level.key==='snow'?'Ice, snowplows and a Wisconsin blizzard':level.key==='carnival'?'Moving rides, runaway bumper cars and finding Allison':level.key==='grocery'?'Milk, bread, eggs · Checkout · Exit':level.key==='soccer'?'Locker room · Tunnel · Two big goals':level.key==='lastcall'?'Camera bag · Closing-time escape':level.key==='encore'?'View-only curtain call · The whole cast takes a bow':'Cross the lake · Collect the beer · Bring it back';
  }
  const count=levelDefinitions.filter(level=>canPlayLevel(level.key)).length;
- document.getElementById('level-progress')!.textContent=reviewLevel?'Local review: Cabin Fever is available directly. Completion flags are not saved.':`${count} of ${levelDefinitions.length} levels unlocked. Complete each level to unlock the next; replay unlocked levels anytime.`+(count>1&&!levelProgress.persistent?' Browser progress could not be saved; unlocks last this session.':' Progress is saved in this browser.');
+ document.getElementById('level-progress')!.textContent=reviewLevel?(reviewLevel==='all'?'PLAYTEST: choose a level below. The music selector changes songs only. No scores or unlocks are saved.':'Local Cabin review. Completions are not saved.'):`${count} of ${levelDefinitions.length} levels unlocked. Complete each level to unlock the next; replay unlocked levels anytime.`+(count>1&&!levelProgress.persistent?' Browser progress could not be saved; unlocks last this session.':' Progress is saved in this browser.');
 }
 refreshLevelLocks();
 let levelPickerWasRunning=false,levelPickerFromMenu=false;
@@ -999,6 +985,7 @@ function closeLevelPicker(){levelDialog.close();if(levelPickerFromMenu)openTouch
 document.getElementById('level-cancel')!.addEventListener('click',closeLevelPicker);
 levelDialog.addEventListener('cancel',event=>{event.preventDefault();closeLevelPicker();});
 function startLevel(key:LevelKey){
+ (document.getElementById('high-scores') as HTMLButtonElement).disabled=key==='encore';
  if(!canPlayLevel(key)){refreshLevelLocks();return;}
  modalNavigation.reset();levelDialog.close();touchMenu.close();touch.clear();resetScoreEntry();resetTakeoutScores();resetScooterScores();resetAdventureScores();
  const previous=activeScene();if(previous)game.scene.stop(previous.sys.settings.key);
@@ -1059,9 +1046,3 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)void check
 void checkUpdates();
 
 document.getElementById('splash-version')!.textContent=`${document.getElementById('game-version')!.textContent} · ${document.getElementById('release-stage')!.textContent}`;
-
-// Ready means the actual title scene and its controls have been created.
-window.addEventListener('game-layout',()=>requestAnimationFrame(()=>{
- if(document.querySelector('#game canvas')&&!document.getElementById('start-game')!.hidden)
- window.dispatchEvent(new CustomEvent('game-startup',{detail:{state:'ready'}}));
-}));

@@ -21,9 +21,9 @@ export abstract class FootAdventure extends Phaser.Scene{
  introOverlay?:Phaser.GameObjects.Container;pauseOverlay?:Phaser.GameObjects.Container;hazards:Hazard[]=[];controller=new ControllerInput();photos=new Set<number>();
  elapsedMs=0;introActive=true;introStarted=false;paused=false;won=false;failed=false;riding=false;renderScale=1;runVersion=0;hits=0;stamina=100;immuneMs=0;restartSince:number|null=null;facing=1;lastGround=-1000;jumpUntil=0;jumpStarted=-1;megaUsed=false;toastUntil=0;checkpoint={x:160,bottom:1130};
  preload(){startupLoader(this);
-  for(const [key,path] of [['adventure-logo','adventure-logo.png'],['thai-street','thai/street-backdrop-v1.png'],['thai-props','thai/street-props-v1.png'],['adventure-brick','scenery/brick-facade-v1.png'],['scruffy','scruffy-pedestrian.png'],['clown','clown.png'],['allison','allison.png'],['concert-fans','concert-fans.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/'+path);
-  if(!this.textures.exists('seth-walk'))this.load.spritesheet('seth-walk','./assets/seth-walk.png',walkLayout);
-  if(!this.textures.exists('seth-fall'))this.load.spritesheet('seth-fall','./assets/seth-fall-v1.png',fallLayout);
+  for(const [key,path] of [['adventure-logo','runtime/adventure-logo.png'],['thai-street','thai/street-backdrop-v1.png'],['thai-props','thai/street-props-v1.png'],['adventure-brick','scenery/brick-facade-v1.png'],['scruffy','runtime/scruffy-pedestrian.png'],['clown','runtime/clown.png'],['allison','runtime/allison.png'],['concert-fans','concert-fans.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/'+path);
+  if(!this.textures.exists('seth-walk'))this.load.spritesheet('seth-walk','./assets/runtime/seth-walk.png',walkLayout);
+  if(!this.textures.exists('seth-fall'))this.load.spritesheet('seth-fall','./assets/runtime/seth-fall-v1.png',fallLayout);
  }
  text(x:number,y:number,value:string,size=16,color='#f3e0c2'){return this.add.text(x,y,value,{fontFamily:'Arial',fontSize:`${size}px`,color,stroke:'#172337',strokeThickness:3}).setResolution(this.renderScale);}
  screenText(x:number,y:number,value:string,size=16,color='#f3e0c2'){const t=this.text(x,y,value,size,color);this.ui.add(t);return t;}

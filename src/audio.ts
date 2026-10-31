@@ -50,6 +50,13 @@ class GameAudio {
     if(paused){this.pausedAt=performance.now();if(this.context?.state==='running')await this.context.suspend();}
     else{if(this.voiceSource)this.voiceUntil+=performance.now()-this.pausedAt;if(this.context?.state==='suspended')await this.context.resume();this.music.refresh();}
   }
+  applaud(){
+    if(this.muted||this.paused||!this.context||!this.master)return ()=>{};
+    const context=this.context,buffer=context.createBuffer(1,Math.ceil(context.sampleRate*1.8),context.sampleRate),data=buffer.getChannelData(0);
+    for(let clap=0;clap<55;clap++){const start=Math.floor(Math.random()*context.sampleRate*1.45),length=Math.floor(context.sampleRate*.08);for(let i=0;i<length&&start+i<data.length;i++)data[start+i]+=(Math.random()*2-1)*Math.exp(-i/(context.sampleRate*.014))*.14;}
+    const source=context.createBufferSource(),gain=context.createGain();source.buffer=buffer;gain.gain.value=.5;source.connect(gain);gain.connect(this.master);let stopped=false;
+    source.onended=()=>{source.disconnect();gain.disconnect();};source.start();return ()=>{if(!stopped){stopped=true;try{source.stop();}catch{}}};
+  }
   toggle() { this.muted = !this.muted;saveSettings({muted:this.muted});if(this.muted){if(this.activeKind!=='start'&&this.activeKind!=='hero')this.stopVoice();this.stopLocations();} if(this.master&&this.context)this.master.gain.setValueAtTime(this.muted?0:.8,this.context.currentTime);this.music.setMuted(this.muted);this.syncButton(); }
   private syncButton() {
     const button=document.getElementById('sound-toggle');
