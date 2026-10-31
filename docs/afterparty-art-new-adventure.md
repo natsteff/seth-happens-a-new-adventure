@@ -11,3 +11,5 @@ The finale uses this game's own logo. No official team or venue affiliation is c
 Art loads on first opening only. The fixed 1100×600 scene is fitted uniformly, with device density capped at 2 and rendering capped at 30fps. The static logo finale stops its animation loop while audio/controls remain active.
 
 Active venue: `venue-band-v3.png`, owner-approved generated band scene with six musicians, raised drums, centered BT-AI booth art and printed fabric New Adventure drape. The earlier venue remains preserved. Crowd includes non-Allison ghost/zombie variants and cabin wildlife; regular Allison is unchanged.
+
+The ghost dancers now use original `haunted/ghosts-v1.png` wraith/skull artwork shared with Haunted House, replacing temporary familiar-character ghost variants. No Allison ghost is used.

@@ -8,10 +8,12 @@ type Book={x:number;floor:number;art:Phaser.GameObjects.Rectangle;warning:Phaser
 export class HauntedHouse extends FootAdventure{
  constructor(){super({key:'haunted',number:5,title:'Haunted House',...HAUNTED,startY:HAUNTED.ground,instructions:'Cross the graveyard. F / Action enters the mansion.\nClimb its four floors to find the attic key, then escape down the east stairs.\nGhosts glow before becoming solid. Watch for falling books.\nThe landing bell is a checkpoint. The attic key awakens the house!'});}
  mission=newHauntedRun();entryGate?:Phaser.GameObjects.Rectangle;keyArt!:Phaser.GameObjects.Container;keyLabel!:Phaser.GameObjects.Text;carriedKey!:Phaser.GameObjects.Container;boss!:Phaser.GameObjects.Image;books:Book[]=[];enteredBell=false;
- preload(){super.preload();if(!this.textures.exists('haunted-wall'))this.load.image('haunted-wall','./assets/haunted/mansion-wall-v1.png');}
+ preload(){super.preload();if(!this.textures.exists('haunted-ghosts'))this.load.image('haunted-ghosts','./assets/haunted/ghosts-v1.png');if(!this.textures.exists('haunted-wall'))this.load.image('haunted-wall','./assets/haunted/mansion-wall-v1.png');}
  resetMission(){this.mission=newHauntedRun();this.books=[];this.enteredBell=false;}
  woodPlatform(x:number,y:number,width:number){const p=this.platform(x,y,width,18,0x65564d);const b=p.body as Phaser.Physics.Arcade.StaticBody;b.checkCollision.down=false;b.checkCollision.left=false;b.checkCollision.right=false;return p;}
  buildWorld(){
+  const atlas=this.textures.get('haunted-ghosts'),cell=atlas.getSourceImage().width/2;
+  for(let i=0;i<4;i++){if(!atlas.has(String(i)))atlas.add(String(i),0,(i%2)*cell,Math.floor(i/2)*cell,cell,cell);}
   const g=this.add.graphics().setDepth(-20);g.fillStyle(0x10192b).fillRect(0,0,HAUNTED.width,HAUNTED.height);g.fillStyle(0xb4c9d1,.75).fillCircle(430,650,64);
   // Cemetery approach: scenery has no bodies; monument tops align with obstacles.
   g.fillStyle(0x142b29).fillRect(0,HAUNTED.ground-80,1200,80);
@@ -27,7 +29,7 @@ export class HauntedHouse extends FootAdventure{
   brickBuilding(this,1240,620,470,HAUNTED.ground,3);g.fillStyle(0x353344).fillTriangle(1200,620,1470,430,1750,620);this.text(1330,720,'OPEN HOUSE\nFOREVER',28,'#d4bce2').setAlign('center');
   this.add.rectangle(HAUNTED.doorX,HAUNTED.ground-70,90,140,0x192335).setStrokeStyle(4,0x929389);this.text(HAUNTED.doorX,HAUNTED.ground-179,'F / ACTION\nENTER MANSION',16,'#c7e8d7').setOrigin(.5).setAlign('center');
   this.entryGate=this.platform(1740,100,35,HAUNTED.ground-100,0x2b3140);
-  for(const [i,x] of [600,1000,1570].entries())this.hazard(i%2?'clown':'scruffy',x,HAUNTED.ground-35,90,3000,32,68).setTint(0x9eddea).setAlpha(.6);
+  for(const [i,x] of [600,1000,1570].entries())this.hazard('haunted-ghosts',x,HAUNTED.ground-35,90,3000,32,68).setFrame(String(i%3)).setDisplaySize(82,92).setAlpha(.6);
   // Repeat room-wall sections horizontally and by floor; wood posts hide image joins.
   for(const floor of [1250,930,610,290]){
    for(let x=1860;x<4300;x+=480){this.add.image(x,floor,'haunted-wall').setOrigin(0,1).setDisplaySize(480,320).setDepth(-16);this.add.rectangle(x,floor-160,10,320,0x342e36).setDepth(-14);}
@@ -36,12 +38,12 @@ export class HauntedHouse extends FootAdventure{
   for(const s of hauntedStairs){this.woodPlatform(s.x,s.y,s.width);g.lineStyle(3,0x928273,.7).lineBetween(s.x,s.y-45,s.x+s.width,s.y-45);g.lineBetween(s.x+12,s.y-45,s.x+12,s.y);}
   this.text(3290,840,'F / ACTION\nRING BELL · CHECKPOINT',14,'#cce8cb').setOrigin(.5).setAlign('center');this.add.circle(3300,910,10,0xc6b077).setDepth(3);
   const inside=[[2200,1250],[2830,930],[3540,930],[2850,610],[3650,610],[3740,290],[4700,530],[5300,850],[5900,1170]];
-  inside.forEach(([x,floor],i)=>this.hazard(i%3===0?'allison':i%2?'clown':'scruffy',x,floor-38,70,2800+i*70,28,68).setTint(0xaadce9).setAlpha(.15));
+  inside.forEach(([x,floor],i)=>this.hazard('haunted-ghosts',x,floor-38,70,2800+i*70,28,68).setFrame(String(i%3)).setDisplaySize(82,92).setAlpha(.15));
   for(const [x,floor] of [[2600,1250],[3430,930],[2860,610],[3850,290]]){const art=this.add.rectangle(x,floor-160,26,19,0x7d4964).setStrokeStyle(2,0xd1ba8d).setDepth(7);const warning=this.text(x,floor-140,'!',28,'#ffcf8b').setOrigin(.5).setVisible(false).setDepth(8);this.books.push({x,floor,art,warning,y:floor-160,vy:0,phase:'waiting',at:0});}
   this.keyArt=this.add.container(HAUNTED.keyX,HAUNTED.keyY-37,[this.add.circle(-9,0,10,0xd9c67b).setStrokeStyle(3,0xffe9a1),this.add.rectangle(12,0,26,6,0xf3dc8b),this.add.rectangle(22,6,5,12,0xf3dc8b)]).setDepth(8);this.keyLabel=this.text(HAUNTED.keyX,HAUNTED.keyY-102,'F / ACTION · ATTIC KEY',15,'#ffe3a3').setOrigin(.5);
   this.text(4460,275,'THE EAST STAIRS →\nKEEP GOING DOWN',18,'#c6e9d5').setAlign('center');
   this.add.rectangle(HAUNTED.exitX,HAUNTED.ground-70,100,140,0x27473f).setStrokeStyle(4,0xb4d4af);this.text(HAUNTED.exitX,HAUNTED.ground-180,'ESCAPE\nF / ACTION',24,'#c9ecca').setOrigin(.5).setAlign('center');
-  this.boss=this.add.image(3600,HAUNTED.keyY-60,'clown').setDisplaySize(115,150).setTint(0xf4b6e6).setAlpha(.55).setDepth(7).setVisible(false);
+  this.boss=this.add.image(3600,HAUNTED.keyY-60,'haunted-ghosts','3').setDisplaySize(150,150).setAlpha(.55).setDepth(7).setVisible(false);
  }
  afterPlayer(){this.carriedKey=this.add.container(0,0,[this.add.circle(-6,0,6,0xf0d587),this.add.rectangle(6,0,15,4,0xf0d587),this.add.rectangle(10,4,4,8,0xf0d587)]).setDepth(11).setVisible(false);}
  objectiveText(){return this.mission.complete?'ESCAPED · The house can keep the security deposit.':this.mission.key?`ATTIC KEY ✓ · Escape via east stairs → ${Math.ceil(escapeRemaining(this.mission,this.elapsedMs)/1000)}s · ${this.hits} scares`:this.mission.entered?`Explore four floors · Find the attic key · ${this.mission.checkpoint?'Bell checkpoint ✓':'Ring the landing bell for a checkpoint'}`:'Reach the mansion · F / Action at its front door · Ghosts glow before becoming solid';}

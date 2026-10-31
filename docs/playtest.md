@@ -18,5 +18,7 @@ Direct links work on GitHub Pages and the local development server. Add `?review
 | 7 | snow | Snow Day From Hell |
 | 8 | carnival | Carnival Catastrophe |
 | 9 | cabin | Cabin Fever |
+| 10 | grocery | Grocery Store Gauntlet |
+| 11 | soccer | Soccer Game Hijinx |
 
-`level=KEY` without `review=all` respects normal locks. Levels 10–13 are not implemented. The previous local-only `?level=cabin&review=cabin` shortcut still works on a local development server.
+`level=KEY` without `review=all` respects normal locks. Levels 12–13 are not implemented. The previous local-only `?level=cabin&review=cabin` shortcut still works on a local development server.

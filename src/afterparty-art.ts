@@ -9,9 +9,9 @@ export class AfterpartyArt{
  private frames=new Map<string,{crop:Crop;scale:number}[]>();
  constructor(private canvas:HTMLCanvasElement){this.ctx=canvas.getContext('2d')!;}
  async load(){
-  const files=['allison','clown','scruffy-pedestrian','soccer-star','concert-fans','cats','title-logo','venue-dj','dance-air-guitar','dance-moonwalk','dance-headspin','dance-shuffle','dance-standing'];
+  const files=['allison','clown','scruffy-pedestrian','soccer-star','concert-fans','cats','ghosts','title-logo','venue-dj','dance-air-guitar','dance-moonwalk','dance-headspin','dance-shuffle','dance-standing'];
   const results=await Promise.allSettled(files.map(async key=>{
-   const path=key==='title-logo'?'adventure-logo':key.startsWith('dance-')?`afterparty/seth-${key.slice(6)}-v1`:key.startsWith('venue-')?'afterparty/venue-band-v3':key;
+   const path=key==='ghosts'?'haunted/ghosts-v1':key==='title-logo'?'adventure-logo':key.startsWith('dance-')?`afterparty/seth-${key.slice(6)}-v1`:key.startsWith('venue-')?'afterparty/venue-band-v3':key;
    const img=new Image();img.src=new URL(`./assets/${path}.png`,document.baseURI).href;
    await img.decode();this.images.set(key,img);if(key.startsWith('dance-'))this.prepareFrames(key,img);
   }));
@@ -78,13 +78,13 @@ export class AfterpartyArt{
    ['soccer-star',undefined,850,167,25],['concert-fans',[180,9,525,979],985,175,25],
    ['concert-fans',[851,11,448,985],755,165,10]
   ];
-  // Familiar non-Allison ghost/zombie variants join the party; new ghost art follows separately.
-  people.push(['clown',undefined,380,145,-90],['scruffy-pedestrian',undefined,680,145,-90],['clown',undefined,440,140,-35],['scruffy-pedestrian',undefined,625,140,-35]);
+  // Original wraiths and zombie variants join the party; regular Allison is never a ghost.
+  people.push(['ghosts',[0,0,627,627],380,125,-90],['ghosts',[627,0,627,627],680,125,-90],['clown',undefined,440,140,-35],['scruffy-pedestrian',undefined,625,140,-35]);
   for(let i=0;i<people.length;i++){
    const [key,crop,base,h,offset]=people[i],s=reduced?0:Math.sin(t*3+i);
    const x=base+(base<550?-1:1)*depart*700+s*13;
-   const c=this.ctx;c.save();if(i===10||i===11){c.globalAlpha=.5;c.filter='grayscale(1) brightness(1.7)';}if(i===12||i===13)c.filter='sepia(1) hue-rotate(65deg)';
-   this.sprite(this.image(key,crop),x,y+offset-Math.abs(s)*5,h*.58,h,s*.035,i%2===1);c.restore();
+   const c=this.ctx;c.save();if(i===10||i===11)c.globalAlpha=.8;if(i===12||i===13)c.filter='sepia(1) hue-rotate(65deg)';
+   this.sprite(this.image(key,crop),x,y+offset-Math.abs(s)*5,key==='ghosts'?h:h*.58,h,s*.035,i%2===1);c.restore();
   }
   this.animal('goose',345-depart*700,y+24,t);this.animal('raccoon',715+depart*700,y+28,t);
  }

@@ -1,18 +1,18 @@
 # Seth Happens - A New Adventure
 
-**Version 0.10.1 · Early alpha**
+**Version 0.11.0 · Early alpha**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.10.1 Early alpha"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.11.0 Early alpha"></a>
 </p>
 
-**Play version 0.10.1** — Fullscreen highly recommended.
+**Play version 0.11.0** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
-One very ordinary guy. Nine increasingly unreasonable adventures.
+One very ordinary guy. Eleven increasingly unreasonable adventures.
 
 Run, jump, dodge and ride through a city full of familiar faces and questionable decisions. Pick up dinner, survive a scooter ride with Allison, photograph a concert, escape a haunted house, and find out just how badly a Wisconsin snow day can go.
 
@@ -39,11 +39,11 @@ Run, jump, dodge and ride through a city full of familiar faces and questionable
 | 7 | Snow Day From Hell | Cross icy streets and dodge snowplows to reach warmth. |
 | 8 | Carnival Catastrophe | Search for Allison across moving rides and a chaotic midway. |
 | 9 | Cabin Fever | Cross the lake, collect the beer and bring it back to the cabin. |
-| 10 | Grocery Store Gauntlet | **COMING SOON!** Dodge runaway carts, collect three shopping-list items and make it through checkout. |
-| 11 | Soccer Game Hijinx | **COMING SOON!** Navigate the stadium, reach the sidelines and photograph the players, tunnel entrance and two big goals. |
+| 10 | Grocery Store Gauntlet | Dodge runaway carts, collect three shopping-list items and make it through checkout. |
+| 11 | Soccer Game Hijinx | Navigate the stadium, reach the sidelines and photograph the players, tunnel entrance and two big goals. |
 | 12 | Last Call | **COMING SOON!** Cross a packed bar, dodge rolling kegs and slippery spills, and reach the exit before closing time. |
 
-Levels 1–9 are playable now; Levels 10–12 are coming soon. Complete each available level to unlock the next. Once unlocked, replay any adventure from **Choose Level** in the desktop controls or mobile game menu.
+Levels 1–11 are playable now; Level 12 is coming soon. Complete each available level to unlock the next. Once unlocked, replay any adventure from **Choose Level** in the desktop controls or mobile game menu.
 
 ## Playtest and jukebox
 

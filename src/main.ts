@@ -1,3 +1,5 @@
+import {GroceryGauntlet} from './grocery-scene';
+import {SoccerHijinx} from './soccer-scene';
 import {startupLoader} from './startup';
 import {standaloneLaunch,readMobileSetup,saveMobileSetup,mobileStartup} from './mobile-setup.mjs';
 import {CabinFever} from './cabin-scene';
@@ -766,13 +768,13 @@ class Errand extends Phaser.Scene {
   }
 }
 const requestedLevel=new URLSearchParams(location.search).get('level');
-const levelDefinitions=[{key:'rooftop',title:'Rooftop Beer Run',scene:Errand},{key:'thai',title:'Thai Takeout Run',scene:ThaiTakeout},{key:'scooter',title:'Scooter Ride',scene:ScooterRide},{key:'concert',title:'Concert Chaos',scene:ConcertChaos},{key:'haunted',title:'Haunted House',scene:HauntedHouse},{key:'zombie',title:'Zombie Apocalypse',scene:ZombieApocalypse},{key:'snow',title:'Snow Day From Hell',scene:SnowDay},{key:'carnival',title:'Carnival Catastrophe',scene:CarnivalCatastrophe},{key:'cabin',title:'Cabin Fever',scene:CabinFever}];
-type LevelKey='rooftop'|'thai'|'scooter'|'concert'|'haunted'|'zombie'|'snow'|'carnival'|'cabin';
+const levelDefinitions=[{key:'rooftop',title:'Rooftop Beer Run',scene:Errand},{key:'thai',title:'Thai Takeout Run',scene:ThaiTakeout},{key:'scooter',title:'Scooter Ride',scene:ScooterRide},{key:'concert',title:'Concert Chaos',scene:ConcertChaos},{key:'haunted',title:'Haunted House',scene:HauntedHouse},{key:'zombie',title:'Zombie Apocalypse',scene:ZombieApocalypse},{key:'snow',title:'Snow Day From Hell',scene:SnowDay},{key:'carnival',title:'Carnival Catastrophe',scene:CarnivalCatastrophe},{key:'cabin',title:'Cabin Fever',scene:CabinFever},{key:'grocery',title:'Grocery Store Gauntlet',scene:GroceryGauntlet},{key:'soccer',title:'Soccer Game Hijinx',scene:SoccerHijinx}];
+type LevelKey='rooftop'|'thai'|'scooter'|'concert'|'haunted'|'zombie'|'snow'|'carnival'|'cabin'|'grocery'|'soccer';
 const scenes=levelDefinitions.map(level=>level.scene);
 const first=levelDefinitions.find(level=>level.key===requestedLevel&&canPlayLevel(level.key))?.scene??Errand;
 const initialScenes=[first,...scenes.filter(scene=>scene!==first)];
 const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W*RENDER_SCALE,height:H*RENDER_SCALE,physics:{default:'arcade',arcade:{gravity:{x:0,y:1050},debug:false}},scene:initialScenes,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true}});
-function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout|ScooterRide|ConcertChaos|HauntedHouse|ZombieApocalypse|SnowDay|CarnivalCatastrophe|CabinFever;}
+function activeScene(){return game.scene.getScenes(true)[0] as Errand|ThaiTakeout|ScooterRide|ConcertChaos|HauntedHouse|ZombieApocalypse|SnowDay|CarnivalCatastrophe|CabinFever|GroceryGauntlet|SoccerHijinx;}
 
 const soundToggle=document.getElementById('sound-toggle');
 soundToggle?.addEventListener('click',()=>{void gameAudio.unlock();gameAudio.toggle();(soundToggle as HTMLButtonElement).blur();});
@@ -978,7 +980,7 @@ function refreshLevelLocks(){
  for(const [index,level] of levelDefinitions.entries()){
   const button=document.querySelector<HTMLButtonElement>(`[data-start-level="${level.key}"]`)!;
   button.disabled=!canPlayLevel(level.key);
-  if(index>0)button.querySelector('span')!.textContent=button.disabled?`Locked · Complete Level ${index} to unlock`:level.key==='thai'?'Collect dinner, dodge traffic, bring it home hot':level.key==='scooter'?'Ride with Allison · Big ramps, bigger regrets':level.key==='concert'?'Climb for credentials · Get to the photo pit':level.key==='haunted'?'Haunted rooms, four floors and an attic escape':level.key==='zombie'?'Survive the neighborhood · Find the truck':level.key==='snow'?'Ice, snowplows and a Wisconsin blizzard':level.key==='carnival'?'Moving rides, runaway bumper cars and finding Allison':'Cross the lake · Collect the beer · Bring it back';
+  if(index>0)button.querySelector('span')!.textContent=button.disabled?`Locked · Complete Level ${index} to unlock`:level.key==='thai'?'Collect dinner, dodge traffic, bring it home hot':level.key==='scooter'?'Ride with Allison · Big ramps, bigger regrets':level.key==='concert'?'Climb for credentials · Get to the photo pit':level.key==='haunted'?'Haunted rooms, four floors and an attic escape':level.key==='zombie'?'Survive the neighborhood · Find the truck':level.key==='snow'?'Ice, snowplows and a Wisconsin blizzard':level.key==='carnival'?'Moving rides, runaway bumper cars and finding Allison':level.key==='grocery'?'Milk, bread, eggs · Checkout · Exit':level.key==='soccer'?'Locker room · Tunnel · Two big goals':'Cross the lake · Collect the beer · Bring it back';
  }
  const count=levelDefinitions.filter(level=>canPlayLevel(level.key)).length;
  document.getElementById('level-progress')!.textContent=reviewLevel?'Local review: Cabin Fever is available directly. Completion flags are not saved.':`${count} of ${levelDefinitions.length} levels unlocked. Complete each level to unlock the next; replay unlocked levels anytime.`+(count>1&&!levelProgress.persistent?' Browser progress could not be saved; unlocks last this session.':' Progress is saved in this browser.');
@@ -1022,8 +1024,8 @@ for(const type of ['keydown','keyup'])levelDialog.addEventListener(type,event=>e
 window.addEventListener('blur',clearPlayPointers);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearPlayPointers();});
 
-// Check on launch and when returning to the app. Confirmed updates reload even
-// during a run, as requested; failed/offline checks leave the page intact.
+// Check on launch and return. Confirmed updates wait for a safe menu/run end;
+// score entry and the jukebox stay open until the player closes them.
 const updateToggle=document.getElementById('auto-update') as HTMLInputElement;
 const updateStatus=document.getElementById('update-status')!;
 const updateButton=document.getElementById('check-updates') as HTMLButtonElement;
@@ -1032,7 +1034,7 @@ let updateChecking=false,lastUpdateCheck=0,pendingUpdate:string|undefined,update
 function applyPendingUpdate(){
  if(!pendingUpdate||updateNavigating)return;
  const scene=activeScene();
- if(!safeUpdatePoint({intro:scene?.introActive,ended:scene?.won||scene?.failed,menu:touchMenu.open||levelDialog.open,party:!!document.querySelector('#afterparty[open]')}))return;
+ if(!safeUpdatePoint({intro:scene?.introActive,ended:scene?.won||scene?.failed,menu:touchMenu.open||levelDialog.open,party:!!document.querySelector('#afterparty[open]')||scoresOpen()}))return;
  updateNavigating=true;
  window.dispatchEvent(new CustomEvent('game-startup',{detail:{state:'updating'}}));
  const url=pendingUpdate;setTimeout(()=>location.replace(url),150);
