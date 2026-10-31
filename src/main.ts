@@ -1,3 +1,4 @@
+import {standaloneLaunch,readMobileSetup,saveMobileSetup,mobileStartup} from './mobile-setup.mjs';
 import {CabinFever} from './cabin-scene';
 import {localReviewLevel,canEnterLevel} from './review-entry.mjs';
 import {modalNavigation} from './modal-navigation.mjs';
@@ -38,7 +39,13 @@ let progressStorage:Storage|null=null;try{progressStorage=localStorage;}catch{/*
 const reviewLevel=localReviewLevel({dev:import.meta.env.DEV,hostname:location.hostname,search:location.search});
 const levelProgress=createLevelProgress(reviewLevel?null:progressStorage);
 const canPlayLevel=(level:string)=>canEnterLevel(level,levelProgress.canPlay,reviewLevel);
-if(reviewLevel){const note=document.createElement('p');note.id='local-review-notice';note.className='note';note.textContent='LOCAL REVIEW · Cabin Fever is available without unlocks. Level completions are not saved in this review session.';document.querySelector('header')!.after(note);}
+if(reviewLevel){const note=document.createElement('p');note.id='local-review-notice';note.className='note';note.textContent=`PLAYTEST MODE · ${reviewLevel==='all'?'All implemented levels':'Cabin Fever'} available. Completions and scores are not saved. Exit with the link below.`;document.querySelector('header')!.after(note);}
+document.body.dataset.review=reviewLevel?'true':'false';
+const reviewButton=document.createElement('button');reviewButton.textContent=reviewLevel?'Exit playtest mode':'Playtest any level';
+reviewButton.onclick=()=>{location.href=reviewLevel?'./':'?review=all&level=rooftop';};
+document.querySelector('.sound-row')!.append(reviewButton);
+const reviewMenuButton=reviewButton.cloneNode(true) as HTMLButtonElement;reviewMenuButton.onclick=reviewButton.onclick;document.getElementById('touch-menu')!.append(reviewMenuButton);
+if(reviewLevel){const exit=document.createElement('a');exit.href='./';exit.textContent='Exit playtest mode';document.getElementById('local-review-notice')!.append(' ',exit);}
 gameAudio.music.configureLevels(level=>canPlayLevel(level));
 // Render at display density, retaining the same logical play area and physics.
 const RENDER_SCALE = Math.min(3, Math.max(1, Math.ceil(
@@ -563,7 +570,7 @@ class Errand extends Phaser.Scene {
     if(this.runVersion!==version||this.failed)return;
     this.rideTween.stop();(this.player.body as Phaser.Physics.Arcade.Body).reset(EGG.elevatorX,home.y-24);
     this.hero.setPosition(this.player.x,this.player.y);this.eggLift.setVisible(false);
-    this.floor=26;this.onRoad=false;this.riding=false;this.heroHeard=true;this.heroPlaying=false;
+    this.floor=26;this.onRoad=false;this.riding=false;this.heroHeard=this.beer;this.heroPlaying=false;
     this.checkpoint={x:home.x+50,y:home.y-24};this.immuneUntil=this.time.now+1500;
     this.finish();
   }
@@ -682,7 +689,7 @@ class Errand extends Phaser.Scene {
       if(this.riding)return;
       const stop=photoStops.findIndex(s=>Math.abs(this.player.x-s.x)<100&&Math.abs(this.player.y-s.y)<90);
       const home=this.floor===26;
-      if(home&&!this.heroHeard){
+      if(home&&this.beer&&!this.heroHeard){
         this.heroHeard=true;this.heroPlaying=true;const run=this.runVersion;
         this.say('Allison: “My hero!”');
         void gameAudio.playHero().then(()=>{if(this.runVersion===run)this.heroPlaying=false;});
@@ -693,11 +700,12 @@ class Errand extends Phaser.Scene {
       if(stop>=0)this.prompt.setText(this.photos.has(stop)?'✓ Photo saved. Upward, photographer.':this.heroHeard?'[ F ] RECOVER PHOTO • +125 points (half value)':'[ F ] PHOTO OPPORTUNITY • +250 points');
       if(beerNearby)this.prompt.setText(beerInReach?'[ Action ] Pick up the six-pack':`GET THE BEER ${this.player.x<beerSpot.x?'→':'←'} Move closer, then press Action`);
       if(Phaser.Input.Keyboard.JustDown(this.keys.F)||controller.interact){
-        if(beerInReach){this.beer=true;gameAudio.play('pickup');this.crate.setVisible(false);this.beerHint.setVisible(false);this.prompt.setVisible(false);this.say('SIX-PACK IN HAND. Only fourteen floors of foam management left.');}
+        if(home&&!this.beer)this.warnMissingBeer();
+        else if(beerInReach){this.beer=true;gameAudio.play('pickup');this.crate.setVisible(false);this.beerHint.setVisible(false);this.prompt.setVisible(false);this.say('SIX-PACK IN HAND. Only fourteen floors of foam management left.');}
         else if(stop>=0&&!this.photos.has(stop)){this.photos.add(stop);if(this.heroHeard)this.latePhotos.add(stop);gameAudio.play('photo');this.cameras.main.flash(140,255,255,255);this.say(`PHOTO SAVED • +${this.latePhotos.has(stop)?125:250} points • ${photoStops[stop].caption}`);}
         else if(home&&!this.heroPlaying)this.finish();
       }
-      for(const i of missedPhotos(this.player.x,this.photos))if(!this.warned.has(i)){
+      for(const i of (home&&!this.beer?[]:missedPhotos(this.player.x,this.photos)))if(!this.warned.has(i)){
         this.warned.add(i);gameAudio.play('miss');this.say(`MISSED PHOTO: ${photoStops[i].short.toUpperCase()}!`);this.flashReminder(touch.enabled?'Missing photo: Menu → Recall missed photo':'Missing photo: press B to recall');
       }
     }
@@ -715,16 +723,24 @@ class Errand extends Phaser.Scene {
     this.updateHud();
     const indicator=photoIndicator(this.player.x,this.photos),hasMissed=missedPhotos(this.player.x,this.photos).length>0;
     this.photoHud.setText(indicator).setColor(hasMissed?'#ffac8c':'#80e5ce');
-    const reminder=this.summitReminder.update(this.elapsedMs,{home:this.floor===26,ready:!this.heroPlaying,finished:this.won||this.failed,beer:this.beer,missed:hasMissed,mobile:touch.enabled});
+    if(this.floor===26&&!this.beer){this.warnMissingBeer();}
+    else this.reminder.setColor("#ffd08b").setFontSize(22);
+    const reminder=this.beer?this.summitReminder.update(this.elapsedMs,{home:this.floor===26,ready:!this.heroPlaying,finished:this.won||this.failed,beer:this.beer,missed:hasMissed,mobile:touch.enabled}):null;
     if(reminder)this.flashReminder(reminder);
     const age=this.elapsedMs-this.reminderAt;
-    this.reminder.setVisible(!this.won&&!this.failed&&age<REMINDER_MS).setAlpha(Math.floor(age/450)%2===0?1:.4);
+    this.reminder.setVisible(!this.won&&!this.failed&&(this.floor===26&&!this.beer||age<REMINDER_MS)).setAlpha(Math.floor(age/450)%2===0?1:.4);
     const status=document.getElementById('live-status');
     const summary=`${this.hud.text}. ${indicator}. ${this.toast.text} ${this.reminder.visible?this.reminder.text:''}${this.won?' Mission complete.':''}`;
     if(status){status.dataset.paused='false';const drop=this.hazards.find(h=>isFalling(h.kind)&&h.floor===this.floor);status.dataset.dropPhase=drop?.piano?.dropping?'dropping':drop?.piano?.landed?'landed':drop?.piano?.warning?'warning':'idle';status.dataset.heroFlipped=String(this.portrait.flipX);status.dataset.heroAnimation=this.portrait.anims.currentAnim?.key??'idle';status.dataset.heroAnimationRate=String(this.portrait.anims.timeScale);status.dataset.heroFilter='nearest';status.dataset.heroTexture=this.portrait.texture.key;status.dataset.timerBeeps=String(this.lastTimerBeep);status.dataset.megaJump=String(this.megaUsed);status.dataset.floor=String(this.floor);status.dataset.elapsed=String(Math.round(this.elapsedMs));status.dataset.eggStage=String(this.eggStage);status.dataset.riding=String(this.riding);status.dataset.failed=String(this.failed);status.dataset.failurePhase=this.failurePhase;status.dataset.score=String(finalScore(this.beer,this.photos,this.mishaps,this.latePhotos,this.elapsedMs,this.cheater));status.dataset.falls=String(this.mishaps.falls);status.dataset.squishes=String(this.mishaps.squishes);status.dataset.bumps=String(this.mishaps.bumps);status.dataset.won=String(this.won);status.dataset.intro='false';status.dataset.heroPlaying=String(this.heroPlaying);status.dataset.fallSound=String(this.fallSoundPlayed);if(status.textContent!==summary)status.textContent=summary;status.dataset.x=String(Math.round(this.player.x));status.dataset.y=String(Math.round(this.player.y));status.dataset.grounded=String(body.blocked.down);status.dataset.walkFrame=String(this.portrait.frame.name);status.dataset.walkFrames=[...this.visitedWalkFrames].sort().join(',');status.dataset.carrying=String(this.beer);status.dataset.sound=gameAudio.state;status.dataset.muted=String(gameAudio.muted);status.dataset.lastCue=gameAudio.lastCue;status.dataset.voiceLine=gameAudio.lastSpoken;status.dataset.voiceStatus=gameAudio.voiceStatus;status.dataset.voiceName=gameAudio.voiceName;status.dataset.loadedVoices=String(gameAudio.loadedVoiceCount);status.dataset.playedVoices=[...gameAudio.playedKinds].sort().join(',');status.dataset.locationCue=gameAudio.lastLocation;status.dataset.heardLocations=[...this.heardLocations].sort().join(',');const nearbyPiano=this.hazards.find(h=>h.kind==='piano'&&h.floor===this.floor);status.dataset.pianoDrops=String(nearbyPiano?.piano?.serial??0);status.dataset.pianoVisible=String(nearbyPiano?.art.visible??false);}
     }finally{this.refreshControlCopy();}
   }
+  warnMissingBeer(){
+    if(this.reminder.text!=="You forgot the beer! Allison is very disappointed in you, go back."||this.elapsedMs-this.reminderAt>5000)this.flashReminder("You forgot the beer! Allison is very disappointed in you, go back.");
+    this.reminder.setColor("#ff3030").setFontSize(32).setWordWrapWidth(950);
+  }
   finish(){
+    if(!this.beer){this.warnMissingBeer();if(!this.paused&&!this.introActive)this.physics.world.resume();return;}
+    if(this.won)return;
     levelProgress.completeRooftop();refreshLevelLocks();
     const next=document.getElementById('next-level')!;next.hidden=false;next.dataset.nextLevel='thai';next.textContent='Continue to Level 2 · Thai Takeout Run →';
     gameAudio.music.finishRun(this.cheater?'cheater':'success');
@@ -800,6 +816,7 @@ if(!document.fullscreenEnabled){
 
 document.getElementById('fullscreen-exit')!.addEventListener('click',()=>{void toggleFullscreen();});
 
+const homeScreenLaunch=standaloneLaunch(window);
 const touchToggle=document.getElementById('touch-toggle')!;
 const touchOffer=document.getElementById('touch-offer') as HTMLDialogElement;
 function setTouch(enabled:boolean){
@@ -807,7 +824,7 @@ function setTouch(enabled:boolean){
   document.getElementById('touch-controls')!.hidden=!enabled;
   gameElement.classList.toggle('touch-mode',enabled);
   touchViewport.sync();
-  activeScene()?.refreshControlCopy();
+  const scene=activeScene();if(scene?.sys?.isActive())scene.refreshControlCopy();
   const radio=document.getElementById('radio')!;
   if(enabled)document.getElementById('touch-radio-slot')!.append(radio);else gameElement.insertBefore(radio,document.getElementById('game'));
   if(!enabled){modalNavigation.reset();(document.getElementById('touch-menu') as HTMLDialogElement).close();}
@@ -815,11 +832,11 @@ function setTouch(enabled:boolean){
   touchToggle.setAttribute('aria-pressed',String(enabled));
   requestAnimationFrame(()=>game.scale.refresh());
 }
-touchToggle.addEventListener('click',()=>{setTouch(!touch.enabled);touchToggle.blur();});
-document.getElementById('touch-accept')!.addEventListener('click',()=>{touchOffer.close();setTouch(true);void toggleFullscreen();});
-document.getElementById('touch-decline')!.addEventListener('click',()=>touchOffer.close());
+touchToggle.addEventListener('click',()=>{setTouch(!touch.enabled);saveMobileSetup(progressStorage,touch.enabled?'touch':'keyboard');touchToggle.blur();});
+document.getElementById('touch-accept')!.addEventListener('click',()=>{touchOffer.close();setTouch(true);saveMobileSetup(progressStorage,'touch');if(homeScreenLaunch)gameElement.classList.add('expanded');});
+document.getElementById('touch-decline')!.addEventListener('click',()=>{touchOffer.close();setTouch(false);saveMobileSetup(progressStorage,'keyboard');});
 document.getElementById('touch-view')!.addEventListener('click',()=>{closeTouchMenu();void toggleFullscreen();});
-if(navigator.maxTouchPoints>0||matchMedia('(pointer: coarse)').matches)touchOffer.showModal();
+
 window.addEventListener('resize',()=>{clearPlayPointers();requestAnimationFrame(()=>game.scale.refresh());});
 
 document.querySelectorAll<HTMLButtonElement>('[data-proxy]').forEach(button=>{
@@ -830,6 +847,29 @@ document.querySelectorAll<HTMLButtonElement>('[data-proxy]').forEach(button=>{
 });
 
 const touchMenu=document.getElementById('touch-menu') as HTMLDialogElement;
+let afterparty:ReturnType<typeof import('./afterparty').createAfterparty>|undefined;
+let partyScene:ReturnType<typeof activeScene>|undefined;
+async function openCredits(){
+ if(afterparty?.isOpen)return;
+ const scene=activeScene();if(!scene||scene.introActive&&scene.introStarted)return;
+ touch.clear();touchMenu.close();
+ if(!scene.introActive&&!scene.paused&&!scene.won&&!scene.failed)scene.togglePause();
+ partyScene=scene;scene.scene.pause();gameAudio.music.setHold('afterparty',true);void gameAudio.setPaused(true);
+ try{
+  const {createAfterparty}=await import('./afterparty');
+  afterparty??=createAfterparty(()=>{
+   const previous=partyScene;partyScene=undefined;
+   // Scene resume is queued by Phaser; restore the menu after it becomes active.
+   previous?.events.once(Phaser.Scenes.Events.RESUME,()=>{if(previous.paused)openTouchMenu();});
+   previous?.scene.resume();
+   gameAudio.music.setHold('afterparty',false);
+   if(previous&&!previous.paused)void gameAudio.setPaused(false);
+  },canPlayLevel);
+  afterparty.open();
+ }catch{scene.scene.resume();gameAudio.music.setHold('afterparty',false);if(!scene.paused)void gameAudio.setPaused(false);openTouchMenu();}
+}
+for(const parent of [document.querySelector('.sound-row')!,touchMenu]){const b=document.createElement('button');b.textContent='Credits/Jukebox';b.onclick=()=>void openCredits();parent.append(b);}
+
 function closeTouchMenu(resume=true){
   touchMenu.close();touch.clear();
   const scene=activeScene();
@@ -898,7 +938,7 @@ document.getElementById('touch-customize')!.addEventListener('click',()=>openCon
 document.querySelectorAll<HTMLInputElement>('input[name=movement-style]').forEach(radio=>radio.addEventListener('change',()=>{if(radio.checked){styleSelect.value=radio.value;previewControls();}}));
 spacingInput.addEventListener('input',previewControls);styleSelect.addEventListener('change',previewControls);
 document.getElementById('controls-reset')!.addEventListener('click',()=>{styleSelect.value='default';spacingInput.value='3';quickSprintInput.checked=false;previewControls();});
-document.getElementById('controls-save')!.addEventListener('click',()=>{controlStyle=styleSelect.value;controlSpacing=Number(spacingInput.value);controlQuickSprint=quickSprintInput.checked;applyControls();try{localStorage.setItem('seth-new-adventure-touch-controls',JSON.stringify({style:controlStyle,spacing:controlSpacing,quickSprint:controlQuickSprint}));}catch{/* Session controls still work. */}controlSettings.close();if(customizeFromOffer){setTouch(true);void toggleFullscreen();}});
+document.getElementById('controls-save')!.addEventListener('click',()=>{controlStyle=styleSelect.value;controlSpacing=Number(spacingInput.value);controlQuickSprint=quickSprintInput.checked;applyControls();try{localStorage.setItem('seth-new-adventure-touch-controls',JSON.stringify({style:controlStyle,spacing:controlSpacing,quickSprint:controlQuickSprint}));}catch{/* Session controls still work. */}controlSettings.close();if(customizeFromOffer){setTouch(true);saveMobileSetup(progressStorage,'touch');if(homeScreenLaunch)gameElement.classList.add('expanded');}});
 controlSettings.addEventListener('cancel',()=>{if(customizeFromOffer)requestAnimationFrame(()=>touchOffer.showModal());});
 controlSettings.addEventListener('close',()=>modalNavigation.restore(controlSettings));
 const installHelp=document.getElementById('install-help') as HTMLDialogElement;
@@ -908,6 +948,12 @@ document.getElementById('install-close')!.addEventListener('click',()=>installHe
 for(const dialog of [controlSettings,installHelp,touchOffer])for(const type of ['keydown','keyup'])dialog.addEventListener(type,event=>event.stopPropagation());
 document.getElementById('start-game')!.addEventListener('click',()=>{gameAudio.unlock();void activeScene()?.startIntro();});
 applyControls();
+const rememberedSetup=readMobileSetup(progressStorage);
+const startup=mobileStartup({touchCapable:navigator.maxTouchPoints>0||matchMedia('(pointer: coarse)').matches,setup:rememberedSetup});
+if(rememberedSetup?.legacy)saveMobileSetup(progressStorage,'touch');
+setTouch(startup.touchEnabled);
+if(homeScreenLaunch){touchOffer.querySelector('h2')!.textContent='Choose your controls';document.getElementById('touch-offer-install-advice')!.hidden=true;document.getElementById('touch-offer-context')!.textContent='Your choice is remembered. You can change it from the menu.';if(startup.touchEnabled)gameElement.classList.add('expanded');}
+if(startup.showOffer)touchOffer.showModal();
 
 // Follow the fitted canvas, rather than the radio + game wrapper or letterbox.
 function positionStartGame(){

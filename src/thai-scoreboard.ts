@@ -6,6 +6,7 @@ let pending:(TakeoutResult&{id:string;date:string})|null=null;
 let returnFocus:HTMLElement|null=null;
 export function resetTakeoutScores(){pending=null;if(dialog.open)dialog.close();}
 export function openTakeoutScores(result?:TakeoutResult){
+ if(document.body.dataset.review==='true')return;
   returnFocus=document.activeElement as HTMLElement;
   if(result)pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};
   dialog.innerHTML='<div class="score-heading"><span class="score-eyebrow">LEVEL 2 · THAI TAKEOUT RUN</span><h2 id="thai-scores-title">TAKEOUT RECORDS</h2></div><p>Saved only in this browser. Separate from rooftop scores.</p><form id="thai-entry"><label>Name or initials <input name="player" required maxlength="16" autocomplete="off"></label><button>Save takeout score</button></form><p role="status"></p><div class="score-list"></div><div class="score-actions"><button id="thai-close">Close</button></div>';

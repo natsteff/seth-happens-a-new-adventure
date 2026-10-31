@@ -1,14 +1,14 @@
 # Seth Happens - A New Adventure
 
-**Version 0.9.3 · Early alpha**
+**Version 0.10.0 · Early alpha**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.9.3 Early alpha"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.10.0 Early alpha"></a>
 </p>
 
-**Play version 0.9.3** — Fullscreen highly recommended.
+**Play version 0.10.0** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
@@ -44,6 +44,12 @@ Run, jump, dodge and ride through a city full of familiar faces and questionable
 | 12 | Last Call | **COMING SOON!** Cross a packed bar, dodge rolling kegs and slippery spills, and reach the exit before closing time. |
 
 Levels 1–9 are playable now; Levels 10–12 are coming soon. Complete each available level to unlock the next. Once unlocked, replay any adventure from **Choose Level** in the desktop controls or mobile game menu.
+
+## Playtest and jukebox
+
+Use **Playtest any level** to review any implemented adventure without unlocking it; playtest completions and scores are not saved. [Open playtest mode](https://natsteff.github.io/seth-happens-a-new-adventure/?review=all&level=rooftop) · [Direct-level links and keys](docs/playtest.md).
+
+Open **Credits/Jukebox** from the controls or mobile menu for the afterparty and music player. Your unlocked tracks are available, plus the default **Eye of the Stairwell (Leads Take Me Away!)**. Your run stays paused until you resume.
 
 ## Controls
 

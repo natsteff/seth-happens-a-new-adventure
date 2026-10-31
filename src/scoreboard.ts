@@ -133,7 +133,8 @@ async function openScores(){
   render();
   if(!dialog.open)dialog.showModal();
 }
-export function offerScore(result:Result){notice='';nameDraft='';pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};openScores();}
+export function offerScore(result:Result){
+ if(document.body.dataset.review==='true')return;notice='';nameDraft='';pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};openScores();}
 export function resetScoreEntry(){nameDraft='';pending=null;if(dialog.open)dialog.close();}
 document.getElementById('high-scores')!.addEventListener('click',openScores);
 dialog.addEventListener('close',()=>returnFocus?.focus());

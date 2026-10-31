@@ -4,6 +4,7 @@ const dialog=document.createElement('dialog');dialog.id='adventure-scores';dialo
 let pending:(Result&{id:string;date:string})|null=null,currentLevel='';
 export function resetAdventureScores(){pending=null;currentLevel='';if(dialog.open)dialog.close();}
 export function openAdventureScores(level:string,title:string,result?:Result){
+ if(document.body.dataset.review==='true')return;
  if(currentLevel!==level)pending=null;currentLevel=level;if(result)pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};
  dialog.innerHTML='<div class="score-heading"><h2 id="adventure-record-title"></h2></div><p>Saved only in this browser. Each adventure has separate records.</p><form><label>Name or initials <input name="player" required maxlength="16" autocomplete="off"></label><button>Save score</button></form><p role="status"></p><div class="score-list"></div><div class="score-actions"><button id="adventure-close">Close</button></div>';
  dialog.setAttribute('aria-labelledby','adventure-record-title');dialog.querySelector('h2')!.textContent=title+' · Records';const form=dialog.querySelector('form')!;form.hidden=!pending;

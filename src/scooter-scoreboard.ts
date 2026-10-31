@@ -6,6 +6,7 @@ let pending:(ScooterResult&{id:string;date:string})|null=null;
 let returnFocus:HTMLElement|null=null;
 export function resetScooterScores(){pending=null;if(dialog.open)dialog.close();}
 export function openScooterScores(result?:ScooterResult){
+ if(document.body.dataset.review==='true')return;
   returnFocus=document.activeElement as HTMLElement;
   if(result)pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};
   dialog.innerHTML='<div class="score-heading"><span class="score-eyebrow">LEVEL 3 · SCOOTER RIDE</span><h2 id="scooter-scores-title">SCOOTER RECORDS</h2></div><p>Saved only in this browser. Separate from rooftop and takeout scores.</p><form id="scooter-entry"><label>Name or initials <input name="player" required maxlength="16" autocomplete="off"></label><button>Save scooter score</button></form><p role="status"></p><div class="score-list"></div><div class="score-actions"><button id="scooter-close">Close</button></div>';

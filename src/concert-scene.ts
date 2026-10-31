@@ -25,7 +25,7 @@ export class ConcertChaos extends FootAdventure{
    this.platform(s.x,s.y,s.width,s.height,i<10?0x69747b:0x66617b);g.lineStyle(3,0xb6a78a,.65).lineBetween(s.x,s.y-55,s.x+s.width,s.y-55);g.lineBetween(s.x+15,s.y-55,s.x+15,s.y);
    if(i<9&&i%2===1)this.hazard(i%3?'scruffy':'clown',s.x+100,s.y-33,48,3000-i*95,27,62);
    if(i>10&&i%2===0)this.hazard('concert-fans',s.x+100,s.y-32,55,1600,32,62);
-   if(i%4===2){this.add.ellipse(s.x+140,s.y-5,48,10,0xd0a549,.9).setDepth(2);this.hazard('concert-fans',s.x+135,s.y-11,40,2200,30,20).setTint(0xcba572).setDisplaySize(30,20);}
+   if(i%4===2){this.hazard('concert-fans',s.x+135,s.y-11,40,2200,30,20).setTint(0xcba572).setDisplaySize(30,20);}
   }
   this.text(1590,820,'PRESS CHECK-IN ↑\nYES, ALL THE WAY UP',19,'#ffe0a2').setAlign('center');
   this.gate=this.platform(3280,200,28,CONCERT.ground-200,0x536077);this.text(3294,535,'PASS\nREQUIRED',16,'#ffda9d').setOrigin(.5).setAlign('center');
@@ -35,7 +35,7 @@ export class ConcertChaos extends FootAdventure{
   this.text(CONCERT.deskX-45,CONCERT.deskY-100,'PRESS DESK\nF / ACTION',14,'#ffe0a2').setAlign('center');
   this.text(3650,285,'CREDENTIALS SECURED?\nDOWN TO THE PIT →',18,'#abe9d1');
   this.stage=this.add.image(6550,CONCERT.ground,'concert-stage').setOrigin(.5,1).setDisplaySize(1500,1000).setDepth(-12);
-  for(const [i,x] of [5100,5400,5720,6050,6350].entries()){this.hazard(i%2?'concert-fans':'clown',x,CONCERT.ground-34,70,i%2?1500:2100,42,66);this.add.ellipse(x+90,CONCERT.ground-4,70,10,0xc8a66a,.8).setDepth(2);}
+  for(const [i,x] of [5100,5400,5720,6050,6350].entries()){this.hazard(i%2?'concert-fans':'clown',x,CONCERT.ground-34,70,i%2?1500:2100,42,66);}
   const surfer=this.hazard('concert-fans',5910,CONCERT.ground-145,150,1700,78,34).setAngle(-83).setDisplaySize(80,45);surfer.setTint(0xf1c0d1);
   this.platform(6520,CONCERT.ground-58,35,58,0x77828e);this.text(6600,CONCERT.ground-150,'PHOTO PIT →\nF / ACTION',21,'#c1f1dc');
  }
@@ -56,7 +56,7 @@ export class ConcertChaos extends FootAdventure{
   this.photoBar=this.add.rectangle(330,560,0,7,0xf0c37a).setOrigin(0,.5);this.photoUi.add(this.photoBar);this.photoUi.add(this.text(550,520,'F / Action · Take the highlighted shot when READY',17,'#ffe2a1').setOrigin(.5));this.toast.setDepth(50);this.say('Three shots. One button. Please keep your head down, front row.');
  }
  tick(delta:number,action:boolean){
-  if(this.traffic){const t=this.traffic,b=t.body.body as Phaser.Physics.Arcade.Body,r=t.roof.body as Phaser.Physics.Arcade.Body;if(t.body.x<430||t.body.x>930){t.direction*=-1;r.reset(t.body.x-t.direction*9,CONCERT.ground-59.5);}b.setVelocityX(t.direction*125);r.setVelocityX(t.direction*125);t.art.setPosition(t.body.x,CONCERT.ground).setFlipX(t.direction>0);}
+  if(this.traffic){const t=this.traffic,b=t.body.body as Phaser.Physics.Arcade.Body,r=t.roof.body as Phaser.Physics.Arcade.Body;if(t.body.x<430){t.direction=1;b.reset(430,CONCERT.ground-25);}else if(t.body.x>930){t.direction=-1;b.reset(930,CONCERT.ground-25);}r.reset(t.body.x-t.direction*9,CONCERT.ground-59.5);b.setVelocityX(t.direction*125);r.setVelocityX(t.direction*125);t.art.setPosition(t.body.x,CONCERT.ground).setFlipX(t.direction>0);}
 
   if(this.mission.phase==='photo')this.photoMs+=delta;
   const body=this.player.body as Phaser.Physics.Arcade.Body;

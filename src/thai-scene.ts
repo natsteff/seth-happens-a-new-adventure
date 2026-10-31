@@ -1,3 +1,4 @@
+import {carryAnchor} from './carry-anchor.mjs';
 import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
 import Phaser from 'phaser';
@@ -35,6 +36,7 @@ export class ThaiTakeout extends Phaser.Scene {
   preload(){
     const image=(key:string,path:string)=>{if(!this.textures.exists(key))this.load.image(key,path);};
     image('thai-street','./assets/thai/street-backdrop-v1.png');image('thai-props','./assets/thai/street-props-v1.png');
+    image('adventure-skyline','./assets/scenery/sunset-skyline-v1.png');
     image('thai-home','./assets/thai/home-lower-facade-v1.png');
     image('adventure-brick','./assets/scenery/brick-facade-v1.png');
     image('scruffy','./assets/scruffy-pedestrian.png');image('clown','./assets/clown.png');
@@ -61,7 +63,7 @@ export class ThaiTakeout extends Phaser.Scene {
     this.facing=1;this.lastGround=-1000;this.jumpUntil=0;this.jumpStarted=-1;this.megaUsed=false;this.immuneUntil=0;this.restartSince=null;this.lastBeep=0;
     this.traffic=[];this.pedestrians=[];this.runVersion++;this.input.keyboard!.enabled=true;
     gameAudio.beginRun('thai');
-    this.cameras.main.setZoom(this.renderScale).setBackgroundColor('#1b2436').setBounds(0,0,THAI.width,H);
+    this.cameras.main.setZoom(this.renderScale).setBackgroundColor('#1b2436').setBounds(-260,0,THAI.width+260,H);
     this.drawStreet();
     const frames=this.textures.get('thai-props');
     // Frames trim transparent margins at runtime; supplied image originals are untouched.
@@ -70,7 +72,7 @@ export class ThaiTakeout extends Phaser.Scene {
       ['bag',90,564,334,384],['car-right',497,710,550,226],['cart',1088,616,418,329]
     ] as [string,number,number,number,number][]){if(!frames.has(name))frames.add(name,0,x,y,w,h);}
     const platforms=this.physics.add.staticGroup();
-    const ground=this.add.rectangle(THAI.width/2,THAI.ground+60,THAI.width,120,0xffffff,0);platforms.add(ground);
+    const ground=this.add.rectangle((THAI.width-260)/2,THAI.ground+60,THAI.width+260,120,0xffffff,0);platforms.add(ground);
     for(const obstacle of streetObstacles){
       const {x,width,height,kind}=obstacle;
       if(kind==='shop'||kind==='building')brickBuilding(this,x,THAI.ground-height,width,THAI.ground,kind==='shop'?2:3);
@@ -81,13 +83,13 @@ export class ThaiTakeout extends Phaser.Scene {
     }
     if(!this.textures.exists('thai-body')){const g=this.add.graphics().fillStyle(0xffffff).fillRect(0,0,26,48);g.generateTexture('thai-body',26,48);g.destroy();}
     this.player=this.physics.add.sprite(THAI.homeX,THAI.ground-24,'thai-body').setVisible(false).setMaxVelocity(SPRINT_SPEED,850).setCollideWorldBounds(true);
-    this.physics.world.setBounds(0,0,THAI.width,H+100);this.physics.add.collider(this.player,platforms);
+    this.physics.world.setBounds(-260,0,THAI.width+260,H+100);this.physics.add.collider(this.player,platforms);
     this.portrait=this.add.sprite(this.player.x,this.player.y+24,'seth-walk',1).setOrigin(.5,1).setDisplaySize(62,82).setDepth(7);
     this.textures.get('seth-walk').setFilter(Phaser.Textures.FilterMode.NEAREST);
     for(const [key,texture] of [['walk-empty','seth-walk'],['fall-empty','seth-fall']]){
       if(!this.anims.exists(key))this.anims.create({key,frames:[0,1,2,3].map(frame=>({key:texture,frame})),frameRate:8,repeat:-1});
     }
-    this.bag=this.add.image(0,0,'thai-props','bag').setOrigin(.5,.4).setDisplaySize(21,25).setDepth(8).setVisible(false);
+    this.bag=this.add.image(0,0,'thai-props','bag').setOrigin(.5,.03).setDisplaySize(25,31).setDepth(8).setVisible(false);
     this.order=this.add.image(THAI.restaurantX,THAI.ground-52,'thai-props','bag').setDisplaySize(35,41).setDepth(6);
     this.add.image(THAI.restaurantX-110,THAI.ground,'concert-fans').setOrigin(.5,1).setDisplaySize(76,91).setDepth(3);
     this.buildTraffic();this.buildPedestrians();
@@ -119,13 +121,17 @@ export class ThaiTakeout extends Phaser.Scene {
   }
   drawStreet(){
     // One reusable image section repeated in world space, then quietened behind play.
-    const backdrop=this.add.tileSprite(0,0,THAI.width,H,'thai-street').setOrigin(0).setTileScale(.65).setDepth(-25);
-    backdrop.tilePositionY=0;
+    for(let x=-260;x<THAI.width;x+=1200)this.add.image(x,THAI.ground,'adventure-skyline').setOrigin(0,1).setDisplaySize(1200,800).setDepth(-30);
+    // Four-to-five storefronts per block, with open side streets revealing skyline.
+    for(let x=650;x<THAI.width;x+=1250){
+      this.add.image(x,THAI.ground,'thai-street').setOrigin(0,1).setDisplaySize(950,600).setDepth(-25);
+      if(x>650)this.text(x-240,THAI.ground-70,'CROSS STREET',12,'#b5cbd3').setDepth(-20);
+    }
     this.add.rectangle(THAI.width/2,H/2,THAI.width,H,0x142136,.18).setDepth(-24);
     const g=this.add.graphics().setDepth(-2);
-    g.fillStyle(0x444653).fillRect(0,THAI.ground,THAI.width,15);
-    g.fillStyle(0xa6a092).fillRect(0,THAI.ground,THAI.width,3);
-    g.fillStyle(0x171f2c).fillRect(0,THAI.ground+15,THAI.width,100);
+    g.fillStyle(0x444653).fillRect(-260,THAI.ground,THAI.width+260,15);
+    g.fillStyle(0xa6a092).fillRect(-260,THAI.ground,THAI.width+260,3);
+    g.fillStyle(0x171f2c).fillRect(-260,THAI.ground+15,THAI.width+260,100);
     g.lineStyle(1,0x78717a,.4);for(let x=0;x<THAI.width;x+=46)g.lineBetween(x,THAI.ground+3,x,THAI.ground+14);
     for(let x=0;x<THAI.width;x+=115)g.fillStyle(0xc2a765,.7).fillRect(x,THAI.ground+55,52,4);
     // Clear foreground destinations, separate from the repeating background storefronts.
@@ -171,6 +177,16 @@ export class ThaiTakeout extends Phaser.Scene {
       tower.fillStyle(0xe3bb78).fillRect(left,y,width,3);
     }
     const texture=this.textures.get('thai-home');
+    if(!texture.has('left-wing'))texture.add('left-wing',0,30,100,740,820);
+    this.add.image(left-740*width/1485,THAI.ground,'thai-home','left-wing').setOrigin(0,1).setDisplaySize(740*width/1485,facadeHeight).setDepth(-1);
+    const wing=this.add.graphics().setDepth(-1);
+    wing.fillStyle(0x99472e).fillRect(left-250,top,250,seam-top);
+    for(let y=top;y<seam;y+=floorHeight){
+      wing.fillStyle(0xe3bb78).fillRect(left-250,y,250,3);
+      for(let x=left-235;x<left-10;x+=29){wing.fillStyle(0x273544).fillRect(x,y+5,22,34);wing.fillStyle(0x126174).fillRect(x+3,y+8,15,26);wing.fillStyle(0x338698).fillRect(x+4,y+9,3,22);}
+    }
+    wing.fillStyle(0xc36938).fillRect(left-4,seam,8,facadeHeight);
+
     if(!texture.has('lower'))texture.add('lower',0,30,100,1485,820);
     this.add.image(left,THAI.ground,'thai-home','lower').setOrigin(0,1)
       .setDisplaySize(width,facadeHeight).setDepth(-1);
@@ -239,7 +255,7 @@ export class ThaiTakeout extends Phaser.Scene {
     if(this.introActive||this.won||this.failed||this.riding||scoresOpen())return;
     this.paused=!this.paused;touch.clear();this.controller.armed=false;this.player.setVelocityX(0);this.jumpStarted=-1;this.megaUsed=false;
     const button=document.getElementById('pause-toggle')!;button.textContent=this.paused?'Resume · P':'Pause · P';button.setAttribute('aria-pressed',String(this.paused));
-    if(this.paused){
+    if(this.paused){this.tweens.pauseAll();
       this.pauseStarted=this.time.now;this.physics.world.pause();this.tweens.pauseAll();void gameAudio.setPaused(true);
       this.pauseOverlay=this.add.container(0,0,[this.add.rectangle(W/2,H/2,W,H,0x102137,.9),this.text(W/2,270,'DINNER BREAK',44,'#ffd08b').setOrigin(.5),this.text(W/2,330,'Resume when you’re ready.',20).setOrigin(.5)]);this.ui.add(this.pauseOverlay);
     }else{
@@ -350,7 +366,7 @@ export class ThaiTakeout extends Phaser.Scene {
     if(controller.disconnected&&!this.paused)this.togglePause();
     if(Phaser.Input.Keyboard.JustDown(this.keys.P)||controller.pause||mobile.pause)this.togglePause();
     if(Phaser.Input.Keyboard.JustDown(this.keys.S))gameAudio.toggle();
-    if(this.paused){this.publishStatus();return;}
+    if(this.paused){this.tweens.pauseAll();this.publishStatus();return;}
     if(scoresOpen()){
       this.physics.world.pause();this.input.keyboard!.enabled=false;this.scorePaused=true;return;
     }
@@ -396,6 +412,7 @@ export class ThaiTakeout extends Phaser.Scene {
     this.portrait.anims.timeScale=walking&&Math.abs(body.velocity.x)>275?1.4:1;
     const alpha=this.time.now<this.immuneUntil?(Math.floor(this.time.now/100)%2?.4:1):1;
     this.portrait.setAlpha(alpha);
-    this.bag.setVisible(this.run.food).setPosition(this.player.x+this.facing*25,this.player.y+4+(walking?Math.sin(this.elapsedMs/65)*1.5:0)).setFlipX(this.facing<0).setAlpha(alpha);
+    const hand=carryAnchor({x:this.player.x,bottom:this.player.y+24,facing:this.facing,frame:Number(this.portrait.frame.name),falling:this.portrait.texture.key==='seth-fall'});
+    this.bag.setVisible(this.run.food).setPosition(hand.x,hand.y).setFlipX(this.facing<0).setAlpha(alpha);
   }
 }
