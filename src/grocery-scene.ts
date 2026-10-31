@@ -15,11 +15,11 @@ export class GroceryGauntlet extends FootAdventure{
   for(let x=1120;x<5850;x+=240){g.fillStyle(0xf2e6b3,.65).fillRoundedRect(x,420,160,8,4);g.lineStyle(2,0x748071,.3).lineBetween(x,500,x,900);}
   this.platform(0,900,GROCERY.width,200,0x495258);
   for(let x=1120;x<5880;x+=100)g.lineStyle(1,0x9caa94,.35).lineBetween(x,900,x+40,980);
-  this.sign(620,550,'SETH’S QUICK SHOP',0x306b78);this.text(220,720,'MILK · BREAD · EGGS\n“JUST THREE THINGS.”',19,'#ffe0ad');
+  this.sign(620,650,'SETH’S QUICK SHOP',0x306b78);this.text(220,720,'MILK · BREAD · EGGS\n“JUST THREE THINGS.”',19,'#ffe0ad');
   this.add.image(380,900,'allison').setOrigin(.5,1).setDisplaySize(59,86).setDepth(3);this.text(380,775,'“Stick to the list!”',17,'#ffdba2').setOrigin(.5);
-  this.add.rectangle(1110,720,100,360,0x23343f).setStrokeStyle(5,0xa5c7b5).setDepth(-2);this.text(1120,525,'ENTER →',19,'#b4efdf').setOrigin(.5);
+  this.add.rectangle(1110,720,100,360,0x23343f).setStrokeStyle(5,0xa5c7b5).setDepth(-2);this.text(1120,650,'ENTER →',19,'#b4efdf').setOrigin(.5);
   for(const [left,width,label,color] of [[1360,900,'DAIRY',0x4c9cb1],[2850,900,'BAKERY',0xa86e43],[4020,850,'FARM FRESH',0x5f8963]] as const){
-   this.sign(left+width/2,515,label,color);
+   this.sign(left+width/2,650,label,color);
    const shelves=this.add.graphics().setDepth(-5);shelves.fillStyle(0x263b43).fillRoundedRect(left,575,width,280,8);
    for(let row=0;row<3;row++){shelves.fillStyle(0xb3ad8c).fillRect(left,650+row*80,width,9);for(let x=left+18;x<left+width-20;x+=48){shelves.fillStyle(row%2?0xcba775:0xd2d9c7).fillRoundedRect(x,610+row*80,27,39,3);shelves.fillStyle(color).fillRect(x+3,622+row*80,21,12);}}
   }
@@ -30,7 +30,7 @@ export class GroceryGauntlet extends FootAdventure{
   for(const x of [2450,4750]){g.fillStyle(0x74bcc4,.4).fillRoundedRect(x,885,300,14,7);this.text(x+150,830,'CAUTION · SLIPPERY',15,'#ffdf8e').setOrigin(.5);}
   this.cartTexture();for(const [i,x] of [700,2210,2670,3820,4940].entries())this.hazard('shop-cart',x,883,100,1800+i*150,62,34).setDisplaySize(88,58);
   for(const [i,x] of [1530,2400,3650,4660,5230].entries())this.hazard(i%2?'scruffy':'concert-fans',x,866,45,2700+i*80,30,68);
-  this.sign(5510,520,'CHECKOUT →',0x95634c);this.add.rectangle(5520,861,220,78,0x607d74).setDepth(2);this.add.rectangle(5520,819,230,8,0x26393c).setDepth(3);this.add.rectangle(5575,792,48,42,0x1b343e).setStrokeStyle(3,0xc5c3aa).setDepth(3);this.text(5520,690,'ALL 3 ITEMS REQUIRED\nF / ACTION · PAY',18,'#ffe4a7').setOrigin(.5).setAlign('center');
+  this.sign(5510,650,'CHECKOUT →',0x95634c);this.add.rectangle(5520,861,220,78,0x607d74).setDepth(2);this.add.rectangle(5520,819,230,8,0x26393c).setDepth(3);this.add.rectangle(5575,792,48,42,0x1b343e).setStrokeStyle(3,0xc5c3aa).setDepth(3);this.text(5520,690,'ALL 3 ITEMS REQUIRED\nF / ACTION · PAY',18,'#ffe4a7').setOrigin(.5).setAlign('center');
   this.gate=this.platform(5870,500,20,400,0xa48155);this.text(5880,620,'PAY\nBEFORE\nEXIT',17,'#ffe5b4').setOrigin(.5).setAlign('center');
   this.add.rectangle(6220,775,180,250,0x20414b).setStrokeStyle(5,0x9bc6b4).setDepth(-3);this.sign(6220,600,'EXIT',0x397c64);this.text(6220,738,'F / ACTION',18,'#b5efda').setOrigin(.5);
  }

@@ -22,10 +22,10 @@ export class SoccerHijinx extends FootAdventure{
   for(let i=0;i<6;i++)this.oneWay(3020+i*145,740+i*80,180);
   this.platform(3800,1160,4300,200,0x3c6551);this.platform(0,1160,3800,200,0x38464c);
   for(const x of [4000,4150,4300,4450,4600,4750]){g.fillStyle(0x2f5363).fillRoundedRect(x,850,125,240,4);g.lineStyle(2,0x91b3b1).strokeRect(x+5,855,115,230);g.lineStyle(3,0x182f3b).lineBetween(x+15,885,x+105,885).lineBetween(x+15,895,x+105,895);}
-  this.placard(4360,770,'LOCKER ROOM · PHOTO 1');
+  this.placard(4360,900,'LOCKER ROOM · PHOTO 1');
   for(const [i,x] of [4160,4360,4580].entries())this.add.image(x,1160,'soccer-star').setOrigin(.5,1).setDisplaySize(65,96).setFlipX(i%2===1).setDepth(3);
   this.lockerGate=this.platform(4970,650,22,510,0x3f7884);this.text(4980,900,'LOCKER\nPHOTO\nFIRST',17,'#d7eac9').setOrigin(.5).setAlign('center');
-  g.fillStyle(0x1a2e38).fillRect(5100,780,830,380);g.lineStyle(13,0x748a89).strokeRect(5110,780,810,380);this.placard(5530,710,'TUNNEL · PHOTO 2');
+  g.fillStyle(0x1a2e38).fillRect(5100,780,830,380);g.lineStyle(13,0x748a89).strokeRect(5110,780,810,380);this.placard(5530,900,'TUNNEL · PHOTO 2');
   for(let i=0;i<5;i++)this.team.push(this.add.image(5300+i*105,1160,'soccer-star').setOrigin(.5,1).setDisplaySize(57,85).setDepth(3));
   this.tunnelGate=this.platform(6020,600,22,560,0x375e66);this.text(6030,900,'TUNNEL\nPHOTO\nFIRST',17,'#d7eac9').setOrigin(.5).setAlign('center');
   // Stadium field, audience and roof use small repeated shapes, never a world-sized texture.
@@ -35,7 +35,7 @@ export class SoccerHijinx extends FootAdventure{
   g.lineStyle(4,0xc6dfc0).strokeRect(6210,930,1830,220).strokeRect(7680,970,320,160);g.lineBetween(6900,930,6900,1150);g.strokeEllipse(6900,1040,160,150);
   // Goal and net sit behind players and ball; floor collision stays at ground.
   g.lineStyle(5,0xe9e5cf).strokeRect(7820,950,150,200);for(let x=7840;x<7970;x+=22)g.lineStyle(1,0xb9d0c3,.6).lineBetween(x,954,x,1150);for(let y=973;y<1150;y+=24)g.lineBetween(7820,y,7970,y);
-  this.placard(7000,760,'SIDELINE · PHOTOS 3 & 4');
+  this.placard(7000,900,'SIDELINE · PHOTOS 3 & 4');
   for(const [i,x] of [7240,7410,7610,7840].entries())this.goalPlayers.push(this.add.image(x,1160,'soccer-star').setOrigin(.5,1).setDisplaySize(59,88).setFlipX(i%2===1).setTint(i%2?0xe0c494:0xb4e4ed).setDepth(3));
   const b=this.add.graphics().fillStyle(0xeee9d7).fillCircle(0,0,12).lineStyle(2,0x263e45).strokeCircle(0,0,12);b.fillStyle(0x263e45).fillTriangle(-5,-5,5,-5,0,4);this.ball=this.add.container(0,0,[b]).setDepth(5);
   for(const [i,x] of [690,1110,1930,2490,3340,3870].entries())this.hazard(i%2?'clown':'concert-fans',x,x<1400?840-Math.floor((x-440)/160)*40:x<3020?625:x<3800?900:1125,32,2600+i*100,30,64);
