@@ -1,10 +1,11 @@
+import {startupLoader} from './startup';
 import {standaloneLaunch,readMobileSetup,saveMobileSetup,mobileStartup} from './mobile-setup.mjs';
 import {CabinFever} from './cabin-scene';
 import {localReviewLevel,canEnterLevel} from './review-entry.mjs';
 import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
 import { SummitReminder, REMINDER_MS } from './reminders.mjs';
-import { checkForUpdate } from './updates.mjs';
+import { checkForUpdate, safeUpdatePoint } from './updates.mjs';
 import { loadSettings, saveSettings } from './preferences.mjs';
 import { mobileTrackLabel } from './mobile-track.mjs';
 import { installOpeningGuard } from './dialog-input.mjs';
@@ -84,7 +85,7 @@ class Errand extends Phaser.Scene {
   visitedWalkFrames=new Set<string>();
   hazards: Hazard[] = []; floor = 0; checkpoint = {x:75,y:ROAD.y-24};
   lastGround = -1000; jumpUntil = 0; immuneUntil = 0; facing = 1; walking = false;
-  preload(){
+  preload(){startupLoader(this);
     this.load.image('adventure-skyline','./assets/scenery/sunset-skyline-v1.png');
     this.load.image('adventure-brick','./assets/scenery/brick-facade-v1.png');
     this.load.image('seth-timeout','./assets/seth-timeout-v1.png');
@@ -233,6 +234,7 @@ class Errand extends Phaser.Scene {
     document.getElementById('start-game')!.hidden=false;
     (document.getElementById('touch-menu-open') as HTMLButtonElement).disabled=false;
     requestAnimationFrame(positionStartGame);
+    window.dispatchEvent(new Event('game-layout'));
   }
   async startIntro(){
     if(this.introStarted||!this.introActive||document.querySelector('dialog[open]'))return;
@@ -1026,7 +1028,17 @@ const updateToggle=document.getElementById('auto-update') as HTMLInputElement;
 const updateStatus=document.getElementById('update-status')!;
 const updateButton=document.getElementById('check-updates') as HTMLButtonElement;
 updateToggle.checked=loadSettings().autoUpdate;
-let updateChecking=false,lastUpdateCheck=0;
+let updateChecking=false,lastUpdateCheck=0,pendingUpdate:string|undefined,updateNavigating=false;
+function applyPendingUpdate(){
+ if(!pendingUpdate||updateNavigating)return;
+ const scene=activeScene();
+ if(!safeUpdatePoint({intro:scene?.introActive,ended:scene?.won||scene?.failed,menu:touchMenu.open||levelDialog.open,party:!!document.querySelector('#afterparty[open]')}))return;
+ updateNavigating=true;
+ window.dispatchEvent(new CustomEvent('game-startup',{detail:{state:'updating'}}));
+ const url=pendingUpdate;setTimeout(()=>location.replace(url),150);
+}
+// Reuse the game frame event; no network polling or additional timer loop.
+game.events.on('poststep',applyPendingUpdate);
 async function checkUpdates(manual=false){
  if(updateChecking||(!manual&&!updateToggle.checked))return;
  if(!manual&&Date.now()-lastUpdateCheck<10000)return;
@@ -1034,8 +1046,8 @@ async function checkUpdates(manual=false){
  const current=document.getElementById('game-version')!.textContent!.replace(/^v/,'');
  updateStatus.textContent=`v${current} · Checking…`;
  let storage:Storage|undefined;try{storage=sessionStorage;}catch{/* URL guard remains available. */}
- const result=await checkForUpdate({current,url:location.href,storage,manual,navigate:(url:string)=>location.replace(url)});
- updateStatus.textContent=`v${current} · ${result==='updating'?'Updating…':result==='current'?'Up to date':result==='stale'?'Reload still returned an older page. Try Check for updates.':'Could not check. Try again online.'}`;
+ const result=await checkForUpdate({current,url:location.href,storage,manual,navigate:(url:string)=>{pendingUpdate=url;applyPendingUpdate();}});
+ updateStatus.textContent=`v${current} · ${result==='updating'?(updateNavigating?'Updating…':'Update ready · Will update at a menu or after this run'):result==='current'?'Up to date':result==='stale'?'Reload still returned an older page. Try Check for updates.':'Could not check. Try again online.'}`;
  updateButton.disabled=false;updateChecking=false;
 }
 updateToggle.addEventListener('change',()=>{saveSettings({autoUpdate:updateToggle.checked});if(updateToggle.checked)void checkUpdates(true);});
@@ -1045,3 +1057,9 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)void check
 void checkUpdates();
 
 document.getElementById('splash-version')!.textContent=`${document.getElementById('game-version')!.textContent} · ${document.getElementById('release-stage')!.textContent}`;
+
+// Ready means the actual title scene and its controls have been created.
+window.addEventListener('game-layout',()=>requestAnimationFrame(()=>{
+ if(document.querySelector('#game canvas')&&!document.getElementById('start-game')!.hidden)
+ window.dispatchEvent(new CustomEvent('game-startup',{detail:{state:'ready'}}));
+}));

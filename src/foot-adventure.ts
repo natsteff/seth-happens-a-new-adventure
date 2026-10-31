@@ -1,3 +1,4 @@
+import {startupLoader} from './startup';
 import {modalNavigation} from './modal-navigation.mjs';
 import Phaser from 'phaser';
 import {gameAudio} from './audio';
@@ -19,7 +20,7 @@ export abstract class FootAdventure extends Phaser.Scene{
  ui!:Phaser.GameObjects.Container;hud!:Phaser.GameObjects.Text;objective!:Phaser.GameObjects.Text;radioLabel!:Phaser.GameObjects.Text;toast!:Phaser.GameObjects.Text;prompt!:Phaser.GameObjects.Text;
  introOverlay?:Phaser.GameObjects.Container;pauseOverlay?:Phaser.GameObjects.Container;hazards:Hazard[]=[];controller=new ControllerInput();photos=new Set<number>();
  elapsedMs=0;introActive=true;introStarted=false;paused=false;won=false;failed=false;riding=false;renderScale=1;runVersion=0;hits=0;stamina=100;immuneMs=0;restartSince:number|null=null;facing=1;lastGround=-1000;jumpUntil=0;jumpStarted=-1;megaUsed=false;toastUntil=0;checkpoint={x:160,bottom:1130};
- preload(){
+ preload(){startupLoader(this);
   for(const [key,path] of [['adventure-logo','adventure-logo.png'],['thai-street','thai/street-backdrop-v1.png'],['thai-props','thai/street-props-v1.png'],['adventure-brick','scenery/brick-facade-v1.png'],['scruffy','scruffy-pedestrian.png'],['clown','clown.png'],['allison','allison.png'],['concert-fans','concert-fans.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/'+path);
   if(!this.textures.exists('seth-walk'))this.load.spritesheet('seth-walk','./assets/seth-walk.png',walkLayout);
   if(!this.textures.exists('seth-fall'))this.load.spritesheet('seth-fall','./assets/seth-fall-v1.png',fallLayout);

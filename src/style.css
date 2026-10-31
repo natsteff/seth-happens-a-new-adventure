@@ -283,3 +283,7 @@ header .adventure-logo{display:block;width:min(340px,65vw);height:auto;border-ra
 @media(max-height:480px) and (orientation:landscape){#afterparty{height:98dvh}#afterparty .party-header{padding:4px 12px}#afterparty h2{font-size:16px}#afterparty .party-header .party-eyebrow{display:none}.party-deck{padding:5px 10px;grid-template-columns:minmax(130px,1fr) minmax(200px,1.4fr) minmax(240px,1.5fr);gap:8px}.party-mix{grid-column:auto;gap:5px}.party-mix label{font-size:10px}.party-mix input{width:70px}.party-now strong{font-size:13px}.party-now .party-eyebrow{display:none}#afterparty button,#afterparty select{padding:5px 8px;font-size:12px}.party-track-controls label{display:none}}
 
 .party-loading{position:absolute;inset:45% 12px auto;text-align:center;color:#bceeff;font-size:16px}
+
+/* Center all three bars as a group, independent of inherited button padding. */
+#touch-menu-open{padding:0!important;line-height:0;align-content:center;justify-content:center}
+#touch-menu-open::before{margin:0;align-self:center;justify-self:center}

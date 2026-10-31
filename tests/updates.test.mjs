@@ -30,3 +30,5 @@ test('auto updates default enabled and saved opt-out survives unrelated preferen
  const storage=memory();assert.equal(readPreferences(storage).autoUpdate,true);
  savePreferences(storage,{autoUpdate:false});savePreferences(storage,{volume:.4});assert.equal(readPreferences(storage).autoUpdate,false);
 });
+
+test('updates wait through active/paused play and the party, then apply at menu or run end',async()=>{const {safeUpdatePoint}=await import('../src/updates.mjs');assert.equal(safeUpdatePoint(),false);assert.equal(safeUpdatePoint({intro:true}),true);assert.equal(safeUpdatePoint({ended:true}),true);assert.equal(safeUpdatePoint({menu:true}),true);assert.equal(safeUpdatePoint({menu:true,party:true}),false);});

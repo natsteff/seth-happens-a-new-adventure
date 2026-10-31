@@ -1,3 +1,4 @@
+import {startupLoader} from './startup';
 import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
 import Phaser from 'phaser';
@@ -19,7 +20,7 @@ export class ScooterRide extends Phaser.Scene{
  bubble!:Phaser.GameObjects.Container;bubbleText!:Phaser.GameObjects.Text;progress!:Phaser.GameObjects.Rectangle;
  controller=new ControllerInput();run=newScooterRun();hazards:Hazard[]=[];photos=new Set<number>();
  introActive=true;introStarted=false;paused=false;won=false;failed=false;riding=false;renderScale=1;runVersion=0;restartSince:number|null=null;scorePaused=false;bubbleUntil=0;toastUntil=0;
- preload(){for(const [key,path] of [['scooter-riders','scooter/seth-allison-v1.png'],['thai-street','thai/street-backdrop-v1.png'],['thai-props','thai/street-props-v1.png'],['adventure-brick','scenery/brick-facade-v1.png'],['scruffy','scruffy-pedestrian.png'],['clown','clown.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/'+path);}
+ preload(){startupLoader(this);for(const [key,path] of [['scooter-riders','scooter/seth-allison-v1.png'],['thai-street','thai/street-backdrop-v1.png'],['thai-props','thai/street-props-v1.png'],['adventure-brick','scenery/brick-facade-v1.png'],['scruffy','scruffy-pedestrian.png'],['clown','clown.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/'+path);}
  text(x:number,y:number,value:string,size=16,color='#f5e4c8'){return this.add.text(x,y,value,{fontFamily:'Arial',fontSize:`${size}px`,color,stroke:'#132436',strokeThickness:3}).setResolution(this.renderScale);}
  screenText(x:number,y:number,value:string,size=16,color='#f5e4c8'){const t=this.text(x,y,value,size,color);this.ui.add(t);return t;}
  create(){

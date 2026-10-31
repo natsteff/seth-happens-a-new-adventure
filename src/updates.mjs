@@ -22,3 +22,5 @@ export async function checkForUpdate({current,url,fetcher=fetch,navigate,storage
   navigate(target.href);return 'updating';
  }catch{return 'unavailable';}finally{clearTimeout(timeout);}
 }
+
+export function safeUpdatePoint({intro=false,ended=false,menu=false,party=false}={}){return !party&&(intro||ended||menu);}

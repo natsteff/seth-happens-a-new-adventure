@@ -19,7 +19,7 @@ test('owner-approved timing keeps the crowd ten seconds after credits, then coup
 test('active realistic venue and all five complete-body atlases are valid PNGs with sprite alpha',()=>{
  const base=new URL('../public/assets/afterparty/',import.meta.url);
  const size=file=>{const data=readFileSync(new URL(file,base));assert.equal(data.subarray(1,4).toString(),'PNG');return {width:data.readUInt32BE(16),height:data.readUInt32BE(20),type:data[25]};};
- const venue=size('venue-new-adventure-v1.png');assert.ok(venue.width>=1600&&venue.height>=900);
+ const venue=size('venue-band-v3.png');assert.ok(venue.width>=1600&&venue.height>=900);
  for(const dance of DANCES){const image=size(`seth-${dance}-v1.png`);assert.equal(image.type,6);assert.ok(image.width>=1200&&image.height>=1200);}
 });
 test('standing lasts 1–2 seconds, moving dances last 3–5 seconds, and none immediately repeat',()=>{

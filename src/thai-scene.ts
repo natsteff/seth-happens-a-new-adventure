@@ -1,3 +1,4 @@
+import {startupLoader} from './startup';
 import {carryAnchor} from './carry-anchor.mjs';
 import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
@@ -33,7 +34,7 @@ export class ThaiTakeout extends Phaser.Scene {
   renderScale=1;facing=1;lastGround=-1000;jumpUntil=0;jumpStarted=-1;megaUsed=false;immuneUntil=0;restartSince:number|null=null;
   toastUntil=0;lastBeep=0;runVersion=0;scorePaused=false;deliveryElapsed=0;rideTween?:Phaser.Tweens.Tween;
 
-  preload(){
+  preload(){startupLoader(this);
     const image=(key:string,path:string)=>{if(!this.textures.exists(key))this.load.image(key,path);};
     image('thai-street','./assets/thai/street-backdrop-v1.png');image('thai-props','./assets/thai/street-props-v1.png');
     image('adventure-skyline','./assets/scenery/sunset-skyline-v1.png');
