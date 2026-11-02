@@ -1,3 +1,4 @@
+import {normalizedScoreName} from './score-options.mjs';
 export const SCORE_KEY = 'seth-new-adventure-scores-v1';
 export function validScores(value) {
   if(!Array.isArray(value))throw new Error('Saved scores are unreadable; nothing was changed.');
@@ -15,6 +16,7 @@ export function readScores(storage) {
   return raw===null?[]:validScores(JSON.parse(raw));
 }
 export function saveScore(storage, score) {
+  score={...score,name:normalizedScoreName(score.name)};
   const existing=readScores(storage);
   if(existing.some(s=>s.id===score.id))return existing;
   if(score.cheater&&existing.filter(s=>s.cheater).length>=5)return rankScores(existing);

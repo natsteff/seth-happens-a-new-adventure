@@ -16,7 +16,7 @@ export function homeTower(scene:Phaser.Scene,x:number,roof:number,width:number,b
   g.fillStyle(0xe1b87d).fillRect(x,y+row-4*scale,width,4*scale);
  }
  // Five differently stepped glass facets echo the approved logo silhouette.
- for(let bay=0;bay<5;bay++){const bx=x+bay*width/5,cap=[70,105,130,100,65][bay]*scale;
+ for(let bay=0;bay<5;bay++){const bx=x+bay*width/5,cap=[70,105,130,100,65][bay]*Math.min(scale,1.25);
   g.fillStyle(bay<3?0x216a8a:0x1b536f).fillRect(bx,roof-cap,width/5,cap);
   g.lineStyle(2*scale,0x6fb9ce).strokeRect(bx+2*scale,roof-cap,width/5-4*scale,cap);
   for(let y=roof-cap+15*scale;y<roof;y+=24*scale)g.lineBetween(bx,y,bx+width/5,y);
@@ -30,5 +30,6 @@ export function homeTower(scene:Phaser.Scene,x:number,roof:number,width:number,b
   for(const bay of [0,1,2,4,5])g.fillStyle(0xcf8a50).fillRect(x+bay*width/6,bottom-120*scale,9*scale,120*scale);
   g.lineStyle(4*scale,0xd1b879).strokeEllipse(x+width*.62,bottom+14*scale,width*.62,34*scale);
  }
+ if(scene.textures.exists('home-entry')){const texture=scene.textures.get('home-entry');if(!texture.has('lower'))texture.add('lower',0,30,100,1485,820);const facade=scene.add.image(x,bottom,'home-entry','lower').setOrigin(0,1).setDisplaySize(width,820*width/1485).setDepth(depth+.5);if(depth===-29)facade.setScrollFactor(0);}
  return g;
 }

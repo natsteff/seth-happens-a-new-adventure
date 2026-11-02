@@ -289,3 +289,19 @@ header .adventure-logo{display:block;width:min(340px,65vw);height:auto;border-ra
 #touch-menu-open::before{margin:0;align-self:center;justify-self:center}
 
 .party-track-controls{gap:6px}.party-track-controls select{min-width:0;flex:1}
+
+/* Compact entry: native modality, visible-keyboard viewport, ordinary text input. */
+.score-dialog[data-entry=true]{position:fixed;inset:auto;left:calc(var(--score-left,0px) + 8px);top:calc(var(--score-top,0px) + 8px);margin:0;width:min(700px,calc(var(--score-width,100vw) - 16px));max-height:calc(var(--score-height,100dvh) - 16px);overflow:auto;padding:10px 14px;box-sizing:border-box}
+.score-dialog[data-entry=true] .score-heading h2{font-size:18px;margin:0 0 6px}
+.score-dialog[data-entry=true] .score-eyebrow,.score-dialog[data-entry=true]>.score-actions,.score-dialog[data-entry=true]>.score-list,.score-dialog[data-entry=true]>p:not([role=status]){display:none}
+.score-dialog .entry-form{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.score-dialog [hidden]{display:none!important}
+.score-dialog .entry-form label{flex:1;min-width:150px}.score-dialog .entry-form input{box-sizing:border-box;min-width:0;width:100%;height:44px;margin:0;font-size:16px}.score-dialog .entry-form button{min-height:44px;font-size:14px}
+.score-dialog .saved-name{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.score-dialog[data-entry=true] [role=status]{margin:4px 0;font-size:13px}.score-dialog .skip-score{font-size:13px}
+/* Rotation fix: one document coordinate space for play and native dialogs. */
+html.touch-play-locked body{position:static;top:auto;left:auto;right:auto;overflow:visible}
+html.touch-play-locked main{margin:0;padding:0;max-width:none;width:100%}
+html.touch-play-locked main>*:not(#play-area):not(#live-status){display:none}
+html.touch-play-locked #play-area.expanded.touch-mode{position:relative;inset:auto;left:auto;top:auto;margin:0}
+.touch-mode dialog:modal,.touch-mode .score-dialog[data-entry=true]{position:absolute}
+
+html.touch-play-locked #live-status{visibility:visible}

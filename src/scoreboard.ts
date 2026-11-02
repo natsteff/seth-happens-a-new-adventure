@@ -1,3 +1,4 @@
+import {compactScoreEntry,showScoreDialog,resetCompactEntry,acceptedPlayerName,setScoreEntryBusy,focusScoreEntry} from './score-entry';
 import { RUN_LIMIT_MS,formatRunSeconds } from './mission.mjs';
 import {gameAudio} from './audio';
 import { rankScores,readScores,saveScore,verifyClearPassword,SCORE_KEY } from './scores.mjs';
@@ -11,6 +12,7 @@ let scope:'server'|'local'='local';
 let notice='';
 let returnFocus:HTMLElement|null=null;
 let nameDraft='';
+let submitting=false,entryEpoch=0;
 export function scoresOpen(){return dialog.open||!!document.querySelector('#thai-scores[open], #scooter-scores[open], #adventure-scores[open]');}
 // Prevent Phaser's window listeners from capturing letters while a dialog is open.
 for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{
@@ -44,8 +46,7 @@ async function request(path='',body?:unknown){
 }
 function render(){
   const current=++revision;
-  const draft=dialog.querySelector('[name="player"]') as HTMLInputElement|null;
-  if(draft)nameDraft=draft.value;
+
   dialog.innerHTML=`<div class="score-heading"><span class="score-eyebrow">THE ROOFTOP RECORD BOOK</span><h2 id="scores-title">HIGH SCORES</h2></div>${serverEnabled?'':'<!--'}<div class="score-actions"><button id="server-scores" aria-pressed="${scope==='server'}">Server High Scores</button><button id="local-scores" aria-pressed="${scope==='local'}">This PC High Scores</button></div>${serverEnabled?'':'-->'}<p>${scope==='server'?'Shared by this deployment.':'Saved only in this browser on this PC.'} Ties favor the earliest run. First five CHEATER runs sit below every legitimate score.</p>
   <p id="score-music" aria-live="polite"></p><form id="score-entry" ${pending?'':'hidden'}><label>Name or initials <input name="player" maxlength="16" required autocomplete="off"></label><button>Save score</button></form>
   <p role="status" aria-live="polite"></p><div class="score-list"></div>
@@ -87,20 +88,23 @@ function render(){
     }
   }).catch(error=>{if(current===revision)message([notice,error.message||'Could not load scores.'].filter(Boolean).join(' '));});
   dialog.querySelector('#score-entry')!.addEventListener('submit',async event=>{
-    event.preventDefault();if(!pending)return;
+    event.preventDefault();if(!pending||submitting)return;
     const form=event.currentTarget as HTMLFormElement;
     const name=String(new FormData(form).get('player')??'').trim();
     if(!name){message('Enter a name or initials.');return;}
-    const button=form.querySelector('button')!;button.disabled=true;
-    const result={...pending,name};const outcomes:string[]=[];let localOK=false,serverOK=!serverEnabled;
-    try{const saved=saveScore(localStorage,result);localOK=true;outcomes.push(saved.some((s:any)=>s.id===result.id)?'This PC: saved.':'This PC: five CHEATER slots already filled.');}
+    const button=form.querySelector('button')!;submitting=true;setScoreEntryBusy(dialog,true);
+    const epoch=entryEpoch,result={...pending,name};const outcomes:string[]=[];let localOK=false,serverOK=!serverEnabled,localAccepted=false,serverAccepted=false;
+    try{const saved=saveScore(localStorage,result);localOK=true;localAccepted=saved.some((s:any)=>s.id===result.id);outcomes.push(localAccepted?'This PC: saved.':'This PC: five CHEATER slots already filled.');}
     catch{outcomes.push('This PC: could not save; existing records unchanged.');}
-    if(serverEnabled)try{const saved=await request('',result);serverOK=true;outcomes.push(saved.accepted?'Server: saved.':'Server: five CHEATER slots already filled.');}
+    if(serverEnabled)try{const saved=await request('',result);serverOK=true;serverAccepted=saved.accepted===true||saved.scores?.some((s:any)=>s.id===result.id)===true;outcomes.push(serverAccepted?'Server: saved.':'Server: five CHEATER slots already filled.');}
     catch(error){outcomes.push('Server: '+(error instanceof Error?error.message:'could not save.'));}
-    if(localOK&&serverOK){pending=null;nameDraft='';}
-    notice=outcomes.join(' ');render();
+    if(epoch!==entryEpoch)return;
+    if(localAccepted||serverAccepted)acceptedPlayerName(name);
+    if(localOK&&serverOK&&(localAccepted||serverAccepted)){pending=null;nameDraft='';resetCompactEntry(dialog);}submitting=false;
+    notice=outcomes.join(' ');render();focusScoreEntry(dialog);
 
   });
+  compactScoreEntry(dialog,!!pending,()=>{pending=null;nameDraft='';notice='Score not saved.';resetCompactEntry(dialog);render();focusScoreEntry(dialog);});
   dialog.querySelector('#server-scores')?.addEventListener('click',()=>{scope='server';notice='';render();});
   dialog.querySelector('#local-scores')?.addEventListener('click',()=>{scope='local';notice='';render();});
   dialog.querySelector('#all-scores')!.addEventListener('click',()=>{all=!all;render();});
@@ -124,18 +128,18 @@ function render(){
   });
 }
 async function openScores(){
-  if(['concert','haunted','zombie','snow','carnival','cabin'].includes(document.body.dataset.level??'')){window.dispatchEvent(new Event('open-adventure-scores'));return;}
+  if(['concert','haunted','zombie','snow','carnival','cabin','grocery','soccer','lastcall'].includes(document.body.dataset.level??'')){window.dispatchEvent(new Event('open-adventure-scores'));return;}
   if(document.body.dataset.level==='scooter'){window.dispatchEvent(new Event('open-scooter-scores'));return;}
   if(document.body.dataset.level==='thai'){window.dispatchEvent(new Event('open-thai-scores'));return;}
   returnFocus=document.activeElement as HTMLElement;
   await configReady;if(!serverEnabled)scope='local';
   if(serverEnabled){try{await syncLocalScores();}catch{notice='Some local scores could not sync. They remain on this PC; retry by reopening High Scores.';}}
   render();
-  if(!dialog.open)dialog.showModal();
+  showScoreDialog(dialog);
 }
 export function offerScore(result:Result){
- if(document.body.dataset.review==='true')return;notice='';nameDraft='';pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};openScores();}
-export function resetScoreEntry(){nameDraft='';pending=null;if(dialog.open)dialog.close();}
+ if(document.body.dataset.review==='true')return;entryEpoch++;submitting=false;resetCompactEntry(dialog);notice='';nameDraft='';pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};openScores();}
+export function resetScoreEntry(){entryEpoch++;submitting=false;resetCompactEntry(dialog);nameDraft='';pending=null;if(dialog.open)dialog.close();}
 document.getElementById('high-scores')!.addEventListener('click',openScores);
 dialog.addEventListener('close',()=>returnFocus?.focus());
 

@@ -1,3 +1,6 @@
+import {installDialogRotationRecovery} from './dialog-rotation.mjs';
+import {installLayoutSettlement,refreshMeasuredScale} from './layout-settlement.mjs';
+import {fitOpenScoreDialogs} from './score-entry';
 import {LastCall} from './lastcall-scene';
 import {Encore} from './encore-scene';
 import {homeTower} from './home-building';
@@ -93,6 +96,7 @@ class Errand extends Phaser.Scene {
   hazards: Hazard[] = []; floor = 0; checkpoint = {x:75,y:ROAD.y-24};
   lastGround = -1000; jumpUntil = 0; immuneUntil = 0; facing = 1; walking = false;
   preload(){startupLoader(this);
+    if(!this.textures.exists('home-entry'))this.load.image('home-entry','./assets/thai/home-lower-facade-v1.png');
     if(!this.textures.exists('adventure-skyline'))this.load.image('adventure-skyline','./assets/scenery/sunset-skyline-v1.png');
     if(!this.textures.exists('adventure-brick'))this.load.image('adventure-brick','./assets/scenery/brick-facade-v1.png');
     if(!this.textures.exists('seth-timeout'))this.load.image('seth-timeout','./assets/seth-timeout-v1.png');
@@ -310,14 +314,14 @@ class Errand extends Phaser.Scene {
       this.label(s.x-90,s.y-44,'Don’t walk past the shot!','#b6f7e7',11);
       this.add.line(0,0,s.x-25,s.y-47,s.x-25,s.y+25,0x93cabb).setOrigin(0);
     }
-    const home=at(26);this.add.rectangle(home.x+190,home.y-59,76,118,0xc18a56).setStrokeStyle(3,0xe0c292);
-    this.add.rectangle(home.x+190,home.y-54,52,108,0x183f4c).setStrokeStyle(3,0x6da7b2);
-    this.add.rectangle(home.x+190,home.y-54,3,108,0xbfac85);this.add.rectangle(home.x+190,home.y-37,52,3,0xbfac85);
-    this.label(home.x+190,home.y-120,"G · HOME",'#ffcd87',15).setOrigin(.5,0);
+    const home=at(26);this.add.rectangle(home.x+home.width*.78,home.y-59,76,118,0xc18a56).setStrokeStyle(3,0xe0c292);
+    this.add.rectangle(home.x+home.width*.78,home.y-54,52,108,0x183f4c).setStrokeStyle(3,0x6da7b2);
+    this.add.rectangle(home.x+home.width*.78,home.y-54,3,108,0xbfac85);this.add.rectangle(home.x+home.width*.78,home.y-37,52,3,0xbfac85);
+    this.label(home.x+home.width*.78,home.y-120,"G · HOME",'#ffcd87',15).setOrigin(.5,0);
     this.label(home.x+5,home.y-218,'HOME. FINALLY.', '#7ce2c7',23);
-    this.add.image(home.x+76,home.y,'allison').setOrigin(.5,1).setDisplaySize(54,82);
-    this.label(home.x+28,home.y-102,'Allison','#f6c9d5',13);
-    this.cat(home.x+123,home.y-9,0xe3aa72,true);this.cat(home.x+163,home.y-9,0xb6a9c5,false);
+    this.add.image(home.x+home.width*.32,home.y,'allison').setOrigin(.5,1).setDisplaySize(54,82);
+    this.label(home.x+home.width*.25,home.y-102,'Allison','#f6c9d5',13);
+    this.cat(home.x+home.width*.45,home.y-9,0xe3aa72,true);this.cat(home.x+home.width*.55,home.y-9,0xb6a9c5,false);
     this.label(home.x+10,home.y+144,'Oakey: box inspector. Ellowyn: lap reserved.','#cbdce5',11);
     this.label(home.x+10,home.y+164,'“The elevator works now.” — Allison','#ffcf91',12);
   }
@@ -769,11 +773,16 @@ const fullscreenToggle=document.getElementById('fullscreen-toggle') as HTMLButto
 const gameElement=document.getElementById('play-area')!;
 let menuPointer:number|null=null;
 function clearPlayPointers(){
- touch.clear();const pointer=menuPointer;menuPointer=null;
+ touch.clear();const scene=activeScene();if(scene?.keys)for(const key of Object.values(scene.keys))key.reset();if(scene&&'player' in scene)scene.player?.setVelocityX(0);const pointer=menuPointer;menuPointer=null;
  const button=document.getElementById('touch-menu-open') as HTMLButtonElement;
  try{if(pointer!==null&&button.hasPointerCapture(pointer))button.releasePointerCapture(pointer);}catch{/* Pointer already invalid after orientation change. */}
 }
-const touchViewport=installTouchViewport(gameElement,{onResize:()=>requestAnimationFrame(()=>game.scale.refresh()),onCancel:clearPlayPointers});
+function refreshGameLayout(){refreshMeasuredScale(game.scale);game.scale.updateBounds();positionStartGame();fitOpenScoreDialogs();}
+window.addEventListener('score-modal-opening',()=>{clearPlayPointers();const scene=activeScene();if(scene&&!scene.introActive&&!scene.won&&!scene.failed&&!scene.paused)scene.togglePause();});
+const touchViewport=installTouchViewport(gameElement,{onResize:()=>requestAnimationFrame(refreshGameLayout),onCancel:clearPlayPointers});
+const settlement=installLayoutSettlement(refreshGameLayout,{parent:gameElement});
+installDialogRotationRecovery(gameElement,{onCancel:clearPlayPointers,onSettled:()=>{touchViewport.sync();refreshGameLayout();}});
+settlement.schedule();
 async function toggleFullscreen(){
   fullscreenToggle.blur();
   try {
@@ -785,7 +794,7 @@ async function toggleFullscreen(){
     gameElement.classList.add('expanded');
   }
   touchViewport.sync();
-  requestAnimationFrame(()=>game.scale.refresh());
+  requestAnimationFrame(refreshGameLayout);
 }
 fullscreenToggle.addEventListener('click',()=>{void toggleFullscreen();});
 document.addEventListener('keydown',(event)=>{
@@ -797,7 +806,7 @@ document.addEventListener('fullscreenchange',()=>{
   document.getElementById('fullscreen-recommendation')!.hidden=!!document.fullscreenElement;
   fullscreenToggle.textContent=document.fullscreenElement?'Exit full screen · V':'Full screen ⛶ · V';
   fullscreenToggle.setAttribute('aria-label',document.fullscreenElement?'Exit fullscreen':'Enter fullscreen');
-  requestAnimationFrame(()=>game.scale.refresh());
+  requestAnimationFrame(refreshGameLayout);
 });
 if(!document.fullscreenEnabled){
   fullscreenToggle.disabled=false;
@@ -820,14 +829,14 @@ function setTouch(enabled:boolean){
   if(!enabled){modalNavigation.reset();(document.getElementById('touch-menu') as HTMLDialogElement).close();}
   touchToggle.textContent=`Touch controls: ${enabled?'On':'Off'}`;
   touchToggle.setAttribute('aria-pressed',String(enabled));
-  requestAnimationFrame(()=>game.scale.refresh());
+  requestAnimationFrame(refreshGameLayout);
 }
 touchToggle.addEventListener('click',()=>{setTouch(!touch.enabled);saveMobileSetup(progressStorage,touch.enabled?'touch':'keyboard');touchToggle.blur();});
 document.getElementById('touch-accept')!.addEventListener('click',()=>{touchOffer.close();setTouch(true);saveMobileSetup(progressStorage,'touch');if(homeScreenLaunch)gameElement.classList.add('expanded');});
 document.getElementById('touch-decline')!.addEventListener('click',()=>{touchOffer.close();setTouch(false);saveMobileSetup(progressStorage,'keyboard');});
 document.getElementById('touch-view')!.addEventListener('click',()=>{closeTouchMenu();void toggleFullscreen();});
 
-window.addEventListener('resize',()=>{clearPlayPointers();requestAnimationFrame(()=>game.scale.refresh());});
+window.addEventListener('resize',()=>{clearPlayPointers();requestAnimationFrame(refreshGameLayout);});
 
 document.querySelectorAll<HTMLButtonElement>('[data-proxy]').forEach(button=>{
   const source=document.getElementById(button.dataset.proxy!) as HTMLButtonElement;

@@ -1,12 +1,12 @@
 export const ROUTE_OFFSET = 200;
-export const LEVEL_WIDTH = 7450;
+export const LEVEL_WIDTH = 7760;
 export const GROUND_Y = 2700;
 export const FLOOR_RISE = 76;
 export const ROAD = { floor:0, x:0, y:GROUND_Y+FLOOR_RISE, width:LEVEL_WIDTH };
 // Index matches floor number; zero is the road, exactly 26 actual rooftops.
 export const floors = [ROAD, ...Array.from({length:26},(_,index)=>{
   const floor=index+1;
-  return {floor,x:ROUTE_OFFSET+index*280,y:GROUND_Y-index*FLOOR_RISE,width:floor===26?250:240};
+  return {floor,x:ROUTE_OFFSET+index*280,y:GROUND_Y-index*FLOOR_RISE,width:floor===26?560:240};
 })];
 export const photoStops = [
   {floor:6,x:floors[6].x+110,y:floors[6].y-30,title:'LOON ZONE',caption:'Caught the ball. With a camera. Much safer.',short:'Soccer'},
@@ -63,7 +63,7 @@ export function patrolX(floor,time,phase,speed=85){
   const distance=((time/1000*speed+phase)%(span*2)+span*2)%(span*2);
   return left+(distance<=span?distance:span*2-distance);
 }
-export const EGG={guitarX:LEVEL_WIDTH-590,ampX:LEVEL_WIDTH-480,ballX:LEVEL_WIDTH-355,goalX:LEVEL_WIDTH-190,elevatorX:LEVEL_WIDTH-78};
+export const EGG={guitarX:6860,ampX:6970,ballX:7095,goalX:7260,elevatorX:floors[26].x+floors[26].width*.72};
 
 export function fallingPose(floor,bottom,velocityY){
   return velocityY>120&&bottom>floors[floor].y+12;

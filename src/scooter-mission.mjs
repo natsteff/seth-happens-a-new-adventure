@@ -1,3 +1,4 @@
+import {normalizedScoreName} from './score-options.mjs';
 // Feet positions and scenery geometry share world coordinates; simulation uses fixed substeps.
 export const SCOOTER={width:8000,ground:950,finish:7730,gravity:1050,minSpeed:220,cruise:330,maxSpeed:470,limitMs:120000};
 export const ramps=[
@@ -89,4 +90,5 @@ export function scooterStep(state,input,deltaMs){
 export const SCOOTER_SCORE_KEY='seth-new-adventure.scooter-scores.v1';
 function valid(s){return s&&typeof s.id==='string'&&typeof s.name==='string'&&s.name.trim().length>0&&s.name.length<=16&&Number.isFinite(Date.parse(s.date))&&Number.isInteger(s.score)&&s.score>=0&&s.score<=10000&&Number.isInteger(s.grip)&&s.grip>0&&s.grip<=100&&Number.isInteger(s.hits)&&s.hits>=0&&Number.isFinite(s.elapsedMs)&&s.elapsedMs>=0&&s.elapsedMs<=SCOOTER.limitMs;}
 export function readScooterScores(storage){const raw=storage.getItem(SCOOTER_SCORE_KEY);if(raw===null)return [];const list=JSON.parse(raw);if(!Array.isArray(list)||!list.every(valid))throw Error('Scooter records are unreadable; nothing was changed.');return [...list].sort((a,b)=>b.score-a.score||Date.parse(a.date)-Date.parse(b.date));}
-export function saveScooterScore(storage,record){const list=readScooterScores(storage);if(!valid(record))throw Error('Invalid scooter record.');if(!list.some(s=>s.id===record.id))list.push(record);list.sort((a,b)=>b.score-a.score||Date.parse(a.date)-Date.parse(b.date));storage.setItem(SCOOTER_SCORE_KEY,JSON.stringify(list));return list;}
+export function saveScooterScore(storage,record){
+ record={...record,name:normalizedScoreName(record.name)};const list=readScooterScores(storage);if(!valid(record))throw Error('Invalid scooter record.');if(!list.some(s=>s.id===record.id))list.push(record);list.sort((a,b)=>b.score-a.score||Date.parse(a.date)-Date.parse(b.date));storage.setItem(SCOOTER_SCORE_KEY,JSON.stringify(list));return list;}

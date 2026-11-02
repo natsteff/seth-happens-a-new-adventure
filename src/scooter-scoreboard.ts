@@ -1,14 +1,15 @@
+import {compactScoreEntry,finishCompactEntry,showScoreDialog,resetCompactEntry,acceptedPlayerName,focusScoreEntry} from './score-entry';
 import { readScooterScores, saveScooterScore } from './scooter-mission.mjs';
 type ScooterResult={score:number;grip:number;hits:number;elapsedMs:number};
 const dialog=document.createElement('dialog');dialog.id='scooter-scores';dialog.className='score-dialog';
 document.getElementById('game')!.append(dialog);
 let pending:(ScooterResult&{id:string;date:string})|null=null;
 let returnFocus:HTMLElement|null=null;
-export function resetScooterScores(){pending=null;if(dialog.open)dialog.close();}
+export function resetScooterScores(){pending=null;resetCompactEntry(dialog);if(dialog.open)dialog.close();}
 export function openScooterScores(result?:ScooterResult){
  if(document.body.dataset.review==='true')return;
   returnFocus=document.activeElement as HTMLElement;
-  if(result)pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};
+  if(result){resetCompactEntry(dialog);pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};}
   dialog.innerHTML='<div class="score-heading"><span class="score-eyebrow">LEVEL 3 · SCOOTER RIDE</span><h2 id="scooter-scores-title">SCOOTER RECORDS</h2></div><p>Saved only in this browser. Separate from rooftop and takeout scores.</p><form id="scooter-entry"><label>Name or initials <input name="player" required maxlength="16" autocomplete="off"></label><button>Save scooter score</button></form><p role="status"></p><div class="score-list"></div><div class="score-actions"><button id="scooter-close">Close</button></div>';
   dialog.setAttribute('aria-labelledby','scooter-scores-title');
   const form=dialog.querySelector('form') as HTMLFormElement;form.hidden=!pending;
@@ -27,12 +28,11 @@ export function openScooterScores(result?:ScooterResult){
   form.addEventListener('submit',event=>{
     event.preventDefault();if(!pending)return;
     const name=String(new FormData(form).get('player')??'').trim();if(!name)return;
-    try{saveScooterScore(localStorage,{...pending,name});pending=null;form.hidden=true;status.textContent='Scooter score saved in this browser.';render();}
+    try{const saved=saveScooterScore(localStorage,{...pending,name});if(!saved.some((record:any)=>record.id===pending!.id))throw Error('Score was not accepted. Try again.');acceptedPlayerName(name);finishCompactEntry(dialog);pending=null;form.hidden=true;status.textContent='Scooter score saved in this browser.';render();focusScoreEntry(dialog);}
     catch(error){status.textContent=error instanceof Error?error.message:'Could not save; existing records unchanged.';}
   });
   dialog.querySelector('#scooter-close')!.addEventListener('click',()=>dialog.close());
-  render();if(!dialog.open)dialog.showModal();
-  (pending?dialog.querySelector('input'):dialog.querySelector('button'))?.focus();
+  compactScoreEntry(dialog,!!pending,()=>{pending=null;finishCompactEntry(dialog);status.textContent='Score not saved.';render();focusScoreEntry(dialog);});render();showScoreDialog(dialog);
 }
 dialog.addEventListener('close',()=>returnFocus?.focus());
 window.addEventListener('open-scooter-scores',()=>openScooterScores());

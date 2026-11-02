@@ -1,3 +1,4 @@
+import {normalizedScoreName} from './score-options.mjs';
 // Level 2 geometry and rules are independent of the original 26-roof mission.
 export const THAI = { width:5500, ground:510, homeX:180, restaurantX:5270, limitMs:180000 };
 // Every tall obstacle has lower steps on both sides. Heights are the collision tops.
@@ -49,6 +50,7 @@ export function readTakeoutScores(storage){
   return [...list].sort((a,b)=>b.score-a.score||Date.parse(a.date)-Date.parse(b.date));
 }
 export function saveTakeoutScore(storage,record){
+ record={...record,name:normalizedScoreName(record.name)};
   const list=readTakeoutScores(storage);if(!validRecord(record))throw Error('Invalid takeout record.');
   if(!list.some(s=>s.id===record.id))list.push(record);
   list.sort((a,b)=>b.score-a.score||Date.parse(a.date)-Date.parse(b.date));
