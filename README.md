@@ -1,14 +1,14 @@
 # Seth Happens - A New Adventure
 
-**Version 0.13.1 · Early alpha**
+**Version 0.13.2 · Early alpha**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.13.1 Early alpha"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.13.2 Early alpha"></a>
 </p>
 
-**Play version 0.13.1** — Fullscreen highly recommended.
+**Play version 0.13.2** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
@@ -107,7 +107,7 @@ Keyboard **1–8** selects the corresponding unlocked song, **0** turns music of
 
 Unlocks, high scores and settings are saved in your browser. No account is required. They do not sync between devices, and browser and Home Screen installations may keep separate records. Clearing site data can remove them.
 
-Every adventure has its own score list. This game keeps its saves separate from the original Seth Happens.
+Each playable adventure has its own score list. Open **High Scores**, then use **View scores for level** to browse any level; it defaults to your currently selected level and does not switch your game. Encore is view-only and has no scores. Playtest mode can view existing records but does not save test runs. This game keeps its saves separate from the original Seth Happens.
 
 ## Help test the game
 

@@ -1,3 +1,4 @@
+import {mountScoreBrowser} from './score-browser';
 import {compactScoreEntry,showScoreDialog,resetCompactEntry,acceptedPlayerName,setScoreEntryBusy,focusScoreEntry} from './score-entry';
 import { RUN_LIMIT_MS,formatRunSeconds } from './mission.mjs';
 import {gameAudio} from './audio';
@@ -13,7 +14,7 @@ let notice='';
 let returnFocus:HTMLElement|null=null;
 let nameDraft='';
 let submitting=false,entryEpoch=0;
-export function scoresOpen(){return dialog.open||!!document.querySelector('#thai-scores[open], #scooter-scores[open], #adventure-scores[open]');}
+export function scoresOpen(){return !!document.querySelector('.score-dialog[open]');}
 // Prevent Phaser's window listeners from capturing letters while a dialog is open.
 for(const type of ['keydown','keyup'])document.addEventListener(type,event=>{
   if(scoresOpen())event.stopPropagation();
@@ -105,6 +106,7 @@ function render(){
 
   });
   compactScoreEntry(dialog,!!pending,()=>{pending=null;nameDraft='';notice='Score not saved.';resetCompactEntry(dialog);render();focusScoreEntry(dialog);});
+  mountScoreBrowser(dialog);
   dialog.querySelector('#server-scores')?.addEventListener('click',()=>{scope='server';notice='';render();});
   dialog.querySelector('#local-scores')?.addEventListener('click',()=>{scope='local';notice='';render();});
   dialog.querySelector('#all-scores')!.addEventListener('click',()=>{all=!all;render();});
@@ -127,10 +129,7 @@ function render(){
     finally{button.disabled=false;}
   });
 }
-async function openScores(){
-  if(['concert','haunted','zombie','snow','carnival','cabin','grocery','soccer','lastcall'].includes(document.body.dataset.level??'')){window.dispatchEvent(new Event('open-adventure-scores'));return;}
-  if(document.body.dataset.level==='scooter'){window.dispatchEvent(new Event('open-scooter-scores'));return;}
-  if(document.body.dataset.level==='thai'){window.dispatchEvent(new Event('open-thai-scores'));return;}
+async function openRooftopEntry(){
   returnFocus=document.activeElement as HTMLElement;
   await configReady;if(!serverEnabled)scope='local';
   if(serverEnabled){try{await syncLocalScores();}catch{notice='Some local scores could not sync. They remain on this PC; retry by reopening High Scores.';}}
@@ -138,9 +137,17 @@ async function openScores(){
   showScoreDialog(dialog);
 }
 export function offerScore(result:Result){
- if(document.body.dataset.review==='true')return;entryEpoch++;submitting=false;resetCompactEntry(dialog);notice='';nameDraft='';pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};openScores();}
+ if(document.body.dataset.review==='true')return;entryEpoch++;submitting=false;resetCompactEntry(dialog);notice='';nameDraft='';pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};void openRooftopEntry();}
 export function resetScoreEntry(){entryEpoch++;submitting=false;resetCompactEntry(dialog);nameDraft='';pending=null;if(dialog.open)dialog.close();}
-document.getElementById('high-scores')!.addEventListener('click',openScores);
+const browser=document.createElement('dialog');browser.id='level-score-browser';browser.className='score-dialog';browser.setAttribute('aria-labelledby','level-score-title');document.getElementById('game')!.append(browser);
+browser.innerHTML='<div class="score-heading"><h2 id="level-score-title">HIGH SCORES</h2></div><p role="status"></p><div class="score-actions"><button class="clear-local-rooftop" type="button">Clear high scores</button><button class="browser-close" type="button">Close</button></div><form class="browser-clear-form" hidden><p>Clear Level 1 rooftop scores saved in this browser.</p><label>Clear password <input name="password" type="password" required autocomplete="off"></label><label><input name="confirm" type="checkbox" required> Permanently delete all Level 1 rooftop scores in this browser</label><button>Confirm clear</button></form>';
+let browserReturnFocus:HTMLElement|null=null;
+browser.addEventListener('close',()=>browserReturnFocus?.focus({preventScroll:true}));
+browser.querySelector('.browser-close')!.addEventListener('click',()=>browser.close());
+const browserClear=browser.querySelector<HTMLFormElement>('.browser-clear-form')!;
+browser.querySelector('.clear-local-rooftop')!.addEventListener('click',()=>{browserClear.hidden=false;browserClear.querySelector<HTMLInputElement>('[name=password]')!.focus();});
+browserClear.addEventListener('submit',async event=>{event.preventDefault();const input=browserClear.querySelector<HTMLInputElement>('[name=password]')!,password=input.value;input.value='';const button=browserClear.querySelector('button')!;button.disabled=true;try{if(!await verifyClearPassword(password))throw Error('Incorrect password. Scores were not cleared.');localStorage.removeItem(SCORE_KEY);browserClear.reset();mountScoreBrowser(browser);browser.querySelector('[role=status]')!.textContent='Level 1 rooftop scores cleared in this browser.';}catch(error){browser.querySelector('[role=status]')!.textContent=error instanceof Error?error.message:'Could not clear scores.';}finally{button.disabled=false;}});
+document.getElementById('high-scores')!.addEventListener('click',()=>{if(document.querySelector('.score-dialog[open]'))return;browserReturnFocus=document.activeElement as HTMLElement;const unfinished=document.querySelector<HTMLDialogElement>('.score-dialog[data-entry=true]');showScoreDialog(unfinished??browser);});
 dialog.addEventListener('close',()=>returnFocus?.focus());
 
 function updateScoreMusic(){const label=dialog.querySelector('#score-music');if(label)label.textContent=gameAudio.music.outcome?`Music: ${gameAudio.music.track.title} · ${gameAudio.music.status}`:'';}

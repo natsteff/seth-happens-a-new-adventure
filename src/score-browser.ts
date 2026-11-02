@@ -1,0 +1,54 @@
+import {readScores,rankScores} from './scores.mjs';
+import {readTakeoutScores} from './thai-mission.mjs';
+import {readScooterScores} from './scooter-mission.mjs';
+import {readAdventureScores} from './adventure-records.mjs';
+import {formatRunSeconds} from './mission.mjs';
+export const scoreLevels=[['rooftop','Rooftop Beer Run'],['thai','Thai Takeout Run'],['scooter','Scooter Ride'],['concert','Concert Chaos'],['haunted','Haunted House'],['zombie','Zombie Apocalypse'],['snow','Snow Day From Hell'],['carnival','Carnival Catastrophe'],['cabin','Cabin Fever'],['grocery','Grocery Store Gauntlet'],['soccer','Soccer Game Hijinx'],['lastcall','Last Call'],['encore','Encore · View-only finale']];
+const selections=new WeakMap<HTMLDialogElement,string>();
+// Browsing never writes scores/progression or replaces a pending run's form.
+export function mountScoreBrowser(dialog:HTMLDialogElement){
+ dialog.querySelector('.score-browser')?.remove();
+ const root=document.createElement('section');root.className='score-browser';
+ const label=document.createElement('label');label.textContent='View scores for level';
+ const select=document.createElement('select');select.setAttribute('aria-label','View scores for level');
+ scoreLevels.forEach(([key,title],i)=>{const option=document.createElement('option');option.value=key;option.textContent=`${i+1} · ${title}`;select.append(option);});label.append(select);
+ select.value=dialog.open?(selections.get(dialog)??document.body.dataset.level??'rooftop'):(document.body.dataset.level??'rooftop');
+ if(!select.value)select.value='rooftop';
+ dialog.querySelectorAll<HTMLElement>(':scope > p:not([role=status])').forEach(el=>el.hidden=true);
+ const note=document.createElement('p');note.textContent='Saved in this browser only. Viewing another level keeps your current game unchanged.';
+ if(document.body.dataset.review==='true')note.textContent+=' Playtest runs do not save scores.';
+ const list=document.createElement('div');list.className='score-list';list.setAttribute('aria-live','polite');
+ const more=document.createElement('button');more.type='button';more.textContent='Show all scores';
+ let all=false;
+ function render(){
+  selections.set(dialog,select.value);list.replaceChildren();dialog.querySelectorAll<HTMLElement>('.score-eyebrow').forEach(el=>el.hidden=select.value!==document.body.dataset.level);
+  more.hidden=select.value==='encore';
+  // Keep the existing rooftop clear action scoped to rooftop scores only.
+  dialog.querySelectorAll<HTMLElement>('#clear-scores,#clear-form,#server-scores,#local-scores,.clear-local-rooftop,.browser-clear-form').forEach(el=>{if(el.id==='clear-form'||el.classList.contains('browser-clear-form'))el.hidden=true;else el.hidden=select.value!=='rooftop';});
+  try{
+   if(select.value==='encore'){list.textContent='Encore is a view-only finale and has no high scores.';return;}
+   const records=select.value==='rooftop'?rankScores(readScores(localStorage)):select.value==='thai'?readTakeoutScores(localStorage):select.value==='scooter'?readScooterScores(localStorage):readAdventureScores(localStorage,select.value);
+   if(!records.length){list.textContent='No saved scores for this level yet.';more.hidden=true;return;}
+   const table=document.createElement('table');table.innerHTML='<thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Run details</th></tr></thead>';
+   const tbody=table.createTBody();
+   const visible=all?records:[...records.filter((s:any)=>!s.cheater).slice(0,10),...records.filter((s:any)=>s.cheater)];
+   visible.forEach((s:any,i:number)=>{
+    const row=tbody.insertRow();if(s.cheater)row.className='cheater-row';
+    row.insertCell().textContent=s.cheater?'—':String(i+1);row.insertCell().textContent=s.name+(s.cheater?' · CHEATER':'');row.insertCell().textContent=s.score.toLocaleString();
+    const details=row.insertCell();details.className='run-details';
+    const facts=[['Date',new Date(s.date).toLocaleDateString()],['Time',s.elapsedMs===undefined?'Legacy run':formatRunSeconds(s.elapsedMs)]];
+    if(select.value==='rooftop')facts.push(['Photos',`${s.photos}/2${s.latePhotos?` · ${s.latePhotos} recovered`:''}`],['Six-pack',s.beer?'Delivered':s.cheater?'Skipped · elevator cheat':'Not delivered'],['Mishaps',`${s.falls} falls · ${s.squishes} squishes · ${s.bumps} bumps`],['Time bonus',s.cheater?'Shortcut: fixed −10,000':`+${(s.bonus??0).toLocaleString()}`]);
+    else {facts.push(['Mishaps',String(s.hits)]);if(select.value==='thai')facts.push(['Food',`${s.condition}%`],['Warmth',`${s.warmth}%`]);if(select.value==='scooter')facts.push(['Grip',`${s.grip}%`]);}
+    for(const [name,value] of facts){const fact=document.createElement('div'),heading=document.createElement('span'),text=document.createElement('strong');heading.textContent=name.toUpperCase();text.textContent=value;fact.append(heading,text);details.append(fact);}
+   });list.append(table);more.hidden=records.filter((s:any)=>!s.cheater).length<=10;
+  }catch(error){list.textContent=error instanceof Error?error.message:'Could not read saved scores. Nothing was changed.';more.hidden=true;}
+ }
+ select.addEventListener('change',()=>{all=false;more.textContent='Show all scores';render();});
+ more.addEventListener('click',()=>{all=!all;more.textContent=all?'Show top 10':'Show all scores';render();});
+ root.append(label,note,list,more);
+ // Original forms/save handlers and clear-password policy remain intact.
+ dialog.querySelectorAll<HTMLElement>(':scope > .score-list,#all-scores').forEach(el=>el.hidden=true);
+ dialog.querySelector('.score-actions')?.before(root);
+ if(!root.isConnected)dialog.append(root);
+ render();
+}

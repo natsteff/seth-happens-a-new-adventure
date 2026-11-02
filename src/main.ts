@@ -733,7 +733,7 @@ class Errand extends Phaser.Scene {
     this.reminder.setColor("#ff3030").setFontSize(32).setWordWrapWidth(950);
   }
   finish(){
-    if(!this.beer){this.warnMissingBeer();if(!this.paused&&!this.introActive)this.physics.world.resume();return;}
+    if(!this.beer&&!this.cheater){this.warnMissingBeer();if(!this.paused&&!this.introActive)this.physics.world.resume();return;}
     if(this.won)return;
     levelProgress.completeRooftop();refreshLevelLocks();
     const next=document.getElementById('next-level')!;next.hidden=false;next.dataset.nextLevel='thai';next.textContent='Continue to Level 2 · Thai Takeout Run →';
@@ -994,7 +994,7 @@ function closeLevelPicker(){levelDialog.close();if(levelPickerFromMenu)openTouch
 document.getElementById('level-cancel')!.addEventListener('click',closeLevelPicker);
 levelDialog.addEventListener('cancel',event=>{event.preventDefault();closeLevelPicker();});
 function startLevel(key:LevelKey){
- (document.getElementById('high-scores') as HTMLButtonElement).disabled=key==='encore';
+ (document.getElementById('high-scores') as HTMLButtonElement).disabled=false;
  if(!canPlayLevel(key)){refreshLevelLocks();return;}
  modalNavigation.reset();levelDialog.close();touchMenu.close();touch.clear();resetScoreEntry();resetTakeoutScores();resetScooterScores();resetAdventureScores();
  const previous=activeScene();if(previous)game.scene.stop(previous.sys.settings.key);
