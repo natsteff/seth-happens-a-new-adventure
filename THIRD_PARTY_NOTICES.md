@@ -12,6 +12,8 @@ The Minnesota United crest in `public/assets/minnesota-united-user-supplied.png`
 
 Public availability does not grant a blanket license to redistribute the game's artwork, likenesses, music, recordings or third-party marks. Their respective rights remain unchanged.
 
+The Victorian mansion, cemetery, woods and Thai street-vehicle atlas are original AI-generated artwork. Their runtime images are resized copies; supplied reference screenshots are not distributed. Existing cast images are reused for animated Thai pedestrians.
+
 ## Dependencies
 
 - **Phaser 3.90.0** — MIT, Copyright (c) 2013–2025 Phaser Studio Inc. [Full notice](licenses/phaser-MIT.txt). [Source](https://github.com/phaserjs/phaser/tree/v3.90.0).
