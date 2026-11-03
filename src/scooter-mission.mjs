@@ -1,14 +1,14 @@
 import {normalizedScoreName} from './score-options.mjs';
 // Feet positions and scenery geometry share world coordinates; simulation uses fixed substeps.
-export const SCOOTER={width:8000,ground:950,finish:7730,gravity:1050,minSpeed:220,cruise:330,maxSpeed:470,limitMs:120000};
-export const ramps=[
+export const SCOOTER={width:16000,ground:950,finish:15300,gravity:1050,minSpeed:220,cruise:330,maxSpeed:470,hopVelocity:560,limitMs:120000};
+const firstRamps=[
  {x:850,end:990,height:40,launch:460,name:'THE WARM-UP'},
  {x:2050,end:2220,height:65,launch:620,name:'BUS HOP'},
  {x:3450,end:3650,height:90,launch:790,name:'ROOFTOP EXPRESS'},
  {x:4650,end:4840,height:75,launch:560,riskyLaunch:900,name:'YOUR CALL',optional:true},
  {x:6200,end:6440,height:120,launch:930,name:'ABSOLUTELY NOT A SHORTCUT'}
 ];
-export const rideObstacles=[
+const firstObstacles=[
  {x:1080,width:115,height:60,kind:'bin'},
  {x:2330,width:290,height:112,kind:'bus'},
  {x:3780,width:350,height:205,kind:'building'},
@@ -16,6 +16,10 @@ export const rideObstacles=[
  {x:6620,width:430,height:235,kind:'building'},
  {x:7150,width:180,height:65,kind:'car-right'}
 ];
+export const ramps=[...firstRamps,...firstRamps.map(r=>({...r,x:r.x+7600,end:r.end+7600,name:r.name+' · AFTER DARK'}))];
+export const rideObstacles=[...firstObstacles,...firstObstacles.map(o=>({...o,x:o.x+7600}))];
+export const movingSemis=[{left:1260,right:1620,speed:90,phase:0},{left:5480,right:5800,speed:100,phase:1},{left:8910,right:9250,speed:100,phase:0},{left:13050,right:13500,speed:95,phase:1}];
+export function scooterSemi(index,elapsedMs){const t=movingSemis[index],length=t.right-t.left,u=((elapsedMs/1000*t.speed/length+t.phase)%2+2)%2;return {x:t.left+(u<=1?u:2-u)*length,direction:u<1?1:-1,width:300,height:125};}
 export const reactions={
  start:'I agreed to a ride. Not a physics experiment.',
  hop:'That pothole had a perfectly good road around it.',
@@ -45,7 +49,7 @@ export function scooterStep(state,input,deltaMs){
   const target=input.move<0?SCOOTER.minSpeed:input.move>0||input.boost?SCOOTER.maxSpeed:SCOOTER.cruise;
   s.vx+=Math.max(-360*dt,Math.min(240*dt,target-s.vx));
   const oldX=s.x,oldY=s.y,wasGrounded=s.grounded;
-  if(hop&&s.grounded){s.vy=-430;s.grounded=false;s.jumps++;events.push({type:'hop'});}hop=false;
+  if(hop&&s.grounded){s.vy=-SCOOTER.hopVelocity;s.grounded=false;s.jumps++;events.push({type:'hop'});}hop=false;
   s.x+=s.vx*dt;
   if(!s.grounded){s.vy+=SCOOTER.gravity*dt;s.y+=s.vy*dt;s.airMs+=ms;s.biggest=Math.max(s.biggest,SCOOTER.ground-s.y);}
   // Grounded feet retain their support height until a ramp/roof update below.
@@ -74,6 +78,13 @@ export function scooterStep(state,input,deltaMs){
     s.y=top-3;s.vy=-280;s.grounded=false;
    }
   }
+  for(let i=0;i<movingSemis.length;i++){
+   const truck=scooterSemi(i,s.elapsedMs),top=SCOOTER.ground-truck.height,inX=s.x+24>truck.x&&s.x-24<truck.x+truck.width;
+   if(!inX)continue;
+   if(!s.grounded&&s.vy>=0&&oldY<=top+2&&s.y>=top){s.y=top;s.vy=0;s.grounded=true;supported=true;events.push({type:'land'});}
+   else if(wasGrounded&&Math.abs(oldY-top)<3){s.y=top;supported=true;}
+   else if(s.y>top+8&&s.y-90<SCOOTER.ground){const front=truck.direction<0?oldX+24<=truck.x+6:oldX-24>=truck.x+truck.width-6;if(front){const hit=scooterHit(s,12);if(hit.hits>s.hits)events.push({type:'hit'});s=hit;}s.y=top-3;s.vy=-280;s.grounded=false;}
+  }
   if(s.grounded&&!supported&&s.y<SCOOTER.ground-2){s.grounded=false;s.vy=0;}
   if(!s.grounded&&s.y>=SCOOTER.ground){
    if(s.vy>1030){const hit=scooterHit(s,10);if(hit.hits>s.hits)events.push({type:'hard'});s=hit;}
@@ -81,7 +92,7 @@ export function scooterStep(state,input,deltaMs){
    s.y=SCOOTER.ground;s.vy=0;s.grounded=true;s.airMs=0;
   }
   // Optional high-air bonus requires choosing the risky ramp and hitting its arc.
-  if(s.risky&&s.x>5100&&s.x<5370&&s.y<SCOOTER.ground-330&&!s.tokens.includes('sky')){s.tokens.push('sky');s.bonus+=750;events.push({type:'bonus'});}
+  for(const [index,offset] of [0,7600].entries()){const token=index===0?'sky':'sky-after-dark';if(s.risky&&s.x>5100+offset&&s.x<5370+offset&&s.y<SCOOTER.ground-330&&!s.tokens.includes(token)){s.tokens.push(token);s.bonus+=750;events.push({type:'bonus'});}}
   if(s.grip<=0||s.elapsedMs>=SCOOTER.limitMs){s.failed=true;events.push({type:'fail'});break;}
   if(s.x>=SCOOTER.finish){s.won=true;events.push({type:'finish'});break;}
  }

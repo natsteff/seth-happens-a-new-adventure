@@ -1,17 +1,17 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {SCOOTER,ramps,rideObstacles,newScooterRun,scooterStep,scooterHit,scooterScore,SCOOTER_SCORE_KEY,readScooterScores,saveScooterScore} from '../src/scooter-mission.mjs';
+import {SCOOTER,ramps,rideObstacles,movingSemis,scooterSemi,newScooterRun,scooterStep,scooterHit,scooterScore,SCOOTER_SCORE_KEY,readScooterScores,saveScooterScore} from '../src/scooter-mission.mjs';
 function ride(move,dt=1000/60,risky=false){let state={...newScooterRun(),risky},events=[];for(let i=0;i<10000&&!state.won&&!state.failed;i++){const r=scooterStep(state,{move},dt);state=r.state;events.push(...r.events);}return {state,events};}
 test('every ramp launches once, climbs progressively, and has reachable safe landings at all speeds',()=>{
  assert.ok(ramps[0].launch<ramps[1].launch&&ramps[1].launch<ramps[2].launch&&ramps[2].launch<ramps[4].launch);
- for(const move of [-1,0,1]){const {state:s,events}=ride(move);assert.equal(s.won,true);assert.equal(s.failed,false);assert.deepEqual(s.launched,[0,1,2,3,4]);assert.equal(events.filter(e=>e.type==='ramp').length,5);assert.ok(s.grip>0);assert.ok(s.biggest>450);assert.ok(s.elapsedMs<SCOOTER.limitMs);}
+ for(const move of [-1,0,1]){const {state:s,events}=ride(move);assert.equal(s.won,true);assert.equal(s.failed,false);assert.deepEqual(s.launched,ramps.map((_,i)=>i));assert.equal(events.filter(e=>e.type==='ramp').length,10);assert.ok(s.grip>0);assert.ok(s.biggest>450);assert.ok(s.elapsedMs<SCOOTER.limitMs);}
  assert.ok(rideObstacles.some(o=>o.kind==='bus')&&rideObstacles.some(o=>o.kind==='building'));
 });
 test('fixed substeps keep ramps and outcomes consistent at 30/60/120fps',()=>{
  const results=[30,60,120].map(fps=>ride(0,1000/fps).state);for(const s of results){assert.equal(s.won,true);assert.equal(s.hits,results[0].hits);assert.deepEqual(s.launched,results[0].launched);assert.ok(Math.abs(s.elapsedMs-results[0].elapsedMs)<40);}
 });
-test('optional high route grants one bonus and is visibly higher than lower route',()=>{
- const low=ride(0),high=ride(0,1000/60,true);assert.equal(low.state.bonus,0);assert.equal(high.state.bonus,750);assert.equal(high.events.filter(e=>e.type==='bonus').length,1);assert.equal(high.events.find(e=>e.type==='ramp'&&e.index===3).risky,true);assert.equal(high.state.won,true);
+test('each optional high route grants one bonus and is visibly higher than lower route',()=>{
+ const low=ride(0),high=ride(0,1000/60,true);assert.equal(low.state.bonus,0);assert.equal(high.state.bonus,1500);assert.equal(high.events.filter(e=>e.type==='bonus').length,2);assert.equal(high.events.find(e=>e.type==='ramp'&&e.index===3).risky,true);assert.equal(high.state.won,true);
 });
 test('front bumps cost grip, roof landings are safe and passenger loss fails without a score',()=>{
  const o=rideObstacles[0];let s={...newScooterRun(),x:o.x-27};let result=scooterStep(s,{},30);assert.equal(result.state.hits,1);assert.equal(result.state.grip,82);
@@ -31,4 +31,10 @@ test('riding off a roof falls under gravity rather than snapping to the road',()
  const o=rideObstacles.find(o=>o.kind==='building'),top=SCOOTER.ground-o.height;
  let s={...newScooterRun(),x:o.x+o.width+23,y:top,grounded:true};s=scooterStep(s,{},50).state;
  assert.equal(s.grounded,false);assert.ok(s.y>=top&&s.y<top+5);assert.ok(s.vy>0);
+});
+
+test('route travel is doubled, and moving semis have bounded continuous motion with safe roofs',()=>{
+ assert.equal(SCOOTER.finish-160,2*(7730-160));assert.equal(ramps.length,10);assert.equal(movingSemis.length,4);assert.ok(SCOOTER.hopVelocity**2/(2*SCOOTER.gravity)>scooterSemi(0,0).height);
+ for(let i=0;i<movingSemis.length;i++){for(const ms of [0,1000,10000,50000]){const t=scooterSemi(i,ms);assert.ok(t.x>=movingSemis[i].left&&t.x<=movingSemis[i].right);assert.ok(Math.abs(scooterSemi(i,ms+1).x-t.x)<1);}}
+ const t=scooterSemi(1,0),s={...newScooterRun(),x:t.x+75,y:SCOOTER.ground-t.height-1,vy:100,grounded:false};const result=scooterStep(s,{},20).state;assert.equal(result.hits,0);assert.equal(result.grounded,true);
 });

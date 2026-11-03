@@ -1,3 +1,4 @@
+import {loadCast,castPerson} from './cast';
 import Phaser from 'phaser';
 import {FootAdventure} from './foot-adventure';
 import {CONCERT,concertStairs,newConcertRun,concertAction,photoWindow,photoBlocked,shotNames,concertScore} from './concert-mission.mjs';
@@ -7,26 +8,28 @@ export class ConcertChaos extends FootAdventure{
  constructor(){super({key:'concert',number:4,title:'Concert Chaos',...CONCERT,startY:CONCERT.ground,instructions:'Get inside → climb the arena stairs → F / Action at press check-in.\nBring your credentials down to the photo pit.\nRun, jump and dodge the crowd. At the pit, time three F / Action shots.\nThe press desk is a checkpoint. Missing a shot lets you try again.'});}
  traffic?:{body:Phaser.GameObjects.Rectangle;roof:Phaser.GameObjects.Rectangle;art:Phaser.GameObjects.Image;direction:number};carArt!:Phaser.GameObjects.Image;
  mission=newConcertRun();pass!:Phaser.GameObjects.Container;stage!:Phaser.GameObjects.Image;gate?:Phaser.GameObjects.Rectangle;photoUi?:Phaser.GameObjects.Container;photoCue?:Phaser.GameObjects.Text;photoBar?:Phaser.GameObjects.Rectangle;photoFrame?:Phaser.GameObjects.Graphics;photoHead?:Phaser.GameObjects.Arc;photoMs=0;signSeen=false;
- preload(){super.preload();if(!this.textures.exists('concert-stage'))this.load.image('concert-stage','./assets/concert/stage-v1.png');}
+ preload(){super.preload();loadCast(this,'concert');if(!this.textures.exists('concert-stage'))this.load.image('concert-stage','./assets/concert/stage-v1.png');}
  resetMission(){this.mission=newConcertRun();this.photoMs=0;this.signSeen=false;this.photoUi=undefined;}
  buildWorld(){
   const g=this.add.graphics().setDepth(-20);g.fillStyle(0x142031).fillRect(0,0,CONCERT.width,CONCERT.height);g.fillStyle(0x303342).fillRect(1250,0,CONCERT.width-1250,CONCERT.height);
   const street=this.add.tileSprite(0,CONCERT.ground-600,1250,600,'thai-street').setOrigin(0).setTileScale(.7).setDepth(-18);street.tilePositionY=1024-600/.7;
   this.platform(0,CONCERT.ground,CONCERT.width,180,0x353d49);
   for(let x=20;x<1200;x+=135)g.fillStyle(0xd6ba79).fillRect(x,CONCERT.ground+55,64,4);
-  for(const x of [470,820]){this.platform(x,CONCERT.ground-52,95,52,0xb36942);this.text(x-5,CONCERT.ground-88,'BARRICADE',11,'#ffe2a0');}
+  for(const x of [470,820]){this.platform(x,CONCERT.ground-52,95,52,0x45515a).setFillStyle(0x45515a,.12);const metal=this.add.graphics().setDepth(3);metal.lineStyle(3,0xa2aeb0).strokeRect(x,CONCERT.ground-52,95,48);for(let n=0;n<9;n++)metal.lineStyle(1,0x6b8088).lineBetween(x+n*10,CONCERT.ground-48,x+Math.min(95,n*10+30),CONCERT.ground-10);metal.lineStyle(4,0x8b9b9c).lineBetween(x+5,CONCERT.ground-52,x+5,CONCERT.ground).lineBetween(x+90,CONCERT.ground-52,x+90,CONCERT.ground);metal.lineBetween(x-8,CONCERT.ground,x+18,CONCERT.ground).lineBetween(x+78,CONCERT.ground,x+102,CONCERT.ground);}
   const frames=this.textures.get('thai-props');if(!frames.has('concert-car'))frames.add('concert-car',0,726,263,418,192);
   const car=this.add.image(620,CONCERT.ground,'thai-props','concert-car').setOrigin(.5,1).setDisplaySize(145,67).setDepth(4);this.carArt=car;
-  this.hazard('clown',1030,CONCERT.ground-34,100,2800);this.text(950,CONCERT.ground-115,'SCALPER: “PHOTO PASS? I KNOW A GUY.”',12,'#ffd18b');
+  this.concertgoer(1030,CONCERT.ground,0,100,2800);this.text(950,CONCERT.ground-115,'SCALPER: “PHOTO PASS? I KNOW A GUY.”',12,'#ffd18b');
   g.fillStyle(0x202c40).fillRect(1180,530,155,600);this.text(1240,700,'ARENA\nENTRANCE →',24,'#bbecdc').setOrigin(.5).setAlign('center');
   // Reusable seat rows and horizontal rail sections behind distinct collision treads.
   for(let x=1400;x<4900;x+=150)for(let y=150;y<1080;y+=100){g.fillStyle((Math.round(x/150)+Math.round(y/100))%2?0x633c54:0x50394c).fillRoundedRect(x,y,105,36,7);g.fillStyle(0x252938).fillRect(x+14,y+35,75,24);}
   for(const [i,s] of concertStairs.entries()){
-   this.platform(s.x,s.y,s.width,s.height,i<10?0x69747b:0x66617b);g.lineStyle(3,0xb6a78a,.65).lineBetween(s.x,s.y-55,s.x+s.width,s.y-55);g.lineBetween(s.x+15,s.y-55,s.x+15,s.y);
-   if(i<9&&i%2===1)this.hazard(i%3?'scruffy':'clown',s.x+100,s.y-33,48,3000-i*95,27,62);
-   if(i>10&&i%2===0)this.hazard('concert-fans',s.x+100,s.y-32,55,1600,32,62);
-   if(i%4===2){this.hazard('concert-fans',s.x+135,s.y-11,40,2200,30,20).setTint(0xcba572).setDisplaySize(30,20);}
+   const column=this.platform(s.x,s.y,s.width,CONCERT.ground-s.y+20,i<10?0x4f5960:0x55505f);
+   const face=this.add.graphics().setDepth(2);face.lineStyle(1,0x333a43);for(let y=s.y+14;y<CONCERT.ground;y+=30)face.lineBetween(s.x,y,s.x+s.width,y);face.lineStyle(3,0x9aa7a8).lineBetween(s.x,s.y-46,s.x+s.width,s.y-46);face.lineBetween(s.x+16,s.y-46,s.x+16,s.y);
+   if(i%2===1&&i!==9)this.concertgoer(s.x+100,s.y,i%4,32,2600+i*65);
+
   }
+  this.platform(3270,330,80,CONCERT.ground-330+20,0x4f5960);
+  this.platform(3318,370,30,CONCERT.ground-370,0x424954);
   this.text(1590,820,'PRESS CHECK-IN ↑\nYES, ALL THE WAY UP',19,'#ffe0a2').setAlign('center');
   this.gate=this.platform(3280,200,28,CONCERT.ground-200,0x536077);this.text(3294,535,'PASS\nREQUIRED',16,'#ffda9d').setOrigin(.5).setAlign('center');
   this.text(2980,100,'PRESS CHECK-IN — LOWER LEVEL',18,'#ffcf87').setBackgroundColor('#293d4b').setPadding(10,5);
@@ -35,10 +38,13 @@ export class ConcertChaos extends FootAdventure{
   this.text(CONCERT.deskX-45,CONCERT.deskY-100,'PRESS DESK\nF / ACTION',14,'#ffe0a2').setAlign('center');
   this.text(3650,285,'CREDENTIALS SECURED?\nDOWN TO THE PIT →',18,'#abe9d1');
   this.stage=this.add.image(6550,CONCERT.ground,'concert-stage').setOrigin(.5,1).setDisplaySize(1500,1000).setDepth(-12);
-  for(const [i,x] of [5100,5400,5720,6050,6350].entries()){this.hazard(i%2?'concert-fans':'clown',x,CONCERT.ground-34,70,i%2?1500:2100,42,66);}
-  const surfer=this.hazard('concert-fans',5910,CONCERT.ground-145,150,1700,78,34).setAngle(-83).setDisplaySize(80,45);surfer.setTint(0xf1c0d1);
+  for(const [i,x] of [5100,5400,5720,6050,6350].entries())this.concertgoer(x,CONCERT.ground,i%4,65,1800+i*100);
+  for(const x of [5200,6100])this.hazard('scruffy',x,CONCERT.ground-31,35,2800,28,62).setDisplaySize(50,78);
+  // Reused existing fan pair stays upright at adult scale, behind the active crowd.
+  for(const x of [5500,5860])this.add.image(x,CONCERT.ground,'concert-fans').setOrigin(.5,1).setDisplaySize(95,78).setDepth(3);
   this.platform(6520,CONCERT.ground-58,35,58,0x77828e);this.text(6600,CONCERT.ground-150,'PHOTO PIT →\nF / ACTION',21,'#c1f1dc');
  }
+ concertgoer(x:number,bottom:number,index:number,range=35,period=2600){const art=castPerson(this,'concert',index,x,bottom,78).setDepth(6);this.hazards.push({art,kind:'concert-person',x,y:bottom-31,range,period,width:28,height:62});return art;}
  afterPlayer(){
   const body=this.add.rectangle(620,CONCERT.ground-25,124,50,0xffffff,0),roof=this.add.rectangle(629,CONCERT.ground-59.5,68,19,0xffffff,0);
   this.physics.add.existing(body);this.physics.add.existing(roof);

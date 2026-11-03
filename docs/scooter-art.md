@@ -7,3 +7,5 @@ The 1536 × 1024 transparent image uses runtime frame `(380, 8, 865, 1008)` to t
 City scenery, street props and familiar characters form the surroundings. Ramps, birds, signs and road markings are drawn in code. Visual landing surfaces align with their collision bodies.
 
 Allison’s reactions are on-screen speech bubbles. No recorded Allison dialogue plays in this version.
+
+The route now covers twice its original travel distance, with ten ramp sequences and four moving semis using the Thai street-vehicle atlas. Eight walkers reuse the Scooter cast with articulated limb animation and active collision hazards. City backdrop strips share one source texture instead of allocating a road-width TileSprite fill.
