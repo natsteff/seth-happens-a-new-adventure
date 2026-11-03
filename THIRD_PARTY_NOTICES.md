@@ -14,6 +14,8 @@ Public availability does not grant a blanket license to redistribute the game's 
 
 The Victorian mansion, cemetery, woods and Thai street-vehicle atlas are original AI-generated artwork. Their runtime images are resized copies; supplied reference screenshots are not distributed. Existing cast images are reused for animated Thai pedestrians.
 
+Four additional concertgoers and the weathered log/boulder atlas are original AI-generated artwork. Existing Scooter cast and Thai vehicle artwork are reused. Supplied reference screenshots are not distributed.
+
 ## Dependencies
 
 - **Phaser 3.90.0** — MIT, Copyright (c) 2013–2025 Phaser Studio Inc. [Full notice](licenses/phaser-MIT.txt). [Source](https://github.com/phaserjs/phaser/tree/v3.90.0).
