@@ -1,0 +1,1 @@
+export const streetVehicleFrames={"shelter": [23, 135, 464, 189], "dump": [521, 135, 480, 191], "double-decker": [1042, 105, 484, 221], "semi": [24, 454, 470, 238], "semi-trailer": [522, 478, 495, 206]};

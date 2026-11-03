@@ -1,14 +1,14 @@
 # Seth Happens - A New Adventure
 
-**Version 0.13.2 · Early alpha**
+**Version 0.14.0 · Early alpha**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.13.2 Early alpha"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.14.0 Early alpha"></a>
 </p>
 
-**Play version 0.13.2** — Fullscreen highly recommended.
+**Play version 0.14.0** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
@@ -34,7 +34,7 @@ Run, jump, dodge and ride through a city full of familiar faces and questionable
 | 2 | Thai Takeout Run | Collect dinner and bring it home through busier streets. |
 | 3 | Scooter Ride | Tackle bigger ramps with Allison still aboard. |
 | 4 | Concert Chaos | Get your press pass, reach the photo pit and get the shots. |
-| 5 | Haunted House | Find the attic key and escape before the house catches up. |
+| 5 | Haunted House | Cross the graveyard, find the attic key, descend to the first-floor exit and escape through haunted woods. |
 | 6 | Zombie Apocalypse | Survive the neighborhood, find a truck and drive to safety. |
 | 7 | Snow Day From Hell | Cross icy streets and dodge snowplows to reach warmth. |
 | 8 | Carnival Catastrophe | Search for Allison across moving rides and a chaotic midway. |

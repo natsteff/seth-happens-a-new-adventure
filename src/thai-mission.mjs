@@ -5,14 +5,14 @@ export const THAI = { width:5500, ground:510, homeX:180, restaurantX:5270, limit
 export const streetObstacles = [
   {kind:'bin',x:690,width:88,height:64},
   {kind:'bus',x:850,width:300,height:110},
-  {kind:'shop',x:1200,width:280,height:174},
+  {kind:'shelter',x:1200,width:280,height:150},
   {kind:'cart',x:1510,width:108,height:106},
   {kind:'bin',x:1645,width:88,height:64},
   {kind:'bin',x:2410,width:88,height:64},
-  {kind:'bus',x:2550,width:300,height:110},
-  {kind:'shop',x:2910,width:260,height:178},
-  {kind:'building',x:3230,width:300,height:244},
-  {kind:'shop',x:3590,width:240,height:178},
+  {kind:'semi',x:2550,width:300,height:140},
+  {kind:'dump',x:2910,width:260,height:140},
+  {kind:'double-decker',x:3230,width:350,height:190},
+  {kind:'semi-trailer',x:3590,width:280,height:140},
   {kind:'bus',x:3890,width:300,height:110},
   {kind:'bin',x:4250,width:88,height:64},
   {kind:'cart',x:5060,width:95,height:76},
@@ -55,4 +55,11 @@ export function saveTakeoutScore(storage,record){
   if(!list.some(s=>s.id===record.id))list.push(record);
   list.sort((a,b)=>b.score-a.score||Date.parse(a.date)-Date.parse(b.date));
   storage.setItem(THAI_SCORE_KEY,JSON.stringify(list));return list;
+}
+
+// Cab and cargo roof heights follow the art; never create a floating roof over a tractor chassis.
+export function streetSolids(o){
+ if(o.kind==='semi')return [{x:o.x,width:o.width*.42,height:36},{x:o.x+o.width*.42,width:o.width*.34,height:o.height},{x:o.x+o.width*.76,width:o.width*.24,height:o.height*.56}];
+ if(o.kind==='dump'||o.kind==='semi-trailer')return [{x:o.x,width:o.width*.76,height:o.height},{x:o.x+o.width*.76,width:o.width*.24,height:Math.round(o.height*.78)}];
+ return [o];
 }

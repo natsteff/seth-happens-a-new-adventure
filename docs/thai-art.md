@@ -15,3 +15,9 @@ The design includes brick piers, tan stone bands, tall teal glass bays, a circul
 Generation prompt: “Create one transparent lower-street-level apartment facade sprite for a 2D cartoon platform game. Use the left-logo tower identity and supplied entrance architecture; brick/tan/glass, three left and two right leg-like sections, prominent circular G, recessed entry and curved circular drive. Show only lower stories cropped above, no roof or full tower; no characters, cars, extra text or photographic background. Keep an open entry area for the runtime elevator.”
 
 The home camera includes 260 extra world pixels to the left, keeping Allison and Seth clear of landscape movement controls. A cropped wing reuses the same facade texture. Street buildings form blocks separated by skyline openings, including the gap to the right of home; scenery never adds physics bodies.
+
+## Street furniture and vehicles
+
+`public/assets/thai/street-vehicles-v1.png` is an original AI-generated transparent atlas containing a glass bus shelter, dump truck, double-decker bus, semi tractor and semi with trailer. Runtime frame crops remove transparent margins; separate mission profiles align cargo, cab and chassis collision tops to the art. Street buildings are background scenery, not street obstacles.
+
+Existing Thai cast illustrations are reused for active pedestrians. A small articulated walk cycle splits each original cutout into torso and legs at runtime without another image atlas. Allison’s speech draws above the entrance art and her scale matches Seth. No new recordings or music are introduced.

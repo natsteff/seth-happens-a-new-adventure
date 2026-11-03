@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {THAI,streetObstacles,newTakeoutRun,collectTakeout,foodWarmth,hitTakeout,canUseElevator,takeoutScore,trafficSpeed,vehicleFrontHurts,THAI_SCORE_KEY,readTakeoutScores,saveTakeoutScore} from '../src/thai-mission.mjs';
+import {THAI,streetObstacles,streetSolids,newTakeoutRun,collectTakeout,foodWarmth,hitTakeout,canUseElevator,takeoutScore,trafficSpeed,vehicleFrontHurts,THAI_SCORE_KEY,readTakeoutScores,saveTakeoutScore} from '../src/thai-mission.mjs';
 import {REGULAR_JUMP_SPEED} from '../src/mission.mjs';
 
 test('takeout must be collected before elevator finish; there is no photo or soccer prerequisite',()=>{
@@ -68,4 +68,11 @@ test('moving vehicles hurt only at their front, with safe roofs and rear contact
   assert.equal(vehicleFrontHurts({},direction),false);
  }
  assert.equal(vehicleFrontHurts({left:true,right:true},0),false);
+});
+
+test('street platforms are street furniture/vehicles with separate cab and cargo collision tops',()=>{
+ assert.ok(!streetObstacles.some(o=>['building','shop'].includes(o.kind)));
+ for(const kind of ['shelter','dump','semi','semi-trailer','double-decker'])assert.ok(streetObstacles.some(o=>o.kind===kind));
+ for(const obstacle of streetObstacles){for(const part of streetSolids(obstacle)){assert.ok(part.x>=obstacle.x);assert.ok(part.x+part.width<=obstacle.x+obstacle.width);assert.ok(part.height<=obstacle.height);}}
+ const tractor=streetSolids(streetObstacles.find(o=>o.kind==='semi'));assert.equal(tractor.length,3);assert.ok(tractor[0].height<tractor[1].height);
 });

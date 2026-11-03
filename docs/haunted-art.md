@@ -1,7 +1,7 @@
 # Haunted House artwork
 
-`public/assets/haunted/mansion-wall-v1.png` provides repeated mansion room sections. Each section displays at 480 × 320 behind four floors, with separate wooden posts, platforms, stair treads and highlighted edges.
+The exterior uses an original AI-generated Victorian mansion cutout (`public/assets/haunted/victorian-mansion-v1.png`). An original cemetery atlas (`cemetery-v1.png`) supplies weathered headstones, monuments and crypts; a moonlit forest (`woods-v1.png`) forms the escape backdrop. Runtime copies are sized for mobile memory use, with transparent edges preserved.
 
-Neighborhood scenery and the mansion exterior reuse city assets. Familiar character illustrations appear as translucent, tinted ghosts with visible warning and solid phases. A larger ghost pursues the player during the escape.
+`mansion-wall-v1.png` repeats behind the enclosed four-floor interior. Separate collision bodies define the walls, wooden floors, stairwell openings and first-floor exit. The key is in the attic; its first-floor door leads to the woods. Upper exterior walls remain solid after the door is unlocked.
 
-The key, checkpoint bell, falling books and exit framing are drawn in code. The default radio track is **The Haunted Happy Hour**. Decorative wall artwork does not alter collision geometry.
+Ghosts use the original creepy ghost atlas `ghosts-v1.png`, never repurposed people. The key, checkpoint bell, falling books and fallen timber are drawn in code. The radio track remains **The Haunted Happy Hour**. Decorative images do not create collision bodies.
