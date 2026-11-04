@@ -7,7 +7,7 @@ export class SummitReminder{
   if(!home||!ready||this.shown||this.arrivedAt===null||now-this.arrivedAt<5000)return null;
   this.shown=true;
   const delivery=beer?'Use Action to deliver the six-pack & finish':'Use Action to finish';
-  return delivery+(missed?(mobile?'\nMissing photo: Menu → Recall missed photo':'\nMissing photo: press B to recall'): '');
+  return delivery+(missed?'\nMissing photo: return to the photo sign': '');
  }
 }
 export const REMINDER_MS=1800;

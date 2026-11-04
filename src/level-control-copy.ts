@@ -3,8 +3,7 @@ export function levelControlCopy(level:string){
  const riding=level==='scooter';
  for(const [selector,copy] of [
   ['[data-touch="jump"] span','Hop'],
-  ['.touch-hint','Left: brake · Right: accelerate'],
-  ['#touch-style-help','Scooter auto-rides forward. Left brakes; right accelerates. Jump hops. Ramps launch automatically. Action toggles the optional high ramp.']
+  ['.touch-hint','Left: brake · Right: accelerate']
  ]){
   const el=document.querySelector<HTMLElement>(selector);if(!el)continue;
   if(riding){if(el.textContent!==copy){el.dataset.platformerCopy=el.textContent??'';el.textContent=copy;}}
