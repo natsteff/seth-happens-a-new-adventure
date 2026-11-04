@@ -24,11 +24,11 @@ export function installTouchViewport(root,{win=window,doc=document,onResize=()=>
   if(active&&!locked){
    savedX=win.scrollX;savedY=win.scrollY;locked=true;
    // Keep body in normal flow: a fixed body can retain pre-rotation iOS hit coordinates.
-   win.scrollTo(0,0);
    doc.documentElement.classList.add('touch-play-locked');
+   win.scrollTo(0,0);
   }else if(!active&&locked){
    locked=false;lastRect='';onCancel();
-   doc.documentElement.classList.remove('touch-play-locked');doc.documentElement.style.removeProperty('--touch-page-top');
+   doc.documentElement.classList.remove('touch-play-locked');
    dimensions.forEach(key=>root.style.removeProperty(key));win.scrollTo(savedX,savedY);onResize();
   }
   layout();
@@ -46,6 +46,8 @@ export function installTouchViewport(root,{win=window,doc=document,onResize=()=>
   if(orientationFrame!==undefined)win.cancelAnimationFrame?.(orientationFrame);
   orientationFrame=win.requestAnimationFrame?.(()=>{orientationFrame=undefined;layout();if(locked)onResize();});
  };
+ const resume=()=>{if(!doc.hidden)orientation();};
+ win.addEventListener('pageshow',resume);doc.addEventListener('visibilitychange',resume);
  win.addEventListener('orientationchange',orientation);win.screen?.orientation?.addEventListener('change',orientation);
  win.addEventListener('resize',layout);win.visualViewport?.addEventListener('resize',layout);win.visualViewport?.addEventListener('scroll',layout);
  // The parent can resize after a toolbar/orientation change without another
@@ -55,6 +57,7 @@ export function installTouchViewport(root,{win=window,doc=document,onResize=()=>
  doc.addEventListener('fullscreenchange',sync);sync();
  return {sync,get locked(){return locked;},dispose(){
   if(orientationFrame!==undefined)win.cancelAnimationFrame?.(orientationFrame);
+  win.removeEventListener('pageshow',resume);doc.removeEventListener('visibilitychange',resume);
   win.removeEventListener('orientationchange',orientation);win.screen?.orientation?.removeEventListener('change',orientation);
   observer?.disconnect();root.classList.remove('touch-mode');sync();types.forEach(type=>root.removeEventListener(type,guard));
   win.removeEventListener('resize',layout);win.visualViewport?.removeEventListener('resize',layout);win.visualViewport?.removeEventListener('scroll',layout);doc.removeEventListener('fullscreenchange',sync);

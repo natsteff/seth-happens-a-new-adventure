@@ -772,10 +772,11 @@ function clearPlayPointers(){
 }
 function refreshGameLayout(){refreshMeasuredScale(game.scale);game.scale.updateBounds();positionStartGame();fitOpenScoreDialogs();}
 window.addEventListener('score-modal-opening',()=>{clearPlayPointers();const scene=activeScene();if(scene&&!scene.introActive&&!scene.won&&!scene.failed&&!scene.paused)scene.togglePause();});
-const touchViewport=installTouchViewport(gameElement,{onResize:()=>requestAnimationFrame(refreshGameLayout),onCancel:clearPlayPointers});
-const settlement=installLayoutSettlement(refreshGameLayout,{parent:gameElement});
+const settlement=installLayoutSettlement(refreshGameLayout,{parent:document.getElementById('game')});
+const touchViewport=installTouchViewport(gameElement,{onResize:settlement.schedule,onCancel:clearPlayPointers});
 installDialogRotationRecovery(gameElement,{onCancel:clearPlayPointers,onSettled:()=>{touchViewport.sync();refreshGameLayout();}});
 settlement.schedule();
+window.addEventListener('resize',()=>{if(!touchViewport.locked)clearPlayPointers();});
 async function toggleFullscreen(){
   fullscreenToggle.blur();
   try {
@@ -812,6 +813,7 @@ const homeScreenLaunch=standaloneLaunch(window);
 const touchToggle=document.getElementById('touch-toggle')!;
 const touchOffer=document.getElementById('touch-offer') as HTMLDialogElement;
 function setTouch(enabled:boolean){
+  if(enabled&&homeScreenLaunch)gameElement.classList.add('expanded');
   touch.clear();touch.enabled=enabled;
   document.getElementById('touch-controls')!.hidden=!enabled;
   gameElement.classList.toggle('touch-mode',enabled);
@@ -825,11 +827,9 @@ function setTouch(enabled:boolean){
   requestAnimationFrame(refreshGameLayout);
 }
 touchToggle.addEventListener('click',()=>{setTouch(!touch.enabled);saveMobileSetup(progressStorage,touch.enabled?'touch':'keyboard');touchToggle.blur();});
-document.getElementById('touch-accept')!.addEventListener('click',()=>{touchOffer.close();setTouch(true);saveMobileSetup(progressStorage,'touch');if(homeScreenLaunch)gameElement.classList.add('expanded');});
+document.getElementById('touch-accept')!.addEventListener('click',()=>{touchOffer.close();setTouch(true);saveMobileSetup(progressStorage,'touch');});
 document.getElementById('touch-decline')!.addEventListener('click',()=>{touchOffer.close();setTouch(false);saveMobileSetup(progressStorage,'keyboard');});
 document.getElementById('touch-view')!.addEventListener('click',()=>{closeTouchMenu();void toggleFullscreen();});
-
-window.addEventListener('resize',()=>{clearPlayPointers();requestAnimationFrame(refreshGameLayout);});
 
 document.querySelectorAll<HTMLButtonElement>('[data-proxy]').forEach(button=>{
   const source=document.getElementById(button.dataset.proxy!) as HTMLButtonElement;
@@ -927,7 +927,7 @@ document.getElementById('touch-customize')!.addEventListener('click',()=>openCon
 document.querySelectorAll<HTMLInputElement>('input[name=movement-style]').forEach(radio=>radio.addEventListener('change',()=>{if(radio.checked){styleSelect.value=radio.value;previewControls();}}));
 spacingInput.addEventListener('input',previewControls);styleSelect.addEventListener('change',previewControls);
 document.getElementById('controls-reset')!.addEventListener('click',()=>{styleSelect.value='default';spacingInput.value='3';quickSprintInput.checked=false;previewControls();});
-document.getElementById('controls-save')!.addEventListener('click',()=>{controlStyle=styleSelect.value;controlSpacing=Number(spacingInput.value);controlQuickSprint=quickSprintInput.checked;applyControls();try{localStorage.setItem('seth-new-adventure-touch-controls',JSON.stringify({style:controlStyle,spacing:controlSpacing,quickSprint:controlQuickSprint}));}catch{/* Session controls still work. */}controlSettings.close();if(customizeFromOffer){setTouch(true);saveMobileSetup(progressStorage,'touch');if(homeScreenLaunch)gameElement.classList.add('expanded');}});
+document.getElementById('controls-save')!.addEventListener('click',()=>{controlStyle=styleSelect.value;controlSpacing=Number(spacingInput.value);controlQuickSprint=quickSprintInput.checked;applyControls();try{localStorage.setItem('seth-new-adventure-touch-controls',JSON.stringify({style:controlStyle,spacing:controlSpacing,quickSprint:controlQuickSprint}));}catch{/* Session controls still work. */}controlSettings.close();if(customizeFromOffer){setTouch(true);saveMobileSetup(progressStorage,'touch');}});
 controlSettings.addEventListener('cancel',()=>{if(customizeFromOffer)requestAnimationFrame(()=>touchOffer.showModal());});
 controlSettings.addEventListener('close',()=>modalNavigation.restore(controlSettings));
 const installHelp=document.getElementById('install-help') as HTMLDialogElement;
@@ -941,7 +941,7 @@ const rememberedSetup=readMobileSetup(progressStorage);
 const startup=mobileStartup({touchCapable:navigator.maxTouchPoints>0||matchMedia('(pointer: coarse)').matches,setup:rememberedSetup});
 if(rememberedSetup?.legacy)saveMobileSetup(progressStorage,'touch');
 setTouch(startup.touchEnabled);
-if(homeScreenLaunch){touchOffer.querySelector('h2')!.textContent='Choose your controls';document.getElementById('touch-offer-install-advice')!.hidden=true;document.getElementById('touch-offer-context')!.textContent='Your choice is remembered. You can change it from the menu.';if(startup.touchEnabled)gameElement.classList.add('expanded');}
+if(homeScreenLaunch){touchOffer.querySelector('h2')!.textContent='Choose your controls';document.getElementById('touch-offer-install-advice')!.hidden=true;document.getElementById('touch-offer-context')!.textContent='Your choice is remembered. You can change it from the menu.';}
 if(startup.showOffer)touchOffer.showModal();
 
 // Follow the fitted canvas, rather than the radio + game wrapper or letterbox.

@@ -1,13 +1,15 @@
-// Array order is the player-facing track number, matching its associated level.
+// Array order is the player-facing station number.
 export const radioTracks=[
  {title:'Arcade Staircase',description:'Level 1 · Rooftop Beer Run soundtrack',file:'arcade-staircase.mp3',unlockLevel:'rooftop',unlockAfter:0},
  {title:'Thai Food Run',description:'Level 2 · Thai Takeout Run soundtrack',file:'thai-food-run.mp3',unlockLevel:'thai',unlockAfter:1},
  {title:'Scooter Run',description:'Level 3 · Scooter Ride soundtrack',file:'scooter-run.mp3',unlockLevel:'scooter',unlockAfter:2},
  {title:'Eye of the Stairwell (Leads Take Me Away!)',description:'Level 4 · Concert Chaos soundtrack',file:'concert-eye-of-the-stairwell.mp3',unlockLevel:'concert',unlockAfter:3},
  {title:'The Haunted Happy Hour',description:'Level 5 · Haunted House soundtrack',file:'haunted-happy-hour.mp3',unlockLevel:'haunted',unlockAfter:4},
- {title:'The Beer of Destiny',description:'Level 6 · Zombie Apocalypse soundtrack',file:'beer-of-destiny.mp3',unlockLevel:'zombie',unlockAfter:5},
+ {title:'Zombie March of Death',description:'Level 6 · Zombie Apocalypse soundtrack',file:'zombie-march-of-death.mp3',unlockLevel:'zombie',unlockAfter:5},
  {title:'Twenty-Six Floors of Celts',description:'Level 7 · Snow Day From Hell soundtrack',file:'twenty-six-floors-of-glory.mp3',unlockLevel:'snow',unlockAfter:6},
- {title:'Go Seth Go',description:'Level 8 · Carnival Catastrophe soundtrack',file:'go-seth-go.mp3',unlockLevel:'carnival',unlockAfter:7}
+ {title:'Go Seth Go',description:'Level 8 · Carnival Catastrophe soundtrack',file:'go-seth-go.mp3',unlockLevel:'carnival',unlockAfter:7},
+ {title:'Banjo Bit Battle',description:'Level 9 · Cabin Fever soundtrack',file:'banjo-bit-battle.mp3',unlockLevel:'cabin',unlockAfter:8},
+ {title:'The Beer of Destiny',description:'Level 12 · Last Call soundtrack',file:'beer-of-destiny.mp3',unlockLevel:'lastcall',unlockAfter:11}
 ];
 export const DEFAULT_RADIO_TRACK=0;
 // v0.8.2 and earlier stored numeric indices in this order. Always migrate by file.
@@ -22,7 +24,7 @@ export function nextRadioTrack(index,step,available=unlockedRadioTracks()){
 }
 export function radioShortcut(code){
  if(code==='Digit0'||code==='Numpad0')return {off:true};
- const digit=/^(?:Digit|Numpad)([1-8])$/.exec(code);
+ const digit=/^(?:Digit|Numpad)([1-9])$/.exec(code);
  if(digit)return {track:Number(digit[1])-1};
  if(code==='BracketLeft')return {step:-1};
  if(code==='BracketRight')return {step:1};

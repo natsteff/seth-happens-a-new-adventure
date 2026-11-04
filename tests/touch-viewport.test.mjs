@@ -65,3 +65,16 @@ test('orientation change clears pointers and refreshes again after the viewport 
  win.innerWidth=390;win.innerHeight=700;late();assert.ok(resizes>before);assert.equal(root.style.getPropertyValue('--play-width'),'390px');
  controller.dispose();assert.equal(screen.listeners.size,0);assert.equal(win.listeners.has('orientationchange'),false);
 });
+
+test('visible page restoration remeasures viewport and clears stale input without an orientation event',()=>{
+ const root=surface(),doc=surface(),win=surface();doc.documentElement=surface();
+ root.classList.add('touch-mode');root.classList.add('expanded');
+ let cancelled=0;Object.assign(win,{innerWidth:844,innerHeight:390,scrollTo(){}});
+ const controller=installTouchViewport(root,{win,doc,onCancel(){cancelled++;}});
+ doc.hidden=true;doc.listeners.get('visibilitychange').fn();assert.equal(cancelled,0);
+ doc.hidden=false;win.innerHeight=350;doc.listeners.get('visibilitychange').fn();
+ assert.equal(root.style.getPropertyValue('--play-height'),'350px');assert.ok(cancelled>0);
+ win.innerHeight=330;win.listeners.get('pageshow').fn();
+ assert.equal(root.style.getPropertyValue('--play-height'),'330px');
+ controller.dispose();assert.equal(win.listeners.has('pageshow'),false);assert.equal(doc.listeners.has('visibilitychange'),false);
+});

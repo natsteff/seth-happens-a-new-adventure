@@ -1,14 +1,14 @@
 # Seth Happens - A New Adventure
 
-**Version 0.15.1 · Early alpha**
+**Version 0.15.2 · Early alpha**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.15.1 Early alpha"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.15.2 Early alpha"></a>
 </p>
 
-**Play version 0.15.1** — Fullscreen highly recommended.
+**Play version 0.15.2** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
@@ -93,15 +93,18 @@ New players start with **1 · Arcade Staircase**. Completing a level unlocks the
 | 3 · Scooter Ride | Scooter Run |
 | 4 · Concert Chaos | Eye of the Stairwell (Leads Take Me Away!) |
 | 5 · Haunted House | The Haunted Happy Hour |
-| 6 · Zombie Apocalypse | The Beer of Destiny |
+| 6 · Zombie Apocalypse | Zombie March of Death |
 | 7 · Snow Day From Hell | Twenty-Six Floors of Celts |
 | 8 · Carnival Catastrophe | Go Seth Go |
-
-Cabin Fever reuses **Arcade Staircase** by default; it has no additional soundtrack unlock.
+| 9 · Cabin Fever | Banjo Bit Battle |
+| 10 · Grocery Store Gauntlet | Arcade Staircase |
+| 11 · Soccer Game Hijinx | Arcade Staircase |
+| 12 · Last Call | The Beer of Destiny |
+| 13 · Encore | Eye of the Stairwell (Leads Take Me Away!) |
 
 Each level starts with its assigned song unless you choose another unlocked track for that level. That choice is remembered across replays and future visits, independently for every level. Existing saved choices retain their song identity where unlocked; a newly locked choice falls back to the level's assigned song. Sound/music mute and volume preferences stay in effect.
 
-Keyboard **1–8** selects the corresponding unlocked song, **0** turns music off, and **[ / ]** moves through unlocked songs. On mobile, choose music in the game menu. The countdown always uses **The Final Warning**; successful finishes use **26 Floors of Glory**. Failure and shortcut music keep their existing behavior.
+Keyboard **1–9** selects the corresponding unlocked station, **0** turns music off, and **[ / ]** moves through unlocked songs. Choose music in the game menu, including station 10 (The Beer of Destiny) once unlocked. The countdown always uses **The Final Warning**; successful finishes use **26 Floors of Glory**. Failure and shortcut music keep their existing behavior.
 
 ## Progress and records
 

@@ -24,3 +24,10 @@ test('legacy alternate special tracks fall back to fixed defaults without distur
  savePreferences(s,{volume:.4,countdownTrack:1,championTrack:1});
  assert.deepEqual(readPreferences(s),{...prefs,volume:.4});assert.equal(s.data.get('high-scores'),'preserve');
 });
+
+test('saved Beer of Destiny selection follows the song to its new station',()=>{
+ const s=store();s.data.set(PREFERENCES_KEY,JSON.stringify({musicSchema:2,track:5}));
+ assert.equal(readPreferences(s).track,9);
+ savePreferences(s,{track:5});
+ assert.equal(readPreferences(s).track,5);
+});

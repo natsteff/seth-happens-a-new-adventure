@@ -5,7 +5,7 @@ import {stripTypeScriptTypes} from 'node:module';
 import {jukeboxTracks,DEFAULT_JUKEBOX_TRACK,afterpartyPhase,nextDance,DANCES,afterpartyCredits,AFTERPARTY_TIMES} from '../src/afterparty-model.mjs';
 
 test('jukebox includes every shipped music resource exactly once, Eye of the Stairwell default',()=>{
- const files=['arcade-staircase.mp3','thai-food-run.mp3','scooter-run.mp3','concert-eye-of-the-stairwell.mp3','haunted-happy-hour.mp3','beer-of-destiny.mp3','twenty-six-floors-of-glory.mp3','go-seth-go.mp3'].sort();
+ const files=['arcade-staircase.mp3','thai-food-run.mp3','scooter-run.mp3','concert-eye-of-the-stairwell.mp3','haunted-happy-hour.mp3','beer-of-destiny.mp3','twenty-six-floors-of-glory.mp3','go-seth-go.mp3','banjo-bit-battle.mp3','zombie-march-of-death.mp3'].sort();
  assert.deepEqual(jukeboxTracks.map(track=>track.file).sort(),files);
  assert.equal(new Set(jukeboxTracks.map(track=>track.file)).size,files.length);
  assert.match(jukeboxTracks[DEFAULT_JUKEBOX_TRACK].title,/Eye of the Stairwell/);

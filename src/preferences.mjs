@@ -10,12 +10,13 @@ function valid(key,value){
 export function readPreferences(storage){
  try{const raw=storage.getItem(PREFERENCES_KEY);if(!raw)return {...preferenceDefaults};const value=JSON.parse(raw);if(!value||typeof value!=='object'||Array.isArray(value))return {...preferenceDefaults};
  const result=Object.fromEntries(Object.entries(preferenceDefaults).map(([key,fallback])=>[key,valid(key,value[key])?value[key]:fallback]));
- if(value.musicSchema!==2)result.track=Math.max(0,legacyRadioTrack(result.track));
+ if(value.musicSchema===2&&result.track===5)result.track=radioTracks.findIndex(track=>track.file==='beer-of-destiny.mp3');
+ else if(value.musicSchema!==2&&value.musicSchema!==3)result.track=Math.max(0,legacyRadioTrack(result.track));
  return result;}catch{return {...preferenceDefaults};}
 }
 export function savePreferences(storage,patch){
  try{const raw=storage.getItem(PREFERENCES_KEY);if(raw){const value=JSON.parse(raw);if(!value||typeof value!=='object'||Array.isArray(value))return false;}
- const next=readPreferences(storage);for(const key of Object.keys(preferenceDefaults))if(valid(key,patch[key]))next[key]=patch[key];storage.setItem(PREFERENCES_KEY,JSON.stringify({...next,musicSchema:2}));return true;}catch{return false;}
+ const next=readPreferences(storage);for(const key of Object.keys(preferenceDefaults))if(valid(key,patch[key]))next[key]=patch[key];storage.setItem(PREFERENCES_KEY,JSON.stringify({...next,musicSchema:3}));return true;}catch{return false;}
 }
 function browserStorage(){try{return localStorage;}catch{return null;}}
 export function loadSettings(){return readPreferences(browserStorage());}

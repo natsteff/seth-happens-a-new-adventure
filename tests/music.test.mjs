@@ -96,7 +96,7 @@ test('level defaults, cross-level selection, replay and reload preserve independ
  const data=new Map();globalThis.localStorage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
  const m=new MusicRadio();let unlocked=0;
  const levels=['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival'];
- m.configureLevels(level=>levels.indexOf(level)<=unlocked);
+ m.configureLevels(level=>levels.slice(0,unlocked+1).includes(level));
  m.select(1);assert.equal(m.selected,0);m.step(-1);assert.equal(m.selected,0);
  for(let i=1;i<levels.length;i++){
   unlocked=i;m.refreshUnlocks();m.beginRun(levels[i]);assert.equal(m.selected,i);
@@ -161,10 +161,10 @@ test('saved alternate countdown/champion choices cannot change the fixed music d
  delete globalThis.localStorage;
 });
 
-test('Cabin reuses Arcade Staircase and remembers its own choice without changing Carnival',()=>{
+test('Cabin defaults to Banjo Bit Battle and remembers its own choice without changing Carnival',()=>{
  const data=new Map();globalThis.localStorage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
  const m=new MusicRadio();m.configureLevels(()=>true);m.beginRun('carnival');assert.equal(m.selected,7);
- m.beginRun('cabin');assert.equal(m.selected,0);m.select(5);m.beginRun('carnival');assert.equal(m.selected,7);
+ m.beginRun('cabin');assert.equal(m.selected,8);m.select(5);m.beginRun('carnival');assert.equal(m.selected,7);
  const reloaded=new MusicRadio();reloaded.configureLevels(()=>true);reloaded.beginRun('cabin');assert.equal(reloaded.selected,5);
  delete globalThis.localStorage;
 });
