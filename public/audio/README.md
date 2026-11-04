@@ -35,3 +35,5 @@ Audio files retain their recorded bytes. Provider credits do not transfer copyri
 
 
 Current Mega Jump WAV (`mega-jump-v2.wav`) SHA-256: `e77207ec9982433161823dd32da2ed761795e5d77fa01a7a43ade68affda6556`.
+
+- Level 6 truck impact uses [Cartoon Splat by Universfield](https://pixabay.com/sound-effects/film-special-effects-cartoon-splat-310479/) under the [Pixabay Content License](https://pixabay.com/service/license-summary/).

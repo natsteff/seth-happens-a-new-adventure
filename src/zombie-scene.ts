@@ -1,37 +1,156 @@
 import Phaser from 'phaser';
 import {FootAdventure} from './foot-adventure';
-import {ZOMBIE,zombiePlatforms,newZombieRun,zombieAction,zombieContact,zombieScore} from './zombie-mission.mjs';
+import {ZOMBIE,zombieBreakdownMs,zombiePlatforms,newZombieRun,zombieAction,zombieContact,zombieScore,zombieBatTarget} from './zombie-mission.mjs';
 import {gameAudio} from './audio';
+const truckScale=250/768;
+const batSwingMs=380;
+const walkGrip=[[175,134],[148,137],[146,143],[141,141]];
+const airGrip=[[160,43],[161,54],[159,55],[145,35]];
 type Undead={art:Phaser.GameObjects.Image;home:number;floor:number;speed:number;alive:boolean};
 export class ZombieApocalypse extends FootAdventure{
- constructor(){super({key:'zombie',number:6,title:'Zombie Apocalypse',...ZOMBIE,startY:ZOMBIE.ground,instructions:'Survive the neighborhood. Jump over zombies and climb bins and buses.\nAllison fights her own way ahead — she is not waiting to be rescued.\nF / Action by the truck: climb in. Then drive forward and flatten the horde!\nTruck: auto-forward · Left brakes · Right accelerates · Jump clears barricades.'});}
- mission=newZombieRun();undead:Undead[]=[];truck!:Phaser.GameObjects.Container;ally!:Phaser.GameObjects.Image;allyText!:Phaser.GameObjects.Text;barriers:Phaser.GameObjects.Rectangle[]=[];allyWins=0;
- resetMission(){this.mission=newZombieRun();this.undead=[];this.barriers=[];this.allyWins=0;}
+ constructor(){super({key:'zombie',number:6,title:'Zombie Apocalypse',...ZOMBIE,startY:ZOMBIE.ground,instructions:'Survive the neighborhood. Jump over zombies and climb bins and buses.\nAllison follows behind and handles zombies that touch her.\nF / Action: swing the bat. Hits require a zombie within reach.\nF / Action by the truck: climb in. Then drive forward and flatten the horde!\nTruck: auto-forward · Left brakes · Right accelerates · Jump clears barricades.'});}
+ mission=newZombieRun();undead:Undead[]=[];truck!:Phaser.GameObjects.Image;bat!:Phaser.GameObjects.Container;batUntil=0;batDirection=1;batPending=false;stride=0;breakdownAt=0;wheels:Phaser.GameObjects.Image[]=[];batUsed=0;ally!:Phaser.GameObjects.Image;allyText!:Phaser.GameObjects.Text;barriers:Phaser.GameObjects.Rectangle[]=[];allyWins=0;
+ resetMission(){this.mission=newZombieRun();this.undead=[];this.barriers=[];this.allyWins=0;this.batUsed=0;this.batUntil=0;this.batPending=false;this.stride=0;this.breakdownAt=0;}
+ preload(){
+  super.preload();
+  for(const [key,file] of [['zombie-baja','baja-truck-v1'],['zombie-chassis','baja-chassis'],['zombie-wheel-rear','baja-wheel-rear'],['zombie-wheel-front','baja-wheel-front']]){
+   if(!this.textures.exists(key))this.load.image(key,`./assets/zombie/${file}.png`);
+  }
+ }
  buildWorld(){
-  this.cameras.main.setBackgroundColor('#233437');this.add.tileSprite(0,200,ZOMBIE.width,600,'thai-street').setOrigin(0).setTileScale(.7).setTint(0x779685).setDepth(-15);
+  this.cameras.main.setBackgroundColor('#233437');for(let x=0;x<ZOMBIE.width;x+=3600)this.add.tileSprite(x,200,Math.min(3600,ZOMBIE.width-x),600,'thai-street').setOrigin(0).setTileScale(.7).setTilePosition(x/.7,0).setTint(0x779685).setDepth(-15);
   this.platform(0,ZOMBIE.ground,ZOMBIE.width,200,0x35413e);
   for(let x=0;x<ZOMBIE.width;x+=160)this.add.rectangle(x,840,75,5,0xc4bd84);
   for(const [x,y,w,h] of zombiePlatforms){this.platform(x,y,w,h,0x52635c);this.text(x+12,y-32,w>150?'OUT OF SERVICE':'BIN',15);if(w>150)for(let i=0;i<4;i++)this.add.rectangle(x+35+i*70,y+36,50,43,0x9da899);}
-  for(let i=0;i<25;i++){const x=i<9?440+i*240:3250+(i-9)*190;const floor=(x>=940&&x<=1250||x>=1800&&x<=2110)?670:800;const art=this.add.image(x,floor,i%3?'scruffy':'clown').setOrigin(.5,1).setDisplaySize(49,73).setTint(i%2?0x99bd76:0x87b8a0).setDepth(6);this.undead.push({art,home:x,floor,speed:i%3?40:90,alive:true});}
-  this.truck=this.makeTruck(ZOMBIE.truckX,ZOMBIE.ground);this.text(ZOMBIE.truckX,640,'F / ACTION · TAKE THE TRUCK',18,'#f2d496').setOrigin(.5);
-  for(const x of [3720,4570,5540,6100]){const b=this.add.rectangle(x,780,55,40,0xd79758).setStrokeStyle(4,0xf7d798).setDepth(7);this.barriers.push(b);this.text(x,708,'JUMP!',17,'#ffd7a0').setOrigin(.5);}
+  for(let i=0;i<65;i++){const x=i<9?440+i*240:3250+(i-9)*190;const floor=(x>=940&&x<=1250||x>=1800&&x<=2110)?670:800;const art=this.add.image(x,floor,i%3?'scruffy':'clown').setOrigin(.5,1).setDisplaySize(49,73).setTint(i%2?0x99bd76:0x87b8a0).setDepth(6);this.undead.push({art,home:x,floor,speed:i%3?40:90,alive:true});}
+  this.truck=this.add.image(ZOMBIE.truckX,ZOMBIE.ground,'zombie-baja').setOrigin(.5,1).setScale(truckScale).setDepth(8);this.text(ZOMBIE.truckX,640,'F / ACTION · TAKE THE TRUCK',18,'#f2d496').setOrigin(.5);
+  this.wheels=['rear','front'].map(end=>this.add.image(0,0,`zombie-wheel-${end}`).setScale(truckScale).setDepth(9).setVisible(false));
+  for(const x of [3720,4570,5540,6100,7190,8110]){const b=this.add.rectangle(x,780,55,40,0xd79758).setStrokeStyle(4,0xf7d798).setDepth(7);this.barriers.push(b);this.text(x,708,'JUMP!',17,'#ffd7a0').setOrigin(.5);}
   this.add.rectangle(ZOMBIE.exitX+100,650,20,300,0xa8c0a5);this.text(ZOMBIE.exitX-140,570,'SAFE ZONE →',34,'#d0efb5');
  }
- makeTruck(x:number,y:number){const parts:Phaser.GameObjects.GameObject[]=[];const rect=(px:number,py:number,w:number,h:number,c:number)=>parts.push(this.add.rectangle(px,py,w,h,c).setStrokeStyle(2,0x203136));rect(-35,-65,130,60,0x8b5946);rect(58,-77,60,85,0xa77151);rect(67,-94,38,32,0xaed5cc);parts.push(this.add.image(57,-94,'seth-walk',1).setDisplaySize(23,30));parts.push(this.add.image(78,-94,'allison').setDisplaySize(18,30));rect(100,-48,38,32,0xa77151);rect(119,-44,10,13,0xffdf8c);rect(-30,-100,115,8,0xc89f70);for(const px of [-67,70]){parts.push(this.add.circle(px,-20,22,0x192b30));parts.push(this.add.circle(px,-20,10,0x9ca9a3));}return this.add.container(x,y,parts).setDepth(8);}
- afterPlayer(){this.ally=this.add.image(400,800,'allison').setOrigin(.5,1).setDisplaySize(57,82).setDepth(8);this.allyText=this.text(400,670,'Allison: “I packed a tire iron.”',16,'#e6f0bc').setOrigin(.5).setDepth(10);}
+ afterPlayer(){
+  this.ally=this.add.image(ZOMBIE.startX-70,800,'allison').setOrigin(.5,1).setDisplaySize(57,82).setDepth(8);
+  this.allyText=this.text(this.ally.x,674,'Allison: “I’m right behind you.”',16,'#e6f0bc').setOrigin(.5).setDepth(10);
+  const batArt=this.add.graphics();
+  batArt.lineStyle(2,0x34251c).fillStyle(0xb7834f)
+   .fillPoints([{x:-7,y:-2},{x:10,y:-2},{x:41,y:-5},{x:47,y:-3},{x:47,y:3},{x:41,y:5},{x:10,y:2},{x:-7,y:2}],true)
+   .strokePoints([{x:-7,y:-2},{x:10,y:-2},{x:41,y:-5},{x:47,y:-3},{x:47,y:3},{x:41,y:5},{x:10,y:2},{x:-7,y:2}],true)
+   .fillStyle(0x47342a).fillRect(-6,-2,13,4).fillStyle(0xc7977c).fillEllipse(0,0,6,5);
+  this.bat=this.add.container(0,0,[batArt]).setDepth(10);
+ }
+ motionHeld(){return this.mission.phase==='breakdown';}
  movementVelocity(direction:number,sprint:boolean,delta:number){return this.mission.truck?(direction<0?170:direction>0?430:340):super.movementVelocity(direction,sprint,delta);}
  jumpVelocity(){return this.mission.truck?-430:super.jumpVelocity();}
- objectiveText(){return this.mission.truck?`TRUCK RAMPAGE → Safe zone · ${this.mission.crushed} flattened · Jump marked barricades`:`SURVIVE → Find the truck · Allison has cleared ${this.allyWins} zombies herself`;}
+ objectiveText(){if(this.mission.truck)return `TRUCK RAMPAGE · ${this.mission.crushed} flattened · Jump marked barricades`;
+  if(this.motionHeld())return 'TRUCK BREAKDOWN';
+  if(this.mission.phase==='on-foot')return 'ON FOOT → Reach the safe zone · Action swings the bat';
+  return 'SURVIVE → Find the truck · Action swings the bat';}
  respawn(){super.respawn();if(this.mission.truck)this.say('Truck checkpoint. The warranty was already void.');}
+ private removeZombie(z:Undead){z.alive=false;z.art.setVisible(false);}
  tick(delta:number,action:boolean){
-  const body=this.player.body as Phaser.Physics.Arcade.Body,r=zombieAction(this.mission,{x:this.player.x,bottom:body.bottom,action});this.mission=r.state;
-  if(r.event==='truck'){this.checkpoint={x:ZOMBIE.truckX+160,bottom:800};this.player.setPosition(ZOMBIE.truckX+160,776);this.player.setMaxVelocity(470,850);this.say('Allison: “Finally. A vehicle with doors. Please use the road.”');gameAudio.play('pickup');}
-  if(r.event==='escape'){this.finish('THE DEAD CAN WALK HOME.',`Seth and Allison made it out.\n${this.mission.crushed} zombies flattened; Allison handled ${this.allyWins} herself.`,zombieScore(this.mission,this.elapsedMs,this.hits));return;}
-  if(!this.mission.truck&&Math.abs(this.player.x-ZOMBIE.truckX)<110){this.prompt.setVisible(true).setText('F / Action · Take the truck');}
-  const allyX=this.mission.truck?this.player.x-20:Math.min(ZOMBIE.truckX-130,this.player.x+210);this.ally.setPosition(allyX,this.mission.truck?body.bottom-82:800).setVisible(!this.mission.truck);this.allyText.setPosition(allyX,this.mission.truck?body.bottom-165:674).setText(this.mission.truck?'Allison: “This is NOT the carpool lane!”':'Allison: “I have my side covered.”');
-  for(const z of this.undead){if(!z.alive)continue;if(Math.abs(z.art.x-this.player.x)<480)z.art.x+=Math.sign(this.player.x-z.art.x)*z.speed*delta/1000;else z.art.x=z.home+Math.sin(this.elapsedMs/900+z.home)*25;if(z.floor===670)z.art.x=Phaser.Math.Clamp(z.art.x,z.home<1500?940:1800,z.home<1500?1250:2110);const contact=zombieContact({truck:this.mission.truck,playerX:this.player.x,playerY:this.player.y,zombieX:z.art.x,zombieY:z.floor-30,allyX:this.mission.truck?-9999:allyX,allyY:770});if(contact==='crush'||contact==='allison'){z.alive=false;z.art.setVisible(false);if(contact==='crush')this.mission.crushed++;else this.allyWins++;}else if(contact==='hit')this.takeHit('Zombie personal space is terrible. Jump or use the bus roofs!');}
+  const body=this.player.body as Phaser.Physics.Arcade.Body;
+  const r=zombieAction(this.mission,{x:this.player.x,bottom:body.bottom,action,breakdownFinished:this.elapsedMs-this.breakdownAt>=zombieBreakdownMs});this.mission=r.state;
+  if(r.event==='truck'){
+   this.batPending=false;this.batUntil=0;
+   this.checkpoint={x:ZOMBIE.truckStartX,bottom:800};
+   body.reset(ZOMBIE.truckStartX,776);this.player.setMaxVelocity(470,850);
+   this.say('Allison: “Finally. A vehicle with doors. Please use the road.”');gameAudio.play('pickup');
+  }
+  if(r.event==='breakdown'){
+   this.breakdownAt=this.elapsedMs;
+   this.facing=1;
+   body.reset(ZOMBIE.breakdownX,ZOMBIE.ground-24);
+   this.truck.setTexture('zombie-chassis').setPosition(ZOMBIE.breakdownX,ZOMBIE.ground).setOrigin(.5,1);
+   this.ally.setVisible(false);this.allyText.setVisible(false);
+   this.say('Allison: “There go the wheels. Back on foot!”');
+   gameAudio.play('impact');
+  }
+  if(this.motionHeld())return;
+  if(r.event==='dismount'){
+   this.checkpoint={x:ZOMBIE.breakdownX+140,bottom:ZOMBIE.ground};
+   body.reset(this.checkpoint.x,this.checkpoint.bottom-24);
+   this.player.setMaxVelocity(450,850);
+   this.ally.setPosition(this.checkpoint.x-78,ZOMBIE.ground);
+   this.allyText.setText('Allison: “Keep that bat handy.”');
+   this.immuneMs=1400;
+  }
+  if(r.event==='escape'){
+   this.finish('THE DEAD CAN WALK HOME.',`Seth and Allison made it out.\n${this.mission.crushed} flattened · ${this.batUsed} batted away · ${this.allyWins} ran into Allison`,zombieScore(this.mission,this.elapsedMs,this.hits));
+   return;
+  }
+  this.ally.setVisible(!this.mission.truck);this.allyText.setVisible(!this.mission.truck);
+  if(!this.mission.truck){
+   const trailX=Phaser.Math.Clamp(this.player.x-78*this.facing,28,ZOMBIE.exitX);
+   this.ally.x+=Phaser.Math.Clamp(trailX-this.ally.x,-.48*delta,.48*delta);
+   const roof=zombiePlatforms.find(([x,y,w])=>this.ally.x>=x&&this.ally.x<=x+w&&body.bottom<=y+20);
+   const trailY=roof?.[1]??ZOMBIE.ground;
+   this.ally.y+=Phaser.Math.Clamp(trailY-this.ally.y,-.48*delta,.48*delta);
+   this.ally.setFlipX(this.facing<0);
+   this.allyText.setPosition(this.ally.x,this.ally.y-122);
+   if(this.mission.phase==='survival'&&Math.abs(this.player.x-ZOMBIE.truckX)<110&&Math.abs(body.bottom-ZOMBIE.ground)<30){
+    this.prompt.setVisible(true).setText('F / Action · Take the truck');
+   }else if(action&&this.elapsedMs>=this.batUntil){
+    this.batDirection=this.facing;
+    this.batUntil=this.elapsedMs+batSwingMs;
+    this.batPending=true;
+   }
+  }
+  if(this.batPending&&this.elapsedMs>=this.batUntil-batSwingMs*.5){
+   this.batPending=false;
+   const target=zombieBatTarget(this.player.x,this.player.y,this.undead.filter(z=>(z.art.x-this.player.x)*this.batDirection>=0));
+   if(target){this.removeZombie(target);this.batUsed++;gameAudio.speak('Squish!','squish');}
+  }
+  for(const z of this.undead){
+   if(!z.alive)continue;
+   if(Math.abs(z.art.x-this.player.x)<480)z.art.x+=Math.sign(this.player.x-z.art.x)*z.speed*delta/1000;
+   else z.art.x=z.home+Math.sin(this.elapsedMs/900+z.home)*25;
+   if(z.floor===670)z.art.x=Phaser.Math.Clamp(z.art.x,z.home<1500?940:1800,z.home<1500?1250:2110);
+   const contact=zombieContact({truck:this.mission.truck,playerX:this.player.x,playerY:this.player.y,zombieX:z.art.x,zombieY:z.floor-30,allyX:this.ally.x,allyY:this.ally.y-30});
+   if(contact==='crush'){this.removeZombie(z);this.mission.crushed++;gameAudio.playLocation('truck-splat');}
+   else if(contact==='allison'){this.removeZombie(z);this.allyWins++;}
+   else if(contact==='hit')this.takeHit('Zombie! Use Action to swing the bat or jump clear.');
+  }
   if(this.mission.truck)for(const b of this.barriers)if(Math.abs(this.player.x-b.x)<65&&body.bottom>b.y-10)this.takeHit('Barricade! Jump when you see the sign.');
  }
- drawExtras(){this.portrait.setVisible(!this.mission.truck);if(this.mission.truck)this.truck.setPosition(this.player.x,(this.player.body as Phaser.Physics.Arcade.Body).bottom);}
- publishStatus(){super.publishStatus({phase:this.mission.phase,truck:String(this.mission.truck),crushed:String(this.mission.crushed),allisonCleared:String(this.allyWins)});}
+ drawExtras(){
+  const onFoot=!this.mission.truck&&!this.motionHeld();
+  this.portrait.setVisible(onFoot);
+  this.bat.setVisible(onFoot);
+  const body=this.player.body as Phaser.Physics.Arcade.Body;
+  if(this.mission.truck)this.truck.setPosition(this.player.x,body.bottom);
+  if(this.mission.phase==='breakdown'||this.mission.phase==='on-foot'||this.mission.phase==='complete'){
+   const t=Phaser.Math.Clamp((this.elapsedMs-this.breakdownAt)/zombieBreakdownMs,0,1);
+   this.truck.setY(ZOMBIE.ground+16*Phaser.Math.Easing.Quadratic.Out(t));
+   this.wheels.forEach((wheel,i)=>{
+    const offset=(i===0?128:540)-384;
+    const travel=(i===0?-82:174)*Phaser.Math.Easing.Quadratic.Out(t);
+    const bounce=20*Math.abs(Math.sin(t*Math.PI*3))*(1-t);
+    wheel.setVisible(true).setPosition(ZOMBIE.breakdownX+offset*truckScale+travel,ZOMBIE.ground-21-bounce)
+     .setRotation(travel/21);
+   });
+  }
+  if(!onFoot)return;
+  const swinging=this.elapsedMs<this.batUntil;
+  const direction=swinging?this.batDirection:this.facing;
+  const airborne=!body.blocked.down&&Math.abs(body.velocity.y)>20;
+  const walking=body.blocked.down&&Math.abs(body.velocity.x)>1;
+  if(walking)this.stride+=Math.abs(body.deltaX());
+  else this.stride=0;
+  const progress=swinging?1-(this.batUntil-this.elapsedMs)/batSwingMs:0;
+  const frame=swinging?(progress<.32?1:2):airborne
+   ?(body.velocity.y<0?1:Math.floor(this.elapsedMs/110)%4)
+   :walking?Math.floor(this.stride/18)%4:1;
+  const [handX,handY]=(airborne&&!swinging?airGrip:walkGrip)[frame];
+  const windup=Phaser.Math.Easing.Sine.InOut(Math.min(progress/.32,1));
+  const follow=Phaser.Math.Easing.Cubic.Out(Phaser.Math.Clamp((progress-.32)/.4,0,1));
+  const recover=Phaser.Math.Easing.Sine.InOut(Phaser.Math.Clamp((progress-.72)/.28,0,1));
+  const lean=swinging?(-.11*windup+.3*follow)*(1-recover):walking?.04:0;
+  const angle=airborne&&!swinging?-1.1:-.86+(swinging?(-1.7*windup+3.9*follow)*(1-recover):walking?.16*Math.sin(this.stride/11):0);
+  this.portrait.stop().setTexture(airborne&&!swinging?'seth-fall':'seth-walk',frame)
+   .setFlipX(direction<0).setRotation(lean*direction);
+  const grip=new Phaser.Math.Vector2(direction*(handX-96)*62/192,(handY-256)*82/256).rotate(lean*direction);
+  this.bat.setPosition(this.player.x+grip.x,body.bottom+grip.y)
+   .setRotation(direction>0?angle+lean:Math.PI-angle-lean).setAlpha(this.portrait.alpha);
+ }
+ publishStatus(){super.publishStatus({phase:this.mission.phase,truck:String(this.mission.truck),crushed:String(this.mission.crushed),allisonCleared:String(this.allyWins),batted:String(this.batUsed)});}
 }
