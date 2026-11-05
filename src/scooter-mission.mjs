@@ -5,7 +5,7 @@ const firstRamps=[
  {x:850,end:990,height:40,launch:460,name:'THE WARM-UP'},
  {x:2050,end:2220,height:65,launch:620,name:'BUS HOP'},
  {x:3450,end:3650,height:90,launch:790,name:'ROOFTOP EXPRESS'},
- {x:4650,end:4840,height:75,launch:560,riskyLaunch:1130,name:'YOUR CALL',optional:true},
+ {x:4650,end:4840,height:155,launch:1130,name:'HIGH LAUNCH',high:true},
  {x:6200,end:6440,height:120,launch:930,name:'ABSOLUTELY NOT A SHORTCUT'}
 ];
 const firstObstacles=[
@@ -30,7 +30,7 @@ export const reactions={
  finish:'Next time we are taking the elevator. Horizontally.',
  fail:'I am walking home. You and the scooter can talk.'
 };
-export function newScooterRun(){return {x:160,y:SCOOTER.ground,vx:SCOOTER.cruise,vy:0,grounded:true,grip:100,hits:0,bonus:0,jumps:0,elapsedMs:0,immuneMs:0,airMs:0,biggest:0,launched:[],tokens:[],risky:false,won:false,failed:false};}
+export function newScooterRun(){return {x:160,y:SCOOTER.ground,vx:SCOOTER.cruise,vy:0,grounded:true,grip:100,hits:0,bonus:0,jumps:0,elapsedMs:0,immuneMs:0,airMs:0,biggest:0,launched:[],tokens:[],won:false,failed:false};}
 export function scooterHit(state,amount=18){
  if(state.won||state.failed||state.immuneMs>0)return {...state};
  const grip=Math.max(0,state.grip-amount);
@@ -59,9 +59,8 @@ export function scooterStep(state,input,deltaMs){
    const surface=rampSurface(r,s.x);
    if(s.x>=r.x&&s.x<=r.end&&((wasGrounded&&oldY>=surface-8)||(!s.grounded&&s.vy>=0&&oldY<=surface+6&&s.y>=surface))){s.y=surface;s.vy=0;s.grounded=true;supported=true;}
    if(oldX<r.end&&s.x>=r.end&&wasGrounded&&oldY<=rampSurface(r,oldX)+8&&oldY>=SCOOTER.ground-r.height-10){
-    const risky=!!(r.optional&&s.risky),launch=risky?r.riskyLaunch:r.launch;
-    s.y=SCOOTER.ground-r.height;s.vy=-launch*(.9+.1*s.vx/SCOOTER.cruise);s.grounded=false;s.launched.push(index);s.jumps++;s.airMs=0;
-    events.push({type:'ramp',index,risky});supported=false;
+    s.y=SCOOTER.ground-r.height;s.vy=-r.launch*(.9+.1*s.vx/SCOOTER.cruise);s.grounded=false;s.launched.push(index);s.jumps++;s.airMs=0;
+    events.push({type:'ramp',index,high:!!r.high});supported=false;
    }
   }
   for(const o of rideObstacles){
@@ -91,8 +90,13 @@ export function scooterStep(state,input,deltaMs){
    else events.push({type:'land'});
    s.y=SCOOTER.ground;s.vy=0;s.grounded=true;s.airMs=0;
   }
-  // Optional high-air bonus requires choosing the risky ramp and hitting its arc.
-  for(const [index,offset] of [0,7600].entries()){const token=index===0?'sky':'sky-after-dark';if(s.risky&&s.x>5100+offset&&s.x<5370+offset&&s.y<SCOOTER.ground-330&&!s.tokens.includes(token)){s.tokens.push(token);s.bonus+=750;events.push({type:'bonus'});}}
+  // Earn each sky bonus by taking its pink ramp and reaching the bonus arc.
+  for(const index of s.launched){
+   const ramp=ramps[index],token=`sky-${index}`;
+   if(ramp.high&&s.x>ramp.end+260&&s.x<ramp.end+530&&s.y<SCOOTER.ground-330&&!s.tokens.includes(token)){
+    s.tokens.push(token);s.bonus+=750;events.push({type:'bonus'});
+   }
+  }
   if(s.grip<=0||s.elapsedMs>=SCOOTER.limitMs){s.failed=true;events.push({type:'fail'});break;}
   if(s.x>=SCOOTER.finish){s.won=true;events.push({type:'finish'});break;}
  }
