@@ -6,12 +6,11 @@ import {FootAdventure} from './foot-adventure';
 import {HAUNTED,hauntedFloors,hauntedFlights,newHauntedRun,hauntedAction,ghostPhase,escapeRemaining,hauntedScore} from './haunted-mission.mjs';
 import {cemeteryFrames,woodsObstacleFrames} from './haunted-art.mjs';
 import {gameAudio} from './audio';
-type Book={x:number;floor:number;art:Phaser.GameObjects.Rectangle;warning:Phaser.GameObjects.Text;y:number;vy:number;phase:string;at:number};
 export class HauntedHouse extends FootAdventure{
- constructor(){super({key:'haunted',number:5,title:'Haunted House',...HAUNTED,startY:HAUNTED.ground,instructions:'Cross the graveyard. F / Action enters the mansion.\nWalk the stairs up for the attic key, then down to the first-floor exit.\nGhosts glow before becoming solid. Watch for falling books.\nUnlock the exit with the key, then cross the haunted woods!'});}
- stairs=new StairWalker();mission=newHauntedRun();entryGate?:Phaser.GameObjects.Rectangle;exitGate?:Phaser.GameObjects.Rectangle;keyArt!:Phaser.GameObjects.Container;keyLabel!:Phaser.GameObjects.Text;carriedKey!:Phaser.GameObjects.Container;boss!:Phaser.GameObjects.Image;books:Book[]=[];enteredBell=false;
+ constructor(){super({key:'haunted',number:5,title:'Haunted House',...HAUNTED,startY:HAUNTED.ground,instructions:'Cross the graveyard. F / Action enters the mansion.\nWalk the stairs up for the attic key, then down to the first-floor exit.\nGhosts glow before becoming solid. Ring the landing bell for a checkpoint.\nUnlock the exit with the key, then cross the haunted woods!'});}
+ stairs=new StairWalker();mission=newHauntedRun();entryGate?:Phaser.GameObjects.Rectangle;exitGate?:Phaser.GameObjects.Rectangle;keyArt!:Phaser.GameObjects.Container;keyLabel!:Phaser.GameObjects.Text;carriedKey!:Phaser.GameObjects.Container;boss!:Phaser.GameObjects.Image;
  preload(){super.preload();if(!this.textures.exists('haunted-ghosts'))this.load.image('haunted-ghosts','./assets/haunted/ghosts-v1.png');for(const [key,file] of [['haunted-obstacles','woods-obstacles-v1.png'],['haunted-mansion','victorian-mansion-v1.png'],['haunted-cemetery','cemetery-v1.png'],['haunted-woods','woods-v1.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/haunted/'+file);if(!this.textures.exists('haunted-wall'))this.load.image('haunted-wall','./assets/haunted/mansion-wall-v1.png');}
- resetMission(){this.stairs.reset(this);this.mission=newHauntedRun();this.books=[];this.enteredBell=false;}
+ resetMission(){this.stairs.reset(this);this.mission=newHauntedRun();}
  solid(x:number,top:number,width:number,height:number){const body=this.add.rectangle(x+width/2,top+height/2,width,height,0xffffff,0);this.platforms.add(body);return body;}
  woodPlatform(x:number,y:number,width:number){const p=this.platform(x,y,width,18,0x65564d);const b=p.body as Phaser.Physics.Arcade.StaticBody;b.checkCollision.down=false;b.checkCollision.left=false;b.checkCollision.right=false;return p;}
  buildWorld(){
@@ -57,10 +56,20 @@ export class HauntedHouse extends FootAdventure{
   for(const [i,x,width,height] of [[0,6020,135,48],[1,6730,130,64],[2,7340,135,52],[3,7790,140,70]]){
    this.solid(x+width*.05,HAUNTED.ground-height*.65,width*.9,height*.65);
    this.solid(x+width*.3,HAUNTED.ground-height,width*.4,height);
-   this.add.image(x,HAUNTED.ground,'haunted-obstacles',String(i)).setOrigin(0,1).setDisplaySize(width,height).setDepth(3);
+   const bottom=HAUNTED.ground,center=x+width/2;
+   for(const [scale,opacity] of [[1.45,.13],[1.18,.18],[.97,.28]]){
+    this.add.ellipse(center,bottom-height*.38,width*scale,height*1.8*scale,0x080d17,opacity).setDepth(-17);
+   }
+   for(const [scale,opacity] of [[1.14,.22],[.97,.34],[.76,.43]]){
+    this.add.ellipse(center,bottom-2,width*scale,12*scale,0x06090d,opacity).setDepth(2);
+   }
+   const obstacle=this.add.image(x,bottom,'haunted-obstacles',String(i)).setOrigin(0,1).setDisplaySize(width,height).setDepth(3);
+   const moonlight=i%2===0?0xe9ae78:0xc3d9ff;
+   this.add.image(obstacle.x,obstacle.y,obstacle.texture.key,obstacle.frame.name)
+    .setOrigin(0,1).setDisplaySize(width,height).setDepth(3).setTintFill(moonlight)
+    .setBlendMode(Phaser.BlendModes.ADD).setAlpha(.26,.33,.025,.08);
   }
   this.text(5800,HAUNTED.ground-180,'THE WOODS →\nKEEP MOVING',20,'#bdcabb').setAlign('center');
-  for(const [x,floor] of [[2600,1250],[3430,930],[2860,610],[3850,290]]){const art=this.add.rectangle(x,floor-160,26,19,0x7d4964).setStrokeStyle(2,0xd1ba8d).setDepth(7);const warning=this.text(x,floor-140,'!',28,'#ffcf8b').setOrigin(.5).setVisible(false).setDepth(8);this.books.push({x,floor,art,warning,y:floor-160,vy:0,phase:'waiting',at:0});}
   this.keyArt=this.add.container(HAUNTED.keyX,HAUNTED.keyY-37,[this.add.circle(-9,0,10,0xd9c67b).setStrokeStyle(3,0xffe9a1),this.add.rectangle(12,0,26,6,0xf3dc8b),this.add.rectangle(22,6,5,12,0xf3dc8b)]).setDepth(8);this.keyLabel=this.text(HAUNTED.keyX,HAUNTED.keyY-102,'F / ACTION · ATTIC KEY',15,'#ffe3a3').setOrigin(.5);
 
   this.add.rectangle(HAUNTED.exitX,HAUNTED.ground-70,100,140,0x27473f).setStrokeStyle(4,0xb4d4af);this.text(HAUNTED.exitX,HAUNTED.ground-180,'ESCAPE\nF / ACTION',24,'#c9ecca').setOrigin(.5).setAlign('center');
@@ -73,8 +82,8 @@ export class HauntedHouse extends FootAdventure{
  tick(delta:number,action:boolean){
   const body=this.player.body as Phaser.Physics.Arcade.Body,result=hauntedAction(this.mission,{x:this.player.x,bottom:body.bottom,action,elapsedMs:this.elapsedMs});this.mission=result.state;
   if(result.event==='enter'){this.player.body!.reset(1930,HAUNTED.ground-24);this.checkpoint={x:1930,bottom:HAUNTED.ground};this.say('Seth: “Lovely place. Terrible doorbell.”  Up the stairs →');}
-  if(result.event==='checkpoint'){this.checkpoint={x:3300,bottom:930};gameAudio.play('pickup');this.say('BELL CHECKPOINT. Something upstairs rings back.');}
-  if(result.event==='key'){this.checkpoint={x:HAUNTED.keyX-80,bottom:HAUNTED.keyY};this.keyArt.setVisible(false);this.keyLabel.setText('KEY TAKEN · DOWN TO THE FIRST-FLOOR EXIT');gameAudio.play('pickup');this.boss.setVisible(true);this.say('THE HOUSE WOKE UP. Descend inside, unlock the first-floor exit, then cross the woods!');}
+  if(result.event==='checkpoint'){this.checkpoint={x:3300,bottom:930};gameAudio.playLocation('checkpoint-bell');this.say('BELL CHECKPOINT. Something upstairs rings back.');}
+  if(result.event==='key'){this.checkpoint={x:HAUNTED.keyX-80,bottom:HAUNTED.keyY};this.keyArt.setVisible(false);this.keyLabel.setText('KEY TAKEN · DOWN TO THE FIRST-FLOOR EXIT');gameAudio.playLocation('attic-key');this.boss.setVisible(true);this.say('THE HOUSE WOKE UP. Descend inside, unlock the first-floor exit, then cross the woods!');}
   if(result.event==='stairs-required')this.say('Take all three stair flights down before unlocking the first-floor door.');
   if(result.event==='leave'){this.exitGate?.destroy();this.exitGate=undefined;this.player.body!.reset(HAUNTED.houseRight+70,HAUNTED.ground-24);this.say('KEY TURNED. Through the woods — watch for ghosts and fallen timber!');}
   if(result.event==='escape'){this.finish('SETH LEFT THE BUILDING.',`Attic key recovered. Ghostly lease declined.\n${Math.ceil(escapeRemaining(this.mission,this.elapsedMs)/1000)} seconds to spare.`,hauntedScore(this.mission,this.elapsedMs,this.hits));return;}
@@ -85,11 +94,6 @@ export class HauntedHouse extends FootAdventure{
   const exit=this.mission.key&&this.mission.outside&&Math.abs(this.player.x-HAUNTED.exitX)<85&&Math.abs(body.bottom-HAUNTED.ground)<25;
   if(door||bell||key||leave||exit)this.prompt.setVisible(true).setText(door?'F / Action · Enter haunted mansion':bell?'F / Action · Ring checkpoint bell':key?'F / Action · Take attic key':leave?'F / Action · Unlock first-floor exit':'F / Action · ESCAPE WOODS');
   this.hazards.forEach((h,i)=>{const phase=ghostPhase(this.elapsedMs,i*590);h.active=phase==='solid'&&this.stairs.active===null;h.art.setVisible(phase!=='gone').setAlpha(phase==='solid'?.8:phase==='warning'?.32:.15);h.art.y=h.y+h.height/2+Math.sin(this.elapsedMs/650+i)*5;});
-  for(const b of this.books){if(b.phase==='waiting'&&Math.abs(this.player.x-b.x)<115&&Math.abs(body.bottom-b.floor)<65){b.phase='warning';b.at=this.elapsedMs;b.warning.setVisible(true);}
-   if(b.phase==='warning'&&this.elapsedMs-b.at>800){b.phase='falling';b.warning.setVisible(false);b.vy=0;}
-   if(b.phase==='falling'){b.vy+=900*delta/1000;b.y+=b.vy*delta/1000;if(Math.abs(this.player.x-b.x)<30&&Math.abs(this.player.y-b.y)<38)this.takeHit('The house has very aggressive reading recommendations.');if(b.y>=b.floor-10){b.y=b.floor-10;b.phase='landed';b.at=this.elapsedMs;}}
-   if(b.phase==='landed'&&this.elapsedMs-b.at>1600){b.phase='waiting';b.y=b.floor-160;}b.art.setY(b.y).setAngle(b.phase==='falling'?this.elapsedMs/8:0);
-  }
   if(this.mission.key){const dx=this.player.x-this.boss.x;this.boss.x+=Math.sign(dx)*Math.min(Math.abs(dx),110*delta/1000);const floor=body.bottom<450?290:body.bottom<770?610:body.bottom<1090?930:1250;this.boss.y+=(floor-this.boss.y)*Math.min(1,delta/240);const solid=ghostPhase(this.elapsedMs,1700)==='solid';this.boss.setAlpha(solid?.7:.25);if(solid&&this.stairs.active===null&&Math.abs(dx)<28&&Math.abs(this.player.y-(this.boss.y-30))<45)this.takeHit('The landlord ghost wants a forwarding address.');if(escapeRemaining(this.mission,this.elapsedMs)<=0){this.hits++;this.respawn();this.say('The escape door slammed. Back to the attic checkpoint — try again!');}}
  }
  update(time:number,delta:number){super.update(time,delta);if(!this.introActive&&!this.paused&&!this.won&&!this.failed&&!document.querySelector('dialog[open]'))this.stairs.update(this,hauntedFlights,delta,index=>{if(this.mission.key)this.mission.descended|=1<<index;});}

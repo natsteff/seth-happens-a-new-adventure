@@ -1,10 +1,10 @@
 export const CABIN={width:6500,height:1100,ground:800,startX:230,coolerX:6070,homeX:230,waterY:840};
 export const cabinLandings=[{x:0,y:800,width:2300},{x:2690,y:770,width:310},{x:3920,y:770,width:400},{x:4700,y:800,width:1800}];
 export const cabinBoats=[
- {x:2470,y:800,width:180,range:70,bob:10,period:5000,kind:'fishing boat'},
+ {x:2470,y:800,width:180,range:70,bob:10,period:5000,kind:'canoe'},
  {x:3190,y:790,width:200,range:70,bob:12,period:5500,kind:'pontoon'},
- {x:3500,y:780,width:200,range:0,bob:25,period:4000,kind:'wobbly dock'},
- {x:3800,y:790,width:200,range:65,bob:10,period:5500,kind:'fishing boat'},
+ {x:3500,y:780,width:200,range:0,bob:25,period:4000,kind:'floating dock'},
+ {x:3800,y:790,width:200,range:65,bob:10,period:5500,kind:'canoe'},
  {x:4510,y:790,width:220,range:65,bob:12,period:5000,kind:'pontoon'}
 ];
 export function cabinBoatPosition(boat,elapsed){const a=elapsed/boat.period*Math.PI*2;return {x:boat.x+Math.sin(a)*boat.range,y:boat.y+Math.sin(a*2)*boat.bob};}

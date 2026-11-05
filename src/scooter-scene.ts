@@ -60,11 +60,23 @@ export class ScooterRide extends Phaser.Scene{
   this.add.rectangle(SCOOTER.width/2,550,SCOOTER.width,1100,0x19263a,.28).setDepth(-24);
   const g=this.add.graphics().setDepth(-2);g.fillStyle(0x343d4a).fillRect(0,SCOOTER.ground,SCOOTER.width,250);g.fillStyle(0xb9ac92).fillRect(0,SCOOTER.ground,SCOOTER.width,4);
   for(let x=0;x<SCOOTER.width;x+=130)g.fillStyle(0xd8bc74,.7).fillRect(x,SCOOTER.ground+65,60,5);
-  for(const o of rideObstacles){if(o.kind==='building')brickBuilding(this,o.x,SCOOTER.ground-o.height,o.width,SCOOTER.ground,3);else this.add.image(o.x+o.width/2,SCOOTER.ground,'thai-props',o.kind).setOrigin(.5,1).setDisplaySize(o.width,o.height).setDepth(1);g.fillStyle(0xb6e7d1).fillRect(o.x,SCOOTER.ground-o.height,o.width,2);}
+  for(const o of rideObstacles){
+   const top=SCOOTER.ground-o.height;
+   if(o.kind==='building')brickBuilding(this,o.x,top,o.width,SCOOTER.ground,3,false);
+   else this.add.image(o.x+o.width/2,SCOOTER.ground,'thai-props',o.kind).setOrigin(.5,1).setDisplaySize(o.width,o.height).setDepth(1);
+  }
   for(const r of ramps){
-   g.fillStyle(0x795b43).fillTriangle(r.x,SCOOTER.ground,r.end,SCOOTER.ground-r.height,r.end,SCOOTER.ground);
-   g.lineStyle(5,r.optional?0xf1b4e0:0xa7e9d1);g.lineBetween(r.x,SCOOTER.ground,r.end,SCOOTER.ground-r.height);
-   for(let x=r.x+25;x<r.end;x+=28)g.lineStyle(2,0xdab786).lineBetween(x,SCOOTER.ground,x+18,SCOOTER.ground-(x-r.x)/(r.end-r.x)*r.height);
+   const base=SCOOTER.ground,lip=base-r.height;
+   g.fillStyle(0x333940,.5).fillEllipse((r.x+r.end)/2,base+4,r.end-r.x+16,14);
+   g.fillStyle(0x3b454b).fillTriangle(r.x,base,r.end,lip,r.end,base);
+   for(let x=r.x+25;x<r.end-8;x+=28){
+    const deck=base-(x-r.x)*r.height/(r.end-r.x);
+    g.lineStyle(5,0x778188).lineBetween(x,deck+7,x,base);
+    g.lineStyle(2,0x262e35).lineBetween(x,deck+8,Math.min(x+24,r.end),base);
+   }
+   g.lineStyle(8,0x242c31).lineBetween(r.x,base+4,r.end,lip+4);
+   g.lineStyle(3,r.optional?0xf1b4e0:0x9f9d91).lineBetween(r.x,base,r.end,lip);
+   g.fillStyle(0xd8ab57).fillRect(r.end-13,base-6,13,5);
    this.text(r.x-100,SCOOTER.ground-160,r.name,16,'#ffe0a2').setBackgroundColor('#182e40').setPadding(6,4);
    if(r.optional)this.text(r.x-190,SCOOTER.ground-120,'F / Action: toggle HIGH ramp · +750 sky bonus',14,'#f6c3ea').setBackgroundColor('#182e40').setPadding(5,4);
   }
@@ -113,7 +125,7 @@ export class ScooterRide extends Phaser.Scene{
   const action=Phaser.Input.Keyboard.JustDown(this.keys.F)||c.interact||m.interact;if(action){this.run.risky=!this.run.risky;this.notice(this.run.risky?'HIGH RAMP ARMED · Optional sky bonus +750':'LOWER RAMP · Easier landing');if(this.run.risky)this.say(reactions.risk);}
   const move=keyboardOrControllerMove(this.keys.A.isDown||this.keys.LEFT.isDown,this.keys.D.isDown||this.keys.RIGHT.isDown,c.move||m.move);
   const next=scooterStep(this.run,{move,boost:this.keys.SHIFT.isDown||c.sprint||m.sprint,jump:c.jump||m.jump||['W','UP','SPACE'].some(k=>Phaser.Input.Keyboard.JustDown(this.keys[k]))},delta);this.run=next.state;
-  for(const event of next.events){if(event.type==='ramp'){this.say(event.risky?reactions.risk:reactions.ramps[event.index!%5]);this.notice(`${ramps[event.index!].name} · AIRBORNE`);gameAudio.play('jump');}else if(event.type==='hop')gameAudio.play('jump');else if(event.type==='hit'||event.type==='hard'){this.say(event.type==='hard'?reactions.landing:reactions.hit[this.run.hits%3]);gameAudio.play('impact');this.cameras.main.shake(110,.002);}else if(event.type==='bonus'){this.say('We are not getting the security deposit back.');this.notice('SKY ROUTE · +750');gameAudio.play('pickup');}}
+  for(const event of next.events){if(event.type==='ramp'){this.say(event.risky?reactions.risk:reactions.ramps[event.index!%5]);this.notice(`${ramps[event.index!].name} · ${event.risky?'HIGH LAUNCH':'AIRBORNE'}`);gameAudio.play('jump');}else if(event.type==='hop')gameAudio.play('jump');else if(event.type==='hit'||event.type==='hard'){this.say(event.type==='hard'?reactions.landing:reactions.hit[this.run.hits%3]);gameAudio.play('impact');this.cameras.main.shake(110,.002);}else if(event.type==='bonus'){this.say('We are not getting the security deposit back.');this.notice('SKY ROUTE · +750');gameAudio.play('pickup');}}
   for(const h of this.hazards){const t=this.run.elapsedMs/1000;h.art.x=h.x+(h.kind==='person'?Math.sin(t*1.1)*65:h.kind==='bird'?Math.sin(t*1.7)*65:0);h.art.y=h.y+(h.kind==='bird'?Math.sin(t*2.1+h.x)*24:0);if(h.kind==='person'){h.art.setScale(Math.cos(t*1.1)>=0?1:-1,1);h.legs?.forEach((leg,i)=>leg.setAngle(Math.sin(t*8+i*Math.PI)*9));}const hx=h.art.x,hy=h.kind==='person'?h.art.y-40:h.art.y;if(Math.abs(this.run.x-hx)<h.radius+25&&Math.abs(this.run.y-55-hy)<(h.kind==='bird'?37:58)){const hit=scooterHit(this.run);if(hit.hits>this.run.hits){this.say(reactions.hit[hit.hits%3]);gameAudio.play('impact');this.cameras.main.shake(100,.002);}this.run=hit;}}
   this.trucks.forEach((art,i)=>{const t=scooterSemi(i,this.run.elapsedMs);art.setX(t.x).setFlipX(t.direction<0);});
   this.cameras.main.followOffset.y=this.run.grounded?75:-35;

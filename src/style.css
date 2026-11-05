@@ -305,6 +305,8 @@ html.touch-play-locked #play-area.expanded.touch-mode{position:relative;inset:au
 
 html.touch-play-locked #live-status{visibility:visible}
 
+.score-browser-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.score-browser-heading .browser-close{flex:none;min-height:44px}
 .score-browser select{display:block;box-sizing:border-box;width:min(100%,450px);min-height:44px;margin:6px 0 12px;padding:8px;background:#203d51;color:#e8f0ef;border:1px solid #79dec5;border-radius:5px;font-size:16px}
 .score-dialog[data-entry=true]>.score-browser{display:none}
 .score-dialog[data-entry=true][data-browse=true]>.score-browser{display:block}

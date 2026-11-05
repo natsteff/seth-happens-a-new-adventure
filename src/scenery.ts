@@ -69,7 +69,7 @@ function skylineLandmarks(scene:Phaser.Scene,width:number,height:number){
  scene.add.text(bx+29*unit,bt+unit,'bank',{fontFamily:'Arial',fontStyle:'bold',fontSize:`${10*unit}px`,color:'#383e5c'}).setScrollFactor(0).setDepth(-29.4);
 }
 
-export function brickBuilding(scene: Phaser.Scene, x: number, roofY: number, width: number, bottom: number, floor: number) {
+export function brickBuilding(scene: Phaser.Scene, x: number, roofY: number, width: number, bottom: number, floor: number, roofHighlight = true) {
   const height = bottom - roofY;
   // TileSprite owns a POT fill canvas + GPU texture for every building. Using
   // the 1536x1024 original here duplicated 8 MiB 26 times at startup. Sample
@@ -93,7 +93,7 @@ export function brickBuilding(scene: Phaser.Scene, x: number, roofY: number, wid
   detail.lineStyle(1, 0x423e49, .8);
   for (let capX = x + 27; capX < x + width; capX += 34) detail.lineBetween(capX, roofY + 2, capX - 2, roofY + 11);
   // A restrained edge highlight, exactly at the existing collision top.
-  detail.fillStyle(floor === 26 ? 0xffd18c : 0xa9d0bb).fillRect(x, roofY, width, 1);
+  if (roofHighlight) detail.fillStyle(floor === 26 ? 0xffd18c : 0xa9d0bb).fillRect(x, roofY, width, 1);
   // Low-profile decorative ventilation, behind actors and never presented as a platform.
   if (floor % 3 !== 1) {
     const ventX = x + width - 45;

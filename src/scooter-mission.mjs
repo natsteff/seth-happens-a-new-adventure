@@ -5,7 +5,7 @@ const firstRamps=[
  {x:850,end:990,height:40,launch:460,name:'THE WARM-UP'},
  {x:2050,end:2220,height:65,launch:620,name:'BUS HOP'},
  {x:3450,end:3650,height:90,launch:790,name:'ROOFTOP EXPRESS'},
- {x:4650,end:4840,height:75,launch:560,riskyLaunch:900,name:'YOUR CALL',optional:true},
+ {x:4650,end:4840,height:75,launch:560,riskyLaunch:1130,name:'YOUR CALL',optional:true},
  {x:6200,end:6440,height:120,launch:930,name:'ABSOLUTELY NOT A SHORTCUT'}
 ];
 const firstObstacles=[

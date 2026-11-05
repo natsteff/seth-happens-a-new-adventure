@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {onIce,winterVelocity,blizzardAlpha,snowScore} from '../src/snow-mission.mjs';
+import {onIce,winterVelocity,blizzardAlpha,icicleLeadDistance,icicleWarningMs,snowScore} from '../src/snow-mission.mjs';
 import {createLevelProgress,PROGRESS_KEY} from '../src/progression.mjs';
 import {vehicleFrontHurts} from '../src/thai-mission.mjs';
 test('ice is limited to marked pavement, release slides and countersteer brakes',()=>{
@@ -16,4 +16,14 @@ test('plow top and rear remain safe, front contact is directional',()=>{
 });
 test('Zombie unlocks Snow; completing Snow persists all prior replay rights',()=>{
  const data=new Map([[PROGRESS_KEY,JSON.stringify({version:1,...Object.fromEntries([1,2,3,4,5].map(i=>[`level${i}Completed`,true]))})]]),store={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};let p=createLevelProgress(store);assert.equal(p.canPlay('snow'),false);assert.equal(p.completeLevel('snow'),false);p.completeLevel('zombie');assert.equal(p.canPlay('snow'),true);p.completeLevel('snow');p=createLevelProgress(store);for(const level of ['rooftop','thai','scooter','concert','haunted','zombie','snow'])assert.equal(p.canPlay(level),true);assert.equal(JSON.parse(data.get(PROGRESS_KEY)).level7Completed,true);
+});
+
+test('icicles start dropping before a running or sprinting player reaches them',()=>{
+ for(const speed of [260,355,-260,-355]){
+  const timeToCross=icicleLeadDistance(speed)/Math.abs(speed);
+  const fallSeconds=timeToCross-icicleWarningMs/1000;
+  const icicleY=600+950*fallSeconds**2/2;
+  assert.ok(fallSeconds>0);
+  assert.ok(Math.abs(icicleY-(800-24))<40);
+ }
 });

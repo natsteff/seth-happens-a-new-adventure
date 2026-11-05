@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {ZOMBIE,zombiePlatforms,newZombieRun,zombieAction,zombieContact,zombieScore,zombieBatTarget} from '../src/zombie-mission.mjs';
+import {ZOMBIE,zombiePlatforms,newZombieRun,zombieAction,zombieContact,zombieScore,zombieBatTarget,zombieCheckpointPositions} from '../src/zombie-mission.mjs';
 import {createLevelProgress,PROGRESS_KEY} from '../src/progression.mjs';
 test('survival cannot finish before truck; boarding requires Action at ground-level truck',()=>{
  let s=newZombieRun();const act=(x,bottom,action=true)=>{const r=zombieAction(s,{x,bottom,action});s=r.state;return r.event;};
@@ -47,4 +47,12 @@ test('trailing Allison takes out zombies at contact range and truck impacts use 
  assert.equal(zombieContact({...c,truck:true,playerY:690}),'');
  assert.equal(ZOMBIE.exitX-ZOMBIE.truckStartX,3*(6600-2970));
  assert.equal(ZOMBIE.breakdownX-ZOMBIE.truckStartX,ZOMBIE.exitX-ZOMBIE.breakdownX);
+});
+
+test('dismount clearance spaces live ground zombies away from Seth and Allison',()=>{
+ const checkpoint=ZOMBIE.breakdownX+140;
+ const zombie=(offset,alive=true,floor=ZOMBIE.ground)=>({art:{x:checkpoint+offset},alive,floor});
+ const left=zombie(-78),right=zombie(0),next=zombie(280),far=zombie(600);
+ const moves=zombieCheckpointPositions(checkpoint,[next,left,far,right,zombie(0,false),zombie(0,true,670)]);
+ assert.deepEqual(moves,[{zombie:left,x:checkpoint-250},{zombie:right,x:checkpoint+250},{zombie:next,x:checkpoint+315}]);
 });

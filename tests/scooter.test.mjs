@@ -38,3 +38,24 @@ test('route travel is doubled, and moving semis have bounded continuous motion w
  for(let i=0;i<movingSemis.length;i++){for(const ms of [0,1000,10000,50000]){const t=scooterSemi(i,ms);assert.ok(t.x>=movingSemis[i].left&&t.x<=movingSemis[i].right);assert.ok(Math.abs(scooterSemi(i,ms+1).x-t.x)<1);}}
  const t=scooterSemi(1,0),s={...newScooterRun(),x:t.x+75,y:SCOOTER.ground-t.height-1,vy:100,grounded:false};const result=scooterStep(s,{},20).state;assert.equal(result.hits,0);assert.equal(result.grounded,true);
 });
+
+test('both armed pink ramps stay visibly higher across speeds and earn both bonuses',()=>{
+ const pinkPeaks=[],regularPeaks=[];
+ for(const move of [-1,0,1]){
+  let state={...newScooterRun(),risky:true},current;
+  const peaks=new Map();
+  for(let frame=0;frame<10000&&!state.won&&!state.failed;frame++){
+   const next=scooterStep(state,{move},1000/120);state=next.state;
+   for(const event of next.events){
+    if(event.type==='ramp')current=event.index;
+    if(event.type==='land'||event.type==='hard')current=undefined;
+   }
+   if(current!==undefined)peaks.set(current,Math.max(peaks.get(current)??0,SCOOTER.ground-state.y));
+  }
+  assert.equal(state.won,true);
+  assert.equal(state.bonus,1500);
+  for(const [index,peak] of peaks)(ramps[index].optional?pinkPeaks:regularPeaks).push(peak);
+ }
+ assert.equal(pinkPeaks.length,6);
+ assert.ok(Math.min(...pinkPeaks)>=Math.max(...regularPeaks)+60);
+});

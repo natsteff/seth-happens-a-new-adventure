@@ -1,6 +1,7 @@
+import {streetVehicle} from './street-vehicles';
 import Phaser from 'phaser';
 import {FootAdventure} from './foot-adventure';
-import {ZOMBIE,zombieBreakdownMs,zombiePlatforms,newZombieRun,zombieAction,zombieContact,zombieScore,zombieBatTarget} from './zombie-mission.mjs';
+import {ZOMBIE,zombieBreakdownMs,zombiePlatforms,newZombieRun,zombieAction,zombieContact,zombieScore,zombieBatTarget,zombieCheckpointPositions} from './zombie-mission.mjs';
 import {gameAudio} from './audio';
 const truckScale=250/768;
 const batSwingMs=380;
@@ -13,6 +14,7 @@ export class ZombieApocalypse extends FootAdventure{
  resetMission(){this.mission=newZombieRun();this.undead=[];this.barriers=[];this.allyWins=0;this.batUsed=0;this.batUntil=0;this.batPending=false;this.stride=0;this.breakdownAt=0;}
  preload(){
   super.preload();
+  if(!this.textures.exists('thai-road-vehicles'))this.load.image('thai-road-vehicles','./assets/thai/street-vehicles-v1.png');
   for(const [key,file] of [['zombie-baja','baja-truck-v1'],['zombie-chassis','baja-chassis'],['zombie-wheel-rear','baja-wheel-rear'],['zombie-wheel-front','baja-wheel-front']]){
    if(!this.textures.exists(key))this.load.image(key,`./assets/zombie/${file}.png`);
   }
@@ -21,12 +23,40 @@ export class ZombieApocalypse extends FootAdventure{
   this.cameras.main.setBackgroundColor('#233437');for(let x=0;x<ZOMBIE.width;x+=3600)this.add.tileSprite(x,200,Math.min(3600,ZOMBIE.width-x),600,'thai-street').setOrigin(0).setTileScale(.7).setTilePosition(x/.7,0).setTint(0x779685).setDepth(-15);
   this.platform(0,ZOMBIE.ground,ZOMBIE.width,200,0x35413e);
   for(let x=0;x<ZOMBIE.width;x+=160)this.add.rectangle(x,840,75,5,0xc4bd84);
-  for(const [x,y,w,h] of zombiePlatforms){this.platform(x,y,w,h,0x52635c);this.text(x+12,y-32,w>150?'OUT OF SERVICE':'BIN',15);if(w>150)for(let i=0;i<4;i++)this.add.rectangle(x+35+i*70,y+36,50,43,0x9da899);}
+  const props=this.textures.get('thai-props');
+  if(!props.has('bin'))props.add('bin',0,1171,204,339,251);
+  const obstacles=['bin','double-decker','bin','semi-trailer','bin'];
+  for(const [i,[x,y,w,h]] of zombiePlatforms.entries()){
+   this.platforms.add(this.add.rectangle(x+w/2,y+h/2,w,h,0xffffff,0));
+   const kind=obstacles[i];
+   if(kind==='bin')this.add.image(x,y+h,'thai-props',kind).setOrigin(0,1).setDisplaySize(w,h).setDepth(1);
+   else streetVehicle(this,x,y+h,w,h,kind);
+  }
   for(let i=0;i<65;i++){const x=i<9?440+i*240:3250+(i-9)*190;const floor=(x>=940&&x<=1250||x>=1800&&x<=2110)?670:800;const art=this.add.image(x,floor,i%3?'scruffy':'clown').setOrigin(.5,1).setDisplaySize(49,73).setTint(i%2?0x99bd76:0x87b8a0).setDepth(6);this.undead.push({art,home:x,floor,speed:i%3?40:90,alive:true});}
   this.truck=this.add.image(ZOMBIE.truckX,ZOMBIE.ground,'zombie-baja').setOrigin(.5,1).setScale(truckScale).setDepth(8);this.text(ZOMBIE.truckX,640,'F / ACTION · TAKE THE TRUCK',18,'#f2d496').setOrigin(.5);
   this.wheels=['rear','front'].map(end=>this.add.image(0,0,`zombie-wheel-${end}`).setScale(truckScale).setDepth(9).setVisible(false));
-  for(const x of [3720,4570,5540,6100,7190,8110]){const b=this.add.rectangle(x,780,55,40,0xd79758).setStrokeStyle(4,0xf7d798).setDepth(7);this.barriers.push(b);this.text(x,708,'JUMP!',17,'#ffd7a0').setOrigin(.5);}
+  for(const [i,x] of [3720,4570,5540,6100,7190,8110].entries()){
+   this.barriers.push(this.add.rectangle(x,780,55,40,0xffffff,0));
+   this.drawBarricade(x,i%2===1);
+   this.text(x,708,'JUMP!',17,'#ffd7a0').setOrigin(.5);
+  }
   this.add.rectangle(ZOMBIE.exitX+100,650,20,300,0xa8c0a5);this.text(ZOMBIE.exitX-140,570,'SAFE ZONE →',34,'#d0efb5');
+ }
+ private drawBarricade(x:number,crossed:boolean){
+  const g=this.add.graphics().setPosition(x,ZOMBIE.ground).setDepth(7);
+  g.fillStyle(0x1d2b2b,.6).fillEllipse(0,0,66,8);
+  if(crossed){
+   g.lineStyle(10,0x333b3f).lineBetween(-23,-3,23,-39).lineBetween(-23,-39,23,-3);
+   g.lineStyle(3,0xa4aba6).lineBetween(-22,-7,23,-41).lineBetween(-23,-41,22,-7);
+   g.fillStyle(0x8f9693).fillCircle(0,-21,6);
+   g.fillStyle(0x41474a).fillCircle(0,-21,2);
+  }else{
+   g.lineStyle(5,0x39464b).strokeRoundedRect(-27,-38,54,32,4);
+   g.lineStyle(2,0xadb7b6).strokeRoundedRect(-27,-39,54,30,4);
+   for(let bar=-18;bar<=18;bar+=9)g.lineBetween(bar,-37,bar,-9);
+   g.fillStyle(0x7c8889).fillRect(-28,-7,8,7).fillRect(20,-7,8,7);
+   g.fillStyle(0xc8854b).fillRect(-24,-36,8,4).fillRect(16,-36,8,4);
+  }
  }
  afterPlayer(){
   this.ally=this.add.image(ZOMBIE.startX-70,800,'allison').setOrigin(.5,1).setDisplaySize(57,82).setDepth(8);
@@ -45,7 +75,21 @@ export class ZombieApocalypse extends FootAdventure{
   if(this.motionHeld())return 'TRUCK BREAKDOWN';
   if(this.mission.phase==='on-foot')return 'ON FOOT → Reach the safe zone · Action swings the bat';
   return 'SURVIVE → Find the truck · Action swings the bat';}
- respawn(){super.respawn();if(this.mission.truck)this.say('Truck checkpoint. The warranty was already void.');}
+ respawn(){
+  super.respawn();
+  if(this.mission.phase==='on-foot')this.clearDismountArea();
+  if(this.mission.truck)this.say('Truck checkpoint. The warranty was already void.');
+ }
+ private clearDismountArea(){
+  const {x,bottom}=this.checkpoint;
+  this.facing=1;
+  this.ally.setPosition(x-78,bottom);
+  this.batPending=false;this.batUntil=0;
+  for(const {zombie,x:clearX} of zombieCheckpointPositions(x,this.undead)){
+   zombie.art.setX(clearX);
+   zombie.home=clearX;
+  }
+ }
  private removeZombie(z:Undead){z.alive=false;z.art.setVisible(false);}
  tick(delta:number,action:boolean){
   const body=this.player.body as Phaser.Physics.Arcade.Body;
@@ -54,7 +98,7 @@ export class ZombieApocalypse extends FootAdventure{
    this.batPending=false;this.batUntil=0;
    this.checkpoint={x:ZOMBIE.truckStartX,bottom:800};
    body.reset(ZOMBIE.truckStartX,776);this.player.setMaxVelocity(470,850);
-   this.say('Allison: “Finally. A vehicle with doors. Please use the road.”');gameAudio.play('pickup');
+   this.say('Allison: “Finally. A vehicle with doors. Please use the road.”');gameAudio.playLocation('smash-zombies');
   }
   if(r.event==='breakdown'){
    this.breakdownAt=this.elapsedMs;
@@ -70,7 +114,7 @@ export class ZombieApocalypse extends FootAdventure{
    this.checkpoint={x:ZOMBIE.breakdownX+140,bottom:ZOMBIE.ground};
    body.reset(this.checkpoint.x,this.checkpoint.bottom-24);
    this.player.setMaxVelocity(450,850);
-   this.ally.setPosition(this.checkpoint.x-78,ZOMBIE.ground);
+   this.clearDismountArea();
    this.allyText.setText('Allison: “Keep that bat handy.”');
    this.immuneMs=1400;
   }

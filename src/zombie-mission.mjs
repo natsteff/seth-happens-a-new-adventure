@@ -23,5 +23,25 @@ export function zombieAction(state,{x,bottom,action=false,breakdownFinished=fals
  else if(s.phase==='breakdown'&&breakdownFinished){s.phase='on-foot';event='dismount';}
  else if(s.phase==='on-foot'&&x>=ZOMBIE.exitX){s.complete=true;s.phase='complete';event='escape';}return {state:s,event};
 }
+// Clear both Seth and Allison's side of the checkpoint without awarding kills.
+export function zombieCheckpointPositions(checkpointX,zombies){
+ const clearance=250,spacing=65;
+ const live=zombies.filter(zombie=>zombie.alive&&zombie.floor===ZOMBIE.ground);
+ const positions=[];
+ for(const direction of [-1,1]){
+  const side=live.filter(zombie=>direction<0?zombie.art.x<checkpointX:zombie.art.x>=checkpointX)
+   .sort((a,b)=>direction*(a.art.x-b.art.x));
+  let nextDistance=clearance;
+  for(const zombie of side){
+   const distance=Math.abs(zombie.art.x-checkpointX);
+   if(distance<nextDistance){
+    positions.push({zombie,x:checkpointX+direction*nextDistance});
+    nextDistance+=spacing;
+   }else if(distance<clearance+spacing)nextDistance=distance+spacing;
+   else break;
+  }
+ }
+ return positions;
+}
 export function zombieContact({truck,playerX,playerY,zombieX,zombieY,allyX,allyY}){if(!truck&&Math.abs(allyX-zombieX)<38&&Math.abs(allyY-zombieY)<58)return 'allison';if(Math.abs(playerX-zombieX)>(truck?130:30)||Math.abs(playerY-zombieY)>(truck?65:55))return '';return truck?'crush':'hit';}
 export function zombieScore(s,elapsed,hits){return s.complete?Math.max(0,6000+s.crushed*100-Math.floor(elapsed/1000)*5-hits*100):0;}

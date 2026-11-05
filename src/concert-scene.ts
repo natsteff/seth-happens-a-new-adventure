@@ -71,7 +71,7 @@ export class ConcertChaos extends FootAdventure{
   if(atDesk||atPit)this.prompt.setVisible(true).setText(atDesk?'F / Action · Collect photo credentials · Checkpoint':'F / Action · Enter photo pit');
   if(!this.signSeen&&this.player.x>2840&&body.bottom<550){this.signSeen=true;this.say('Seth: “Lower level?!”  Attendant: “Relax. That sign is from last tour.”');}
   const result=concertAction(this.mission,{x:this.player.x,bottom:body.bottom,action,photoMs:this.photoMs});this.mission=result.state;
-  if(result.event==='pass'){this.checkpoint={x:CONCERT.deskX-60,bottom:CONCERT.deskY};this.gate?.destroy();this.say('Attendant: “Try not to photograph your thumb.”  PRESS PASS + CHECKPOINT');gameAudio.play('pickup');}
+  if(result.event==='pass'){this.checkpoint={x:CONCERT.deskX-60,bottom:CONCERT.deskY};this.gate?.destroy();this.say('Attendant: “Try not to photograph your thumb.”  PRESS PASS + CHECKPOINT');gameAudio.playLocation('press-pass');}
   if(result.event==='floor')this.say('Main floor! Jump the crowd surges; the photo pit is ahead →');
   if(result.event==='pit'){this.beginPhoto();for(const h of this.hazards)h.active=false;}
   if(result.event==='shot'){gameAudio.play('photo');this.cameras.main.flash(110,255,255,240);this.say(`SHOT ${this.mission.shots}/3 SAVED. Next: ${shotNames[this.mission.shots]}`);}

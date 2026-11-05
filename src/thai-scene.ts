@@ -82,7 +82,6 @@ export class ThaiTakeout extends Phaser.Scene {
       else this.add.image(x+width/2,THAI.ground,'thai-props',kind).setOrigin(.5,1).setDisplaySize(width,kind==='bus'?height+8:height).setDepth(1);
       for(const part of streetSolids(obstacle)){
         const solid=this.add.rectangle(part.x+part.width/2,THAI.ground-part.height/2,part.width,part.height,0xffffff,0);platforms.add(solid);
-        this.add.rectangle(part.x+part.width/2,THAI.ground-part.height,part.width,2,0xbcd4bd,.8).setDepth(2);
       }
     }
     if(!this.textures.exists('thai-body')){const g=this.add.graphics().fillStyle(0xffffff).fillRect(0,0,26,48);g.generateTexture('thai-body',26,48);g.destroy();}
@@ -216,7 +215,7 @@ export class ThaiTakeout extends Phaser.Scene {
     });
   }
   buildPedestrians(){
-    const people:[number,number,number,boolean][]=[[0,5250,5400,false],[1,4850,5030,false],[2,2200,2370,false],[3,4320,4430,false],[2,1740,2190,false],[1,4470,4840,false],[3,1830,2310,true],[0,5120,5205,false]];
+    const people:[number,number,number,boolean][]=[[0,4850,5030,false],[2,2200,2370,false],[3,4320,4430,false],[2,1740,2190,false],[1,4470,4840,false],[3,1830,2310,true]];
     for(const [index,[frame,left,right,thief]] of people.entries()){
       const body=this.add.rectangle((left+right)/2,THAI.ground-33,30,66,0xffffff,0);this.physics.add.existing(body);
       (body.body as Phaser.Physics.Arcade.Body).setAllowGravity(false).setImmovable(true);

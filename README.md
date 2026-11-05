@@ -118,7 +118,7 @@ Found a problem? [Report a bug](https://github.com/natsteff/seth-happens-a-new-a
 
 ## Credits
 
-Music: **[BT-AI](https://suno.com/@bt_ai)**. Selected sound effects: **[Pixabay](https://pixabay.com/sound-effects/)**. Voice production: **[ElevenLabs](https://elevenlabs.io/)**. Built with **[Phaser](https://phaser.io/)**.
+Music: **[BT-AI](https://suno.com/@bt_ai)**. Selected sound effects: **[Pixabay](https://pixabay.com/sound-effects/)**. Voice production: **Morgan** from **[ElevenLabs](https://elevenlabs.io/)**. Built with **[Phaser](https://phaser.io/)**.
 
 See [asset and dependency notices](THIRD_PARTY_NOTICES.md) for credits and third-party rights. This is a fictional comedy adventure with no official team, band or venue affiliation.
 

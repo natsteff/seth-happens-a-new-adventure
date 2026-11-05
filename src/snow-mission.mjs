@@ -4,3 +4,6 @@ export function onIce(x,bottom){return Math.abs(bottom-SNOW.ground)<8&&icePatche
 export function winterVelocity(velocity,direction,sprint,ice,delta){const target=direction*(sprint?355:260),rate=ice?(direction?1.35:.55):14;return target+(velocity-target)*Math.exp(-rate*Math.max(0,Math.min(100,delta))/1000);}
 export function blizzardAlpha(elapsed){return .04+.12*Math.max(0,Math.sin(elapsed/7000));}
 export function snowScore(complete,elapsed,hits){return complete?Math.max(0,6500-Math.floor(elapsed/1000)*8-hits*125):0;}
+export const icicleWarningMs=420;
+// Allow for the warning and the time the icicle needs to fall into Seth's path.
+export function icicleLeadDistance(velocity){return Math.max(90,Math.abs(velocity)*(icicleWarningMs/1000+.55));}
