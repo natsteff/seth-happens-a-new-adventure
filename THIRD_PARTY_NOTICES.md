@@ -46,3 +46,5 @@ The Cabin Fever Unicorn Haze six-pack is an owner-supplied design prepared as a 
 Grocery fixtures, milk/bread/egg pickups and shopping cart, Carnival food-vendor walking poses and roller-coaster car are generated transparent sprite assets. Existing approved cast artwork is reused for ordinary shoppers and the information-booth attendant. Physics bodies remain separate from decorative artwork.
 
 Grocery collection and high Scooter launches use owner-supplied Pixabay recordings; authors, source links and license links are listed in [audio credits](public/audio/README.md). Supplied originals remain local.
+
+The Grocery carried basket and opening parking-lot backdrop are generated game artwork. The basket has transparent alpha and attaches to the existing hand anchor; parking-lot scenery has no collision bodies.
