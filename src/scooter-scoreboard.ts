@@ -1,5 +1,6 @@
+import {readLevelScores,saveLevelScore} from './score-service';
 import {compactScoreEntry,finishCompactEntry,showScoreDialog,resetCompactEntry,acceptedPlayerName,focusScoreEntry} from './score-entry';
-import { readScooterScores, saveScooterScore } from './scooter-mission.mjs';
+
 type ScooterResult={score:number;grip:number;hits:number;elapsedMs:number};
 const dialog=document.createElement('dialog');dialog.id='scooter-scores';dialog.className='score-dialog';
 document.getElementById('game')!.append(dialog);
@@ -17,7 +18,7 @@ export function openScooterScores(result?:ScooterResult){
   const render=()=>{
     const list=dialog.querySelector('.score-list')!;list.replaceChildren();
     try{
-      const records=readScooterScores(localStorage);
+      const records=readLevelScores('scooter');
       if(!records.length){list.textContent='No rides yet. Finish with Allison aboard!';return;}
       const table=document.createElement('table');table.innerHTML='<thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Ride</th></tr></thead>';
       const body=table.createTBody();
@@ -28,7 +29,7 @@ export function openScooterScores(result?:ScooterResult){
   form.addEventListener('submit',event=>{
     event.preventDefault();if(!pending)return;
     const name=String(new FormData(form).get('player')??'').trim();if(!name)return;
-    try{const saved=saveScooterScore(localStorage,{...pending,name});if(!saved.some((record:any)=>record.id===pending!.id))throw Error('Score was not accepted. Try again.');acceptedPlayerName(name);finishCompactEntry(dialog);pending=null;form.hidden=true;status.textContent='Scooter score saved in this browser.';render();focusScoreEntry(dialog);}
+    try{const saved=saveLevelScore('scooter',{...pending,name});if(!saved.some((record:any)=>record.id===pending!.id))throw Error('Score was not accepted. Try again.');acceptedPlayerName(name);finishCompactEntry(dialog);pending=null;form.hidden=true;status.textContent='Scooter score saved in this browser.';render();focusScoreEntry(dialog);}
     catch(error){status.textContent=error instanceof Error?error.message:'Could not save; existing records unchanged.';}
   });
   dialog.querySelector('#scooter-close')!.addEventListener('click',()=>dialog.close());

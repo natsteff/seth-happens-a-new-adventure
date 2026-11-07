@@ -1,14 +1,14 @@
 # Seth Happens - A New Adventure
 
-**Version 0.15.7 · Early alpha**
+**Version 0.16.0 · Early alpha**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.15.7 Early alpha"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.16.0 Early alpha"></a>
 </p>
 
-**Play version 0.15.7** — Fullscreen highly recommended.
+**Play version 0.16.0** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
@@ -108,7 +108,9 @@ Keyboard **1–9** selects the corresponding unlocked station, **0** turns music
 
 ## Progress and records
 
-Unlocks, high scores and settings are saved in your browser. No account is required. They do not sync between devices, and browser and Home Screen installations may keep separate records. Clearing site data can remove them.
+Unlocks and settings stay in your browser. New high scores save on your device first and automatically synchronize with Firebase online leaderboards. No sign-up is required; the game uses anonymous authentication. Browser and Home Screen installations may keep separate device histories. Clearing site data can remove local scores and pending submissions.
+
+Each playable adventure has its own online leaderboard: top 25 legitimate scores, initially showing 10. Use **Online** or **This Device** to choose which list to view; viewing device scores keeps synchronization active. If Firebase is unavailable, the game shows device scores with a notice and retries pending submissions automatically. Level 1 shortcut scores remain below legitimate runs in five separate slots. Previous alpha score lists are ignored; there is no historical migration.
 
 Each playable adventure has its own score list. Open **High Scores**, then use **View scores for level** to browse any level; it defaults to your currently selected level and does not switch your game. Encore is view-only and has no scores. Playtest mode can view existing records but does not save test runs. This game keeps its saves separate from the original Seth Happens.
 
@@ -123,3 +125,11 @@ Music: **[BT-AI](https://suno.com/@bt_ai)**. Selected sound effects: **[Pixabay]
 See [asset and dependency notices](THIRD_PARTY_NOTICES.md) for credits and third-party rights. This is a fictional comedy adventure with no official team, band or venue affiliation.
 
 
+
+Firebase setup, validation, initialization and deployment are documented in [firebase/README.md](firebase/README.md).
+
+### Birthday Surprise
+
+On November 7–9 (your device’s local calendar), the idle launch screen offers a birthday interlude once per browser per year. A prominent **🎂 Birthday Surprise** button allows unlimited replays during those dates. Skip returns to the launch screen. Muted/music-off settings are respected; blocked autoplay offers audio or silent playback, and missing audio safely continues silently. Annual playback uses an independent localStorage flag; unavailable storage falls back to once per visit. No scores or unlocks change.
+
+During local development only, `?birthday=preview` previews the scene on any date. This parameter has no effect in production builds. The supplied 20.76-second song plays in full, with the 20-second choreography scaled to its actual playback position.

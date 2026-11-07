@@ -19,6 +19,10 @@ Four additional concertgoers and the weathered log/boulder atlas are original AI
 ## Dependencies
 
 - **Phaser 3.90.0** — MIT, Copyright (c) 2013–2025 Phaser Studio Inc. [Full notice](licenses/phaser-MIT.txt). [Source](https://github.com/phaserjs/phaser/tree/v3.90.0).
+- **Firebase JavaScript SDK 13.2.0** (App, Anonymous Authentication and Firestore) — Apache-2.0. [Full notice](licenses/firebase-Apache-2.0.txt).
+- **idb** — ISC. [Full notice](licenses/idb-ISC.txt).
+- **protobufjs** — BSD-3-Clause. [Full notice](licenses/protobufjs-BSD.txt).
+- **long** — Apache-2.0. [Full notice](licenses/long-Apache-2.0.txt).
 - **eventemitter3** — MIT. [Full notice](licenses/eventemitter3-MIT.txt).
 - **Vite 8.3.5** — MIT; development dependency.
 - **TypeScript 7.0.2** — Apache-2.0; development dependency.
@@ -30,3 +34,9 @@ Build-tool and transitive dependency notices are included with their installed p
 Technical descriptions of runtime artwork and icon sizes are available in [scenery notes](docs/scenery.md), [Thai Takeout art](docs/thai-art.md), [Scooter Ride art](docs/scooter-art.md), [Concert Chaos art](docs/concert-art.md), [Haunted House art](docs/haunted-art.md) and [app icons](docs/app-icons.md).
 
 Cabin Fever woods, cabin, lake, boats, docks, cooler and wildlife are drawn in scene code; existing Seth/Allison art and audio are reused. See [Cabin Fever art](docs/cabin-art.md).
+
+## Birthday Surprise audio
+
+`public/audio/birthday/happy-birthday-seth.mp3` is the owner-supplied custom “Happy Birthday, Seth” recording. Dedicated generated birthday atlases are based on the existing owner-approved Seth/Allison artwork; fitted hat/horn and held camera are baked into the poses. The cloth birthday banner is a generated transparent atlas. Confetti, lighting and camera flash are drawn in code. No additional third-party assets or services were introduced.
+
+The Cabin Fever Unicorn Haze six-pack is an owner-supplied design prepared as a transparent pickup sprite. Its original reference is kept locally; only the selected game cutout is distributed.

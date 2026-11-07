@@ -742,7 +742,7 @@ class Errand extends Phaser.Scene {
     this.sharpenDisplay();this.updateHud();
     const live=document.getElementById('live-status');
     if(live){live.dataset.riding='false';live.dataset.floor=String(this.floor);live.dataset.won='true';live.dataset.score=String(score);live.textContent=`Run complete. Score ${score}. ${this.cheater?'CHEATER elevator shortcut.':''}`;}
-    offerScore({score,...this.mishaps,photos:this.photos.size,latePhotos:this.latePhotos.size,beer:this.beer,elapsedMs:Math.round(this.elapsedMs),bonus:this.cheater?0:timeBonus(this.elapsedMs),cheater:this.cheater});
+    offerScore({score,...this.mishaps,photos:this.photos.size,latePhotos:this.latePhotos.size,beer:this.beer,elapsedMs:this.elapsedMs,bonus:this.cheater?0:timeBonus(this.elapsedMs),cheater:this.cheater});
   }
 }
 const requestedLevel=new URLSearchParams(location.search).get('level');
@@ -1040,3 +1040,11 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)void check
 void checkUpdates();
 
 document.getElementById('splash-version')!.textContent=`${document.getElementById('game-version')!.textContent} · ${document.getElementById('release-stage')!.textContent}`;
+
+// The seasonal interlude is offered only on the idle launch screen, never mid-run.
+let birthdayScene:ReturnType<typeof activeScene>|undefined;
+void import('./birthday').then(({installBirthday})=>installBirthday({
+ canOpen:()=>{const scene=activeScene();return !!scene&&scene.introActive&&!scene.introStarted&&!document.querySelector('dialog[open]:not(#touch-menu)');},
+ onOpen:()=>{clearPlayPointers();touchMenu.close();birthdayScene=activeScene();birthdayScene?.scene.pause();gameAudio.music.setHold('birthday',true);void gameAudio.setPaused(true);},
+ onClose:()=>{birthdayScene?.scene.resume();birthdayScene=undefined;gameAudio.music.setHold('birthday',false);void gameAudio.setPaused(false);}
+}));

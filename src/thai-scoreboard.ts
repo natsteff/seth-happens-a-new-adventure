@@ -1,5 +1,6 @@
+import {readLevelScores,saveLevelScore} from './score-service';
 import {compactScoreEntry,finishCompactEntry,showScoreDialog,resetCompactEntry,acceptedPlayerName,focusScoreEntry} from './score-entry';
-import { readTakeoutScores, saveTakeoutScore } from './thai-mission.mjs';
+
 type TakeoutResult={score:number;condition:number;warmth:number;hits:number;elapsedMs:number};
 const dialog=document.createElement('dialog');dialog.id='thai-scores';dialog.className='score-dialog';
 document.getElementById('game')!.append(dialog);
@@ -17,7 +18,7 @@ export function openTakeoutScores(result?:TakeoutResult){
   const render=()=>{
     const list=dialog.querySelector('.score-list')!;list.replaceChildren();
     try{
-      const records=readTakeoutScores(localStorage);
+      const records=readLevelScores('thai');
       if(!records.length){list.textContent='No deliveries yet. Bring dinner home!';return;}
       const table=document.createElement('table');table.innerHTML='<thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Delivery</th></tr></thead>';
       const body=table.createTBody();
@@ -28,7 +29,7 @@ export function openTakeoutScores(result?:TakeoutResult){
   form.addEventListener('submit',event=>{
     event.preventDefault();if(!pending)return;
     const name=String(new FormData(form).get('player')??'').trim();if(!name)return;
-    try{const saved=saveTakeoutScore(localStorage,{...pending,name});if(!saved.some((record:any)=>record.id===pending!.id))throw Error('Score was not accepted. Try again.');acceptedPlayerName(name);finishCompactEntry(dialog);pending=null;form.hidden=true;status.textContent='Takeout score saved in this browser.';render();focusScoreEntry(dialog);}
+    try{const saved=saveLevelScore('thai',{...pending,name});if(!saved.some((record:any)=>record.id===pending!.id))throw Error('Score was not accepted. Try again.');acceptedPlayerName(name);finishCompactEntry(dialog);pending=null;form.hidden=true;status.textContent='Takeout score saved in this browser.';render();focusScoreEntry(dialog);}
     catch(error){status.textContent=error instanceof Error?error.message:'Could not save; existing records unchanged.';}
   });
   dialog.querySelector('#thai-close')!.addEventListener('click',()=>dialog.close());

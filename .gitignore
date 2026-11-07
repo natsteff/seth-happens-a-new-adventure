@@ -10,3 +10,8 @@ AGENTS.md
 WORK-QUEUE.md
 docs/WORK-LOG.md
 docs/qa/
+
+# Local Firebase emulator artifacts
+*-debug.log
+.firebase/
+docs/REQUEST-ID-MAP.md

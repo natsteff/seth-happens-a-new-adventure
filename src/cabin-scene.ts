@@ -7,8 +7,8 @@ type Deck={art:Phaser.GameObjects.Rectangle;body:Phaser.Physics.Arcade.Body;hull
 type CabinWalker=ReturnType<typeof walkingCastPerson>&{home:number;phase:number};
 export class CabinFever extends FootAdventure{
  constructor(){super({key:'cabin',number:9,title:'Cabin Fever',...CABIN,startY:CABIN.ground,instructions:'A cooler full of beer. Naturally, it is on the OTHER shore.\nHead right through the woods. Jump between boats, islands and the wobbly dock.\nLand on the deck or canoe rim. Wait for boats to come closer. Dodge walkers.\nF / Action at the cooler, then bring the beer LEFT to the cabin. Water returns you to a checkpoint.'});}
- preload(){super.preload();loadCast(this,'cabin');}
- mission=newCabinRun();decks:Deck[]=[];walkers:CabinWalker[]=[];support:number|null=null;supportOffset=0;returnHazards=false;beerArt!:Phaser.GameObjects.Container;coolerLid!:Phaser.GameObjects.Rectangle;
+ preload(){super.preload();loadCast(this,'cabin');this.load.image('cabin-unicorn-beer','./assets/cabin/unicorn-haze-v1.png');}
+ mission=newCabinRun();decks:Deck[]=[];walkers:CabinWalker[]=[];support:number|null=null;supportOffset=0;returnHazards=false;beerArt!:Phaser.GameObjects.Container;pickupBeer!:Phaser.GameObjects.Image;coolerLid!:Phaser.GameObjects.Rectangle;
  resetMission(){this.mission=newCabinRun();this.decks=[];this.walkers=[];this.support=null;this.supportOffset=0;this.returnHazards=false;}
  buildWorld(){
   // Decorative scenery has no bodies and allocates no world-sized bitmap textures.
@@ -25,6 +25,8 @@ export class CabinFever extends FootAdventure{
   for(const [x,line] of [[1990,'LAKE AHEAD · CHECKPOINT\nWAIT, JUMP, RIDE →'],[2830,'TINY ISLAND · CHECKPOINT\nNO, THIS IS NOT THE CABIN.'],[4200,'ALMOST THE OTHER SHORE →'],[5030,'FAR SHORE · CHECKPOINT\nCOOLER →'] ] as const)this.text(x,625,line,17,'#dcecc8').setOrigin(.5).setAlign('center');
   const dock=this.add.graphics().setDepth(3);for(let x=2130;x<2300;x+=24)dock.lineStyle(2,0xb6a58b).lineBetween(x,800,x,850);
   const cooler=this.add.graphics().setDepth(4);cooler.fillStyle(0xe5e1c9).fillRoundedRect(CABIN.coolerX-43,751,86,49,7);cooler.fillStyle(0x498a8d).fillRect(CABIN.coolerX-38,762,76,30);cooler.lineStyle(4,0xe9dfb4).strokeRoundedRect(CABIN.coolerX-48,760,96,25,7);
+  const beerTexture=this.textures.get('cabin-unicorn-beer');if(!beerTexture.has('pack'))beerTexture.add('pack',0,158,16,1025,1173);
+  this.pickupBeer=this.add.image(CABIN.coolerX,751,'cabin-unicorn-beer','pack').setOrigin(.5,1).setDisplaySize(43,43*1173/1025).setDepth(7);
   this.coolerLid=this.add.rectangle(CABIN.coolerX,749,94,10,0xf2e8c6).setDepth(5);this.text(CABIN.coolerX,655,'THE COOLER\nF / ACTION · PICK UP BEER',21,'#ffe0a0').setOrigin(.5).setAlign('center');
   this.add.image(CABIN.homeX+75,800,'allison').setOrigin(.5,1).setDisplaySize(58,84).setDepth(6);
   for(const [i,x] of [600,1290,5480,6240].entries()){
@@ -112,7 +114,7 @@ export class CabinFever extends FootAdventure{
    this.decks.push({art,body,hull});
    this.physics.add.collider(this.player,art,()=>{const rider=this.player.body as Phaser.Physics.Arcade.Body;if(body.touching.up&&rider.velocity.y<0)rider.setVelocityY(0);});
   });
-  const pack=this.add.graphics();pack.fillStyle(0xbe7d42).fillRoundedRect(-17,-19,34,22,3);for(let i=0;i<3;i++){pack.fillStyle(0xdec67a).fillRect(-14+i*10,-28,7,13);pack.fillStyle(0xf5e8bd).fillRect(-14+i*10,-30,7,3);}this.beerArt=this.add.container(0,0,[pack]).setDepth(10).setVisible(false);
+  const pack=this.add.image(0,-10,'cabin-unicorn-beer','pack').setDisplaySize(40,40*1173/1025);this.beerArt=this.add.container(0,0,[pack]).setDepth(10).setVisible(false);
  }
  objectiveText(){return this.mission.complete?'BEER DELIVERED · The cabin weekend can finally begin.':this.mission.beer?`← RETURN TO CABIN · Beer ${this.mission.condition}% · Checkpoint: ${this.mission.checkpoint}`:'COOLER ON THE FAR SHORE → · Woods, docks, boats. What could go wrong?';}
  respawn(){this.support=null;this.mission=cabinRecovery(this.mission);super.respawn();}
@@ -146,6 +148,7 @@ export class CabinFever extends FootAdventure{
     hazard.art.setFlipX(Math.cos(phase)<0);
    }
   }
+  this.pickupBeer.setVisible(!this.mission.beer);
   this.beerArt.setVisible(this.mission.beer&&!this.won).setPosition(this.player.x+this.facing*25,(this.player.body as Phaser.Physics.Arcade.Body).bottom-37);}
  publishStatus(){super.publishStatus({phase:this.mission.phase,beer:String(this.mission.beer),condition:String(this.mission.condition),checkpoint:this.mission.checkpoint,support:String(this.support??''),boatX:String(Math.round(this.decks[0]?.art.x??0))});}
 }

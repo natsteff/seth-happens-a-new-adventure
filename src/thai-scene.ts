@@ -331,7 +331,7 @@ export class ThaiTakeout extends Phaser.Scene {
     const warmth=foodWarmth(this.run,this.deliveryElapsed),score=takeoutScore(this.run,this.deliveryElapsed);
     this.endPanel('DINNER. DELIVERED.',`SCORE ${score.toLocaleString()}\nFood condition ${this.run.condition}% · Warmth ${warmth}%\n${(this.deliveryElapsed/1000).toFixed(1)} seconds · ${this.run.hits} hits\n\nAllison: “You even remembered the spring rolls.”`);
     this.publishStatus();
-    openTakeoutScores({score,condition:this.run.condition,warmth,hits:this.run.hits,elapsedMs:Math.min(THAI.limitMs-1,Math.round(this.deliveryElapsed))});
+    openTakeoutScores({score,condition:this.run.condition,warmth,hits:this.run.hits,elapsedMs:Math.min(THAI.limitMs-1,this.deliveryElapsed)});
   }
   failRun(){
     this.failed=true;this.physics.world.pause();this.player.setVelocity(0,0);this.prompt.setVisible(false);

@@ -1,12 +1,14 @@
-import {readScores,rankScores} from './scores.mjs';
-import {readTakeoutScores} from './thai-mission.mjs';
-import {readScooterScores} from './scooter-mission.mjs';
-import {readAdventureScores} from './adventure-records.mjs';
+import {readLevelScores,onlineLevelScores,onlineEnabled,scoreReady} from './score-service';
+import {deviceFallback} from './score-fallback.mjs';
 import {formatRunSeconds} from './mission.mjs';
 export const scoreLevels=[['rooftop','Rooftop Beer Run'],['thai','Thai Takeout Run'],['scooter','Scooter Ride'],['concert','Concert Chaos'],['haunted','Haunted House'],['zombie','Zombie Apocalypse'],['snow','Snow Day From Hell'],['carnival','Carnival Catastrophe'],['cabin','Cabin Fever'],['grocery','Grocery Store Gauntlet'],['soccer','Soccer Game Hijinx'],['lastcall','Last Call'],['encore','Encore · View-only finale']];
 const selections=new WeakMap<HTMLDialogElement,string>();
+const cleanups=new WeakMap<HTMLDialogElement,()=>void>();
+function savedView(){try{return localStorage.getItem('seth-happens-2.score-view')==='local'?'local':'online';}catch{return 'online';}}
+function rememberView(view:string){try{localStorage.setItem('seth-happens-2.score-view',view);}catch{/* Session preference still works. */}}
 // Browsing never writes scores/progression or replaces a pending run's form.
 export function mountScoreBrowser(dialog:HTMLDialogElement){
+ cleanups.get(dialog)?.();
  const heading=dialog.querySelector<HTMLElement>('.score-heading');
  const close=dialog.querySelector<HTMLButtonElement>('#close-scores,#thai-close,#scooter-close,#adventure-close');
  if(heading&&close&&!heading.contains(close)){
@@ -27,17 +29,28 @@ export function mountScoreBrowser(dialog:HTMLDialogElement){
  const note=document.createElement('p');note.textContent='Saved in this browser only. Viewing another level keeps your current game unchanged.';
  if(document.body.dataset.review==='true')note.textContent+=' Playtest runs do not save scores.';
  const list=document.createElement('div');list.className='score-list';list.setAttribute('aria-live','polite');
+ const toggle=document.createElement('div');toggle.className='score-actions';
+ let view=savedView();
+ const onlineButton=document.createElement('button'),deviceButton=document.createElement('button');onlineButton.type=deviceButton.type='button';onlineButton.textContent='Online';deviceButton.textContent='This Device';toggle.append(onlineButton,deviceButton);
  const more=document.createElement('button');more.type='button';more.textContent='Show all scores';
- let all=false;
- function render(){
+ let all=false,revision=0;
+ async function render(){
+  const current=++revision,level=select.value;
+  onlineButton.setAttribute('aria-pressed',String(view==='online'));deviceButton.setAttribute('aria-pressed',String(view==='local'));
   selections.set(dialog,select.value);list.replaceChildren();dialog.querySelectorAll<HTMLElement>('.score-eyebrow').forEach(el=>el.hidden=select.value!==document.body.dataset.level);
   more.hidden=select.value==='encore';
   // Keep the existing rooftop clear action scoped to rooftop scores only.
-  dialog.querySelectorAll<HTMLElement>('#clear-scores,#clear-form,#server-scores,#local-scores,.clear-local-rooftop,.browser-clear-form').forEach(el=>{if(el.id==='clear-form'||el.classList.contains('browser-clear-form'))el.hidden=true;else el.hidden=select.value!=='rooftop';});
+  dialog.querySelectorAll<HTMLElement>('#clear-scores,#clear-form,#server-scores,#local-scores,.clear-local-rooftop,.browser-clear-form').forEach(el=>{if(el.id==='clear-form'||el.classList.contains('browser-clear-form'))el.hidden=true;else el.hidden=select.value!=='rooftop'||view!=='local';});
+  toggle.hidden=false;
   try{
-   if(select.value==='encore'){list.textContent='Encore is a view-only finale and has no high scores.';return;}
-   const records=select.value==='rooftop'?rankScores(readScores(localStorage)):select.value==='thai'?readTakeoutScores(localStorage):select.value==='scooter'?readScooterScores(localStorage):readAdventureScores(localStorage,select.value);
-   if(!records.length){list.textContent='No saved scores for this level yet.';more.hidden=true;return;}
+   if(select.value==='encore'){note.textContent='';toggle.hidden=true;list.textContent='Encore is a view-only finale and has no high scores.';return;}
+   note.textContent='Loading scores…';
+   let records:any[];
+   if(view==='online'){
+    try{records=await onlineLevelScores(level);if(current!==revision||!root.isConnected)return;note.textContent='Online · Top 25 per level. Ties favor the earliest run. Device scores synchronize automatically.';}
+    catch{if(current!==revision||!root.isConnected)return;const fallback=deviceFallback(()=>readLevelScores(level));records=fallback.scores;note.textContent=onlineEnabled()?fallback.notice:'Online scoring is not enabled. Showing This Device scores.';}
+   }else{records=readLevelScores(level);note.textContent=onlineEnabled()?'This Device · Saved in this browser. Online synchronization stays active.':'This Device · Saved in this browser. Online scoring is not enabled.';}
+   if(!records.length){list.textContent='No scores for this level yet.';more.hidden=true;return;}
    const table=document.createElement('table');table.innerHTML='<thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Run details</th></tr></thead>';
    const tbody=table.createTBody();
    const visible=all?records:[...records.filter((s:any)=>!s.cheater).slice(0,10),...records.filter((s:any)=>s.cheater)];
@@ -54,7 +67,11 @@ export function mountScoreBrowser(dialog:HTMLDialogElement){
  }
  select.addEventListener('change',()=>{all=false;more.textContent='Show all scores';render();});
  more.addEventListener('click',()=>{all=!all;more.textContent=all?'Show top 10':'Show all scores';render();});
- root.append(label,note,list,more);
+ onlineButton.addEventListener('click',()=>{view='online';rememberView(view);all=false;more.textContent='Show all scores';void render();});
+ deviceButton.addEventListener('click',()=>{view='local';rememberView(view);all=false;more.textContent='Show all scores';void render();});
+ root.append(label,toggle,note,list,more);
+ void scoreReady.then(()=>{if(root.isConnected)void render();});
+ const refresh=()=>{if(root.isConnected&&dialog.open)void render();};window.addEventListener('scores-changed',refresh);cleanups.set(dialog,()=>window.removeEventListener('scores-changed',refresh));
  // Original forms/save handlers and clear-password policy remain intact.
  dialog.querySelectorAll<HTMLElement>(':scope > .score-list,#all-scores').forEach(el=>el.hidden=true);
  dialog.querySelector('.score-actions')?.before(root);
