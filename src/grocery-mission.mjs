@@ -12,3 +12,10 @@ export function groceryAction(state,{x,bottom,action=false}){
 }
 export function groceryScore(s,elapsedMs,hits){return s.complete?Math.max(0,6500-Math.ceil(elapsedMs/1000)*5-hits*90):0;}
 export function grocerySlippery(x){return x>2450&&x<2810||x>4750&&x<5050;}
+
+// Collision tops are shared with artwork placement; both approaches use ordinary jumps.
+export const groceryPlatforms=[
+ {x:2880,y:820,width:120,frame:1},{x:3020,y:750,width:130,frame:2},{x:3160,y:700,width:300,frame:2},
+ {x:3480,y:750,width:130,frame:2},{x:3630,y:820,width:120,frame:1},
+ {x:4110,y:850,width:130,frame:3},{x:4270,y:810,width:320,frame:4},{x:4610,y:850,width:130,frame:3}
+];

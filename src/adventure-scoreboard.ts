@@ -1,7 +1,7 @@
 import {readLevelScores,saveLevelScore} from './score-service';
 import {compactScoreEntry,finishCompactEntry,showScoreDialog,resetCompactEntry,acceptedPlayerName,focusScoreEntry} from './score-entry';
 
-type Result={score:number;elapsedMs:number;hits:number};
+type Result={score:number;elapsedMs:number;hits:number;condition?:number;wheelBonus?:boolean;coasterBonus?:boolean};
 const dialog=document.createElement('dialog');dialog.id='adventure-scores';dialog.className='score-dialog';document.getElementById('game')!.append(dialog);
 let pending:(Result&{id:string;date:string})|null=null,currentLevel='';
 export function resetAdventureScores(){pending=null;currentLevel='';resetCompactEntry(dialog);if(dialog.open)dialog.close();}

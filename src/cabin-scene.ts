@@ -1,15 +1,17 @@
+import {carryAnchor} from './carry-anchor.mjs';
 import {loadCast,walkingCastPerson} from './cast';
 import Phaser from 'phaser';
 import {FootAdventure} from './foot-adventure';
 import {gameAudio} from './audio';
-import {CABIN,cabinLandings,cabinBoats,cabinBoatPosition,newCabinRun,cabinAction,cabinCheckpoints,cabinRecovery,cabinScore} from './cabin-mission.mjs';
+import {CABIN,cabinLandings,cabinBoats,cabinBoatPosition,newCabinRun,cabinAction,cabinCheckpoints,cabinRecovery,cabinCollision,cabinScore} from './cabin-mission.mjs';
 type Deck={art:Phaser.GameObjects.Rectangle;body:Phaser.Physics.Arcade.Body;hull:Phaser.GameObjects.Graphics};
 type CabinWalker=ReturnType<typeof walkingCastPerson>&{home:number;phase:number};
 export class CabinFever extends FootAdventure{
  constructor(){super({key:'cabin',number:9,title:'Cabin Fever',...CABIN,startY:CABIN.ground,instructions:'A cooler full of beer. Naturally, it is on the OTHER shore.\nHead right through the woods. Jump between boats, islands and the wobbly dock.\nLand on the deck or canoe rim. Wait for boats to come closer. Dodge walkers.\nF / Action at the cooler, then bring the beer LEFT to the cabin. Water returns you to a checkpoint.'});}
  preload(){super.preload();loadCast(this,'cabin');this.load.image('cabin-unicorn-beer','./assets/cabin/unicorn-haze-v1.png');}
+ private recoveries=0;
  mission=newCabinRun();decks:Deck[]=[];walkers:CabinWalker[]=[];support:number|null=null;supportOffset=0;returnHazards=false;beerArt!:Phaser.GameObjects.Container;pickupBeer!:Phaser.GameObjects.Image;coolerLid!:Phaser.GameObjects.Rectangle;
- resetMission(){this.mission=newCabinRun();this.decks=[];this.walkers=[];this.support=null;this.supportOffset=0;this.returnHazards=false;}
+ resetMission(){this.recoveries=0;this.mission=newCabinRun();this.decks=[];this.walkers=[];this.support=null;this.supportOffset=0;this.returnHazards=false;}
  buildWorld(){
   // Decorative scenery has no bodies and allocates no world-sized bitmap textures.
   const g=this.add.graphics().setDepth(-25);
@@ -26,7 +28,7 @@ export class CabinFever extends FootAdventure{
   const dock=this.add.graphics().setDepth(3);for(let x=2130;x<2300;x+=24)dock.lineStyle(2,0xb6a58b).lineBetween(x,800,x,850);
   const cooler=this.add.graphics().setDepth(4);cooler.fillStyle(0xe5e1c9).fillRoundedRect(CABIN.coolerX-43,751,86,49,7);cooler.fillStyle(0x498a8d).fillRect(CABIN.coolerX-38,762,76,30);cooler.lineStyle(4,0xe9dfb4).strokeRoundedRect(CABIN.coolerX-48,760,96,25,7);
   const beerTexture=this.textures.get('cabin-unicorn-beer');if(!beerTexture.has('pack'))beerTexture.add('pack',0,158,16,1025,1173);
-  this.pickupBeer=this.add.image(CABIN.coolerX,751,'cabin-unicorn-beer','pack').setOrigin(.5,1).setDisplaySize(43,43*1173/1025).setDepth(7);
+  this.pickupBeer=this.add.image(CABIN.coolerX,751,'cabin-unicorn-beer','pack').setOrigin(.5,1).setDisplaySize(64.5,64.5*1173/1025).setDepth(7);
   this.coolerLid=this.add.rectangle(CABIN.coolerX,749,94,10,0xf2e8c6).setDepth(5);this.text(CABIN.coolerX,655,'THE COOLER\nF / ACTION · PICK UP BEER',21,'#ffe0a0').setOrigin(.5).setAlign('center');
   this.add.image(CABIN.homeX+75,800,'allison').setOrigin(.5,1).setDisplaySize(58,84).setDepth(6);
   for(const [i,x] of [600,1290,5480,6240].entries()){
@@ -114,13 +116,20 @@ export class CabinFever extends FootAdventure{
    this.decks.push({art,body,hull});
    this.physics.add.collider(this.player,art,()=>{const rider=this.player.body as Phaser.Physics.Arcade.Body;if(body.touching.up&&rider.velocity.y<0)rider.setVelocityY(0);});
   });
-  const pack=this.add.image(0,-10,'cabin-unicorn-beer','pack').setDisplaySize(40,40*1173/1025);this.beerArt=this.add.container(0,0,[pack]).setDepth(10).setVisible(false);
+  const pack=this.add.image(0,0,'cabin-unicorn-beer','pack').setDisplaySize(12,12*1173/1025);this.beerArt=this.add.container(0,0,[pack]).setDepth(10).setVisible(false);
  }
  objectiveText(){return this.mission.complete?'BEER DELIVERED · The cabin weekend can finally begin.':this.mission.beer?`← RETURN TO CABIN · Beer ${this.mission.condition}% · Checkpoint: ${this.mission.checkpoint}`:'COOLER ON THE FAR SHORE → · Woods, docks, boats. What could go wrong?';}
- respawn(){this.support=null;this.mission=cabinRecovery(this.mission);super.respawn();}
+ scoreDetails(){return {elapsedMs:Math.floor(this.elapsedMs),condition:this.mission.condition};}
+ takeHit(line='Watch the crowd!'){
+  const hits=this.hits,recoveries=this.recoveries,before=this.mission.condition;
+  super.takeHit(line);
+  // Base acceptance/iframes decide damage. A lethal hit already called our respawn.
+  if(this.hits!==hits&&this.recoveries===recoveries){this.mission=cabinCollision(this.mission);if(this.mission.condition!==before)this.say(`${line} Beer ${this.mission.condition}% (−${before-this.mission.condition}%).`);}
+ }
+ respawn(){const before=this.mission.condition;this.recoveries++;this.support=null;this.mission=cabinRecovery(this.mission);super.respawn();if(this.mission.condition!==before)this.say(`Back to the checkpoint. Beer ${this.mission.condition}% (−${before-this.mission.condition}%).`);}
  tick(delta:number,action:boolean){
   const body=this.player.body as Phaser.Physics.Arcade.Body;
-  if(body.bottom>910&&this.player.x>2300&&this.player.x<4700){this.hits++;this.respawn();this.say(this.mission.beer?'Lake checkpoint. The beer survived. Your dignity did not.':'Lake checkpoint. Swimming was not in the weekend itinerary.');return;}
+  if(body.bottom>910&&this.player.x>2300&&this.player.x<4700){this.hits++;this.respawn();this.say(this.mission.beer?`Lake checkpoint. Beer ${this.mission.condition}% (−15%, minimum 0%). Your dignity did not survive.`:'Lake checkpoint. Swimming was not in the weekend itinerary.');return;}
   const result=cabinAction(this.mission,{x:this.player.x,bottom:body.bottom,action});this.mission=result.state;
   if(result.event){this.checkpoint={...cabinCheckpoints[this.mission.checkpoint as keyof typeof cabinCheckpoints]};if(result.event==='checkpoint'){this.stamina=100;this.say('Dry land checkpoint. Geese still have right of way.');}else if(result.event==='pickup'){this.coolerLid.setAngle(-18);this.returnHazards=true;for(const h of this.hazards)h.period*=.7;this.say('Beer acquired. Allison: “Great. Now bring it BACK.” The wildlife is less patient.');gameAudio.play('pickup');}else if(result.event==='delivery'){this.finish('CABIN FEVER: CURED.',`Allison: “You were gone so long I nearly drank water.”\nBeer delivered · Condition ${this.mission.condition}%`,cabinScore(this.mission,this.elapsedMs,this.hits));return;}}
   if(!this.mission.beer&&Math.abs(this.player.x-CABIN.coolerX)<95&&Math.abs(body.bottom-800)<22)this.prompt.setVisible(true).setText('F / Action · Collect the beer');else if(this.mission.beer&&Math.abs(this.player.x-CABIN.homeX)<95&&Math.abs(body.bottom-800)<22)this.prompt.setVisible(true).setText('F / Action · Deliver the beer');
@@ -149,6 +158,6 @@ export class CabinFever extends FootAdventure{
    }
   }
   this.pickupBeer.setVisible(!this.mission.beer);
-  this.beerArt.setVisible(this.mission.beer&&!this.won).setPosition(this.player.x+this.facing*25,(this.player.body as Phaser.Physics.Arcade.Body).bottom-37);}
+  const hand=carryAnchor({x:this.player.x,bottom:(this.player.body as Phaser.Physics.Arcade.Body).bottom,facing:this.facing,frame:Number(this.portrait.frame.name),falling:this.portrait.texture.key==='seth-fall'});this.beerArt.setVisible(this.mission.beer&&!this.won).setPosition(hand.x,hand.y+4);}
  publishStatus(){super.publishStatus({phase:this.mission.phase,beer:String(this.mission.beer),condition:String(this.mission.condition),checkpoint:this.mission.checkpoint,support:String(this.support??''),boatX:String(Math.round(this.decks[0]?.art.x??0))});}
 }

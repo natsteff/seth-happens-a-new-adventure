@@ -5,20 +5,29 @@ service cloud.firestore {
   function levelOK(l){return l in ['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival','cabin','grocery','soccer','lastcall'];}
   function keyOK(k){return k is string && k.matches('^[A-Za-z0-9_-]{1,128}$');}
   function digestOK(k){return k is string && k.matches('^[a-f0-9]{64}$');}
-  function bp(l){return /databases/$(database)/documents/games/seth-happens-2/levels/$(l)/record-book/current;}
+  function balanced(l){return l in ['rooftop','carnival','cabin'];}
+  function revised(p){return p.keys().hasAny(['ruleset']) && p.ruleset=='risk-v2';}
+  function bookOK(l,id){return id=='current'||balanced(l)&&id=='risk-v2';}
+  function edition(data){return data.keys().hasAny(['book'])?data.book:'current';}
+  function matches(l,id,p){return id=='current'&&!p.keys().hasAny(['ruleset'])||balanced(l)&&id=='risk-v2'&&revised(p);}
+  function bp(l,id){return /databases/$(database)/documents/games/seth-happens-2/levels/$(l)/record-book/$(id);}
   function sp(l,k){return /databases/$(database)/documents/games/seth-happens-2/levels/$(l)/seen-runs/$(k);}
   function budgetPath(){return /databases/$(database)/documents/games/seth-happens-2/budgets/$(request.auth.uid);}
   function nat(n,max){return n is int && n>=0 && n<=max;}
   function positive(n){return n>0?n:0;}
   function rooftop(p){
    let bonus=p.cheater?0:positive(120-math.ceil(p.elapsedMs / 1000.0))*100;
-   let base=positive(1000+(p.photos-p.latePhotos)*250+p.latePhotos*125+(p.beer?500:0)-10*(p.falls+p.squishes+p.bumps));
-   return p.elapsedMs<120000 && (p.beer||p.cheater) && p.bonus==bonus && p.score==(p.cheater?-10000:base+bonus);
+   let objectives=1000+(p.photos-p.latePhotos)*250+p.latePhotos*125+(p.beer?500:0);
+   let total=revised(p)?positive(objectives+bonus-300*p.falls-250*p.squishes-200*p.bumps):positive(objectives-10*(p.falls+p.squishes+p.bumps))+bonus;
+   return p.elapsedMs<120000 && (p.beer||p.cheater) && p.bonus==bonus && p.score==(p.cheater?-10000:total);
   }
   function payloadOK(p,l){
+   let current=revised(p);
    let maximum={'rooftop':14000,'thai':4800,'scooter':10000,'concert':6250,'haunted':6800,'zombie':20000,'snow':6500,'carnival':8000,'cabin':8500,'grocery':6500,'soccer':8000,'lastcall':9000};
    return p.keys().hasAll(['level','id','name','dateMs','score','elapsedMs','cheater','beer','falls','squishes','bumps','photos','latePhotos','bonus','hits','condition','warmth','grip'])
-    && p.keys().hasOnly(['level','id','name','dateMs','score','elapsedMs','cheater','beer','falls','squishes','bumps','photos','latePhotos','bonus','hits','condition','warmth','grip'])
+    && p.keys().hasOnly(['level','id','name','dateMs','score','elapsedMs','cheater','beer','falls','squishes','bumps','photos','latePhotos','bonus','hits','condition','warmth','grip','ruleset','wheelBonus','coasterBonus'])
+    && (!p.keys().hasAny(['ruleset'])||balanced(l)&&p.ruleset=='risk-v2')
+    && (!p.keys().hasAny(['wheelBonus','coasterBonus'])||l=='carnival'&&current)
     && p.level==l && levelOK(l) && keyOK(p.id)
     && p.name is string && p.name.size()>0 && p.name.size()<=16 && p.name.matches('.*[^ ].*') && !p.name.matches('.*[\\x00-\\x1f\\x7f].*')
     && nat(p.dateMs,request.time.toMillis()+86400000) && nat(p.elapsedMs,3600000) && p.score is int && p.cheater is bool && p.beer is bool
@@ -26,6 +35,8 @@ service cloud.firestore {
     && nat(p.photos,2) && nat(p.latePhotos,p.photos) && nat(p.bonus,12000) && nat(p.condition,100) && nat(p.warmth,100) && nat(p.grip,100)
     && (p.cheater?l=='rooftop' && p.score==-10000:p.score>=0 && p.score<=maximum[l])
     && (l!='rooftop'||rooftop(p))
+    && (!current||l!='carnival'||p.wheelBonus is bool && p.coasterBonus is bool && p.score==positive(6500+(p.wheelBonus?150:0)+(p.coasterBonus?75:0)-math.floor(p.elapsedMs / 1000.0)*6-p.hits*100))
+    && (!current||l!='cabin'||p.score==positive(7000+p.condition*15-math.floor(p.elapsedMs / 1000.0)*5-p.hits*100))
     && (l!='thai'||p.elapsedMs<180000 && p.score==positive(1000+p.condition*10+p.warmth*10+positive(180-math.ceil(p.elapsedMs / 1000.0))*10-p.hits*25))
     && (l!='scooter'||p.elapsedMs<=120000 && p.grip>0)
     && (l!='lastcall'||p.elapsedMs<=120000);
@@ -37,37 +48,48 @@ service cloud.firestore {
    && n.normal.removeAll([c])==old.normal.removeAll(old.normal.size()==25?[old.normal[24]]:[])
    && n.normal[n.lastPosition]==c && ordered(n.normal,n.lastPosition) && (old.normal.size()<25||before(c,old.normal[24]));}
   function shortcutChange(old,n,c){return n.normal==old.normal && old.cheaters.size()<5 && n.cheaters==old.cheaters.concat([c]) && n.lastPosition==old.cheaters.size();}
-  function bookChange(l,old,n){
+  function bookChange(l,id,old,n){
    let c={'key':n.lastKey,'payload':n.lastPayload};
    let budget=getAfter(budgetPath()).data;
+   let seen=getAfter(sp(l,n.lastKey)).data;
    return n.keys().hasOnly(['schema','revision','normal','cheaters','lastKey','lastPayload','lastDigest','lastPosition','updatedAt'])
     && n.schema==1 && n.revision==old.revision+1 && n.updatedAt==request.time && n.lastPosition is int
     && n.normal is list && n.normal.size()<=25 && n.cheaters is list && n.cheaters.size()<=5
-    && keyOK(n.lastKey) && n.lastKey==n.lastPayload.id && digestOK(n.lastDigest) && payloadOK(n.lastPayload,l)
-    && !exists(sp(l,n.lastKey)) && getAfter(sp(l,n.lastKey)).data.digest==n.lastDigest
-    && budget.lastRunKey==n.lastKey && budget.level==l && budget.lastAt==request.time
+    && keyOK(n.lastKey) && n.lastKey==n.lastPayload.id && digestOK(n.lastDigest)
+    && !exists(sp(l,n.lastKey)) && seen.digest==n.lastDigest && edition(seen)==id
+    && budget.lastRunKey==n.lastKey && budget.level==l && budget.lastAt==request.time && edition(budget)==id
     && (n.lastPayload.cheater?shortcutChange(old,n,c):normalChange(old,n,c));
   }
   match /games/seth-happens-2/levels/{level}/record-book/{id}{
-   allow get: if signed() && levelOK(level) && id=='current';
+   allow get: if signed() && levelOK(level) && bookOK(level,id);
    // Safe lazy initialization; clients can create only this exact empty structure.
-   allow create: if signed() && levelOK(level) && id=='current' && request.resource.data=={'schema':1,'revision':0,'normal':[],'cheaters':[]};
-   allow update: if signed() && levelOK(level) && id=='current' && bookChange(level,resource.data,request.resource.data);
+   allow create: if signed() && levelOK(level) && bookOK(level,id) && request.resource.data=={'schema':1,'revision':0,'normal':[],'cheaters':[]};
+   allow update: if signed() && levelOK(level) && bookOK(level,id) && bookChange(level,id,resource.data,request.resource.data);
    allow delete,list: if false;
+  }
+  function receiptOK(l,key,r){
+   let id=edition(r);
+   let book=getAfter(bp(l,id)).data;
+   let budget=getAfter(budgetPath()).data;
+   return r.keys().hasOnly(['digest','receivedAt','book']) && bookOK(l,id) && digestOK(r.digest) && r.receivedAt==request.time
+    && book.lastKey==key && book.lastDigest==r.digest && book.updatedAt==request.time
+    && payloadOK(book.lastPayload,l) && matches(l,id,book.lastPayload)
+    && budget.lastRunKey==key && budget.level==l && edition(budget)==id;
   }
   match /games/seth-happens-2/levels/{level}/seen-runs/{key}{
    allow get: if signed() && levelOK(level) && keyOK(key);
-   allow create: if signed() && levelOK(level) && keyOK(key)
-    && request.resource.data.keys().hasOnly(['digest','receivedAt']) && digestOK(request.resource.data.digest) && request.resource.data.receivedAt==request.time
-    && getAfter(bp(level)).data.lastKey==key && getAfter(bp(level)).data.lastDigest==request.resource.data.digest && getAfter(bp(level)).data.updatedAt==request.time
-    && getAfter(budgetPath()).data.lastRunKey==key && getAfter(budgetPath()).data.level==level;
+   allow create: if signed() && levelOK(level) && keyOK(key) && receiptOK(level,key,request.resource.data);
    allow update,delete,list: if false;
   }
-  function budgetOK(b,previous,reset){return b.keys().hasOnly(['windowStartedAt','lastAt','lastRunKey','level','count']) && levelOK(b.level) && keyOK(b.lastRunKey)
-   && b.lastAt==request.time && b.windowStartedAt==(reset?request.time:previous.windowStartedAt)
-   && b.count is int && b.count==(reset?0:previous.count)+1 && b.count<=60
-   && !exists(sp(b.level,b.lastRunKey)) && existsAfter(sp(b.level,b.lastRunKey))
-   && getAfter(bp(b.level)).data.lastKey==b.lastRunKey && getAfter(bp(b.level)).data.updatedAt==request.time;}
+  function budgetOK(b,previous,reset){
+   let id=edition(b);
+   let book=getAfter(bp(b.level,id)).data;
+   return b.keys().hasOnly(['windowStartedAt','lastAt','lastRunKey','level','count','book']) && bookOK(b.level,id) && levelOK(b.level) && keyOK(b.lastRunKey)
+    && b.lastAt==request.time && b.windowStartedAt==(reset?request.time:previous.windowStartedAt)
+    && b.count is int && b.count==(reset?0:previous.count)+1 && b.count<=60
+    && !exists(sp(b.level,b.lastRunKey)) && existsAfter(sp(b.level,b.lastRunKey))
+    && book.lastKey==b.lastRunKey && book.updatedAt==request.time;
+  }
   match /games/seth-happens-2/budgets/{uid}{
    allow get: if signed() && uid==request.auth.uid;
    allow create: if signed() && uid==request.auth.uid && budgetOK(request.resource.data,{},true);

@@ -13,7 +13,7 @@ test('optional objectives and distinct mishaps determine the final score', () =>
   mishaps=recordMishap(mishaps,'person');
   mishaps=recordMishap(mishaps,'object');
   assert.deepEqual(mishaps,{falls:1,squishes:1,bumps:2});
-  assert.equal(runScore(true,new Set([0,1]),mishaps),1960);
+  assert.equal(runScore(true,new Set([0,1]),mishaps),1050);
   assert.equal(runScore(false,new Set(),{falls:101,squishes:0,bumps:0}),0);
 });
 test('missing a photo is persistent until captured, even after a later photo', () => {

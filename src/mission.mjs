@@ -1,3 +1,4 @@
+import {rooftopPenalty} from './scoring-rules.mjs';
 export const ROUTE_OFFSET = 200;
 export const LEVEL_WIDTH = 7760;
 export const GROUND_Y = 2700;
@@ -25,7 +26,7 @@ export function objectImpactReaction(randomValue) { return (['ouch','ahh','grunt
 export function runScore(beer, photos, mishaps, latePhotos = new Set()) {
   const photoPoints = photoStops.reduce((points, _, i) => points + (photos.has(i) ? (latePhotos.has(i) ? 125 : 250) : 0), 0);
   return Math.max(0, 1000 + photoPoints + (beer ? 500 : 0)
-    - 10 * (mishaps.falls + mishaps.squishes + mishaps.bumps));
+    - rooftopPenalty(mishaps));
 }
 export function recordMishap(mishaps, reaction) {
   const key = reaction === 'fall' ? 'falls' : reaction === 'squish' ? 'squishes' : 'bumps';
@@ -39,7 +40,10 @@ export const RUN_LIMIT_MS=120000;
 export const SPRINT_SPEED=385;
 export function timeBonus(elapsedMs){return Math.max(0,120-Math.ceil(Math.max(0,elapsedMs)/1000))*100;}
 export function finalScore(beer,photos,mishaps,latePhotos,elapsedMs,cheater=false){
-  return cheater?-10000:runScore(beer,photos,mishaps,latePhotos)+timeBonus(elapsedMs);
+  if(cheater)return -10000;
+  // Apply penalties to the whole total so they do not disappear once base points hit zero.
+  const objectives=1000+photoStops.reduce((n,_,i)=>n+(photos.has(i)?latePhotos.has(i)?125:250:0),0)+(beer?500:0);
+  return Math.max(0,objectives+timeBonus(elapsedMs)-rooftopPenalty(mishaps));
 }
 export function roadLandingIsFall(departureFloor){return departureFloor>=2;}
 export const dropProfiles={

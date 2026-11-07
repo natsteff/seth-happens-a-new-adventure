@@ -38,3 +38,6 @@ Current Mega Jump WAV (`mega-jump-v2.wav`) SHA-256: `e77207ec9982433161823dd32da
 
 - Level 6 truck impact uses [Cartoon Splat by Universfield](https://pixabay.com/sound-effects/film-special-effects-cartoon-splat-310479/) under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
 - The Haunted House checkpoint uses [Single Church Bell by Universfield](https://pixabay.com/sound-effects/musical-single-church-bell-156463/) under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
+
+- Grocery item collection uses the owner-supplied WAV of [Cash Register Open Ding by Universfield](https://pixabay.com/ru/sound-effects/кино-и-спецэффекты-cash-register-open-ding-559401/) under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
+- Scooter high launches use the owner-edited WAV excerpt of [Woman Enraged Fearful Scream Sound Effect by JesusChristIsGod](https://pixabay.com/sound-effects/woman-enraged-fearful-scream-sound-effect-322706/) under the [Pixabay Content License](https://pixabay.com/service/license-summary/). Supplied edited bytes are preserved.

@@ -1,14 +1,14 @@
 # Seth Happens - A New Adventure
 
-**Version 0.16.0 · Early alpha**
+**Version 0.17.0 · Beta**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.16.0 Early alpha"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.17.0 Beta"></a>
 </p>
 
-**Play version 0.16.0** — Fullscreen highly recommended.
+**Play version 0.17.0** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
@@ -133,3 +133,5 @@ Firebase setup, validation, initialization and deployment are documented in [fir
 On November 7–9 (your device’s local calendar), the idle launch screen offers a birthday interlude once per browser per year. A prominent **🎂 Birthday Surprise** button allows unlimited replays during those dates. Skip returns to the launch screen. Muted/music-off settings are respected; blocked autoplay offers audio or silent playback, and missing audio safely continues silently. Annual playback uses an independent localStorage flag; unavailable storage falls back to once per visit. No scores or unlocks change.
 
 During local development only, `?birthday=preview` previews the scene on any date. This parameter has no effect in production builds. The supplied 20.76-second song plays in full, with the 20-second choreography scaled to its actual playback position.
+
+Current Rooftop, Carnival and Cabin scoring uses a separate balance edition. Their **Scoring rules** selector can show preserved earlier scores; the other nine levels keep their existing leaderboards. See [scoring formulas, risk/reward rationale and comparisons](docs/scoring-balance.md).

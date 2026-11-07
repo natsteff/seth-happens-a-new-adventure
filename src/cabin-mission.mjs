@@ -1,3 +1,4 @@
+import {CABIN_CONDITION_LOSS} from './scoring-rules.mjs';
 export const CABIN={width:6500,height:1100,ground:800,startX:230,coolerX:6070,homeX:230,waterY:840};
 export const cabinLandings=[{x:0,y:800,width:2300},{x:2690,y:770,width:310},{x:3920,y:770,width:400},{x:4700,y:800,width:1800}];
 export const cabinBoats=[
@@ -22,5 +23,7 @@ export function cabinAction(state,{x,bottom,action=false}){
  }
  return {state:s,event};
 }
-export function cabinRecovery(state){return {...state,condition:state.beer?Math.max(0,state.condition-10):state.condition};}
+export function cabinConditionDamage(state,event){const loss=CABIN_CONDITION_LOSS[event];if(!state.beer||state.complete||loss===undefined)return state;return {...state,condition:Math.max(0,Math.min(100,state.condition-loss))};}
+export const cabinCollision=state=>cabinConditionDamage(state,'collision');
+export const cabinRecovery=state=>cabinConditionDamage(state,'respawn');
 export function cabinScore(state,elapsed,hits){return state.complete?Math.max(0,7000+state.condition*15-Math.floor(elapsed/1000)*5-hits*100):0;}

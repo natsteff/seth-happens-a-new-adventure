@@ -8,13 +8,13 @@ import {bookPath,emptyBook,updateBook} from '../src/record-book.mjs';
 import {FirebaseScores} from '../src/firebase-scores.ts';
 const env=await initializeTestEnvironment({projectId:'demo-seth-happens-2',firestore:{host:'127.0.0.1',port:8080,rules:readFileSync(new URL('../firebase/firestore.rules',import.meta.url),'utf8')}});
 after(()=>env.cleanup());beforeEach(()=>env.clearFirestore());
-const run=(l,id='run',extra={})=>({id,name:'Player',date:'2026-11-07T12:00:00Z',score:l==='rooftop'?8000:l==='thai'?4200:1000,elapsedMs:60000,beer:true,bonus:l==='rooftop'?6000:0,photos:2,latePhotos:0,falls:0,squishes:0,bumps:0,hits:0,condition:100,warmth:100,grip:100,...extra});
-async function setup(level='snow',uid='alice',id='run',extra={}){const db=env.authenticatedContext(uid).firestore();await setDoc(doc(db,bookPath(level)),emptyBook());return {db,uid,level,job:await submission(payload(level,run(level,id,extra)))};}
+const run=(l,id='run',extra={})=>({id,name:'Player',date:'2026-11-07T12:00:00Z',score:l==='rooftop'?8000:l==='thai'?4200:l==='cabin'?8200:l==='carnival'?6140:1000,elapsedMs:60000,beer:true,bonus:l==='rooftop'?6000:0,photos:2,latePhotos:0,falls:0,squishes:0,bumps:0,hits:0,condition:100,warmth:100,grip:100,...extra});
+async function setup(level='snow',uid='alice',id='run',extra={}){const db=env.authenticatedContext(uid).firestore();if(!(await getDoc(doc(db,bookPath(level)))).exists())await setDoc(doc(db,bookPath(level)),emptyBook());return {db,uid,level,job:await submission(payload(level,run(level,id,extra)))};}
 function batch(x,{book=emptyBook(),change={},budget={},omitSeen=false,omitBudget=false}={}){
- const {db,level,job,uid}=x,b=writeBatch(db),next={...updateBook(book,job),updatedAt:serverTimestamp(),...change};
+ const {db,level,job,uid}=x,version=job.payload.ruleset?{book:job.payload.ruleset}:{},b=writeBatch(db),next={...updateBook(book,job),updatedAt:serverTimestamp(),...change};
  b.set(doc(db,bookPath(level)),next);
- if(!omitSeen)b.set(doc(db,`games/seth-happens-2/levels/${level}/seen-runs/${job.payload.id}`),{digest:job.digest,receivedAt:serverTimestamp()});
- if(!omitBudget)b.set(doc(db,`games/seth-happens-2/budgets/${uid}`),{windowStartedAt:serverTimestamp(),lastAt:serverTimestamp(),count:1,lastRunKey:job.payload.id,level,...budget});
+ if(!omitSeen)b.set(doc(db,`games/seth-happens-2/levels/${level}/seen-runs/${job.payload.id}`),{...version,digest:job.digest,receivedAt:serverTimestamp()});
+ if(!omitBudget)b.set(doc(db,`games/seth-happens-2/budgets/${uid}`),{...version,windowStartedAt:serverTimestamp(),lastAt:serverTimestamp(),count:1,lastRunKey:job.payload.id,level,...budget});
  return b;
 }
 test('12 levels initialize empty safely and accept atomic scores; Encore denied',async()=>{for(const [i,l] of LEVELS.entries()){const x=await setup(l,'user'+i);await assertSucceeds(batch(x).commit());assert.equal((await getDoc(doc(x.db,bookPath(l)))).data().normal.length,1);}const db=env.authenticatedContext('a').firestore();await assertFails(setDoc(doc(db,bookPath('encore')),emptyBook()));});
@@ -33,4 +33,25 @@ test('bounded insertion rejects reorder/deletion/25th eviction forgery and caps 
  const z=await setup('rooftop','shortcut','s0',{score:-10000,cheater:true,bonus:0});await assertSucceeds(batch(z).commit());
  let short=emptyBook();for(let i=0;i<5;i++)short=updateBook(short,await submission(payload('rooftop',run('rooftop','c'+i,{score:-10000,cheater:true,bonus:0}))));await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),bookPath('rooftop')),short));
  const p=payload('rooftop',run('rooftop','sixth',{score:-10000,cheater:true,bonus:0}));const job=await submission(p);await assertFails(batch({...z,job},{book:short,change:{...short,revision:short.revision+1,lastKey:p.id,lastPayload:p,lastDigest:job.digest,lastPosition:5,cheaters:[...short.cheaters,{key:p.id,payload:p}]}}).commit());
+});
+test('revised and original scoring books remain separate; old pending runs still synchronize',async()=>{
+ const client=new FirebaseScores({apiKey:'demo-key',authDomain:'demo-seth-happens-2.firebaseapp.com',projectId:'demo-seth-happens-2'},true);
+ try{
+  const revised=payload('rooftop',run('rooftop','new-balanced',{falls:1,score:7700}));
+  const original={...payload('rooftop',run('rooftop','pending-old',{falls:1,score:7700}))};delete original.ruleset;original.score=7990;
+  assert.equal(await client.submit(await submission(original)),'accepted');const oldBefore=await client.list('rooftop','original');
+  await new Promise(r=>setTimeout(r,1150));assert.equal(await client.submit(await submission(revised)),'accepted');
+  assert.deepEqual(await client.list('rooftop','original'),oldBefore);assert.deepEqual((await client.list('rooftop')).map(r=>r.id),['new-balanced']);
+  assert.equal(await client.submit(await submission(original)),'duplicate');
+ }finally{await client.dispose();}
+});
+test('new version enforces exact Cabin/Carnival totals and cannot bind a current receipt/budget to archived book',async()=>{
+ for(const [l,uid,extra] of [['cabin','cab',{condition:85,hits:1,score:7875}],['carnival','car',{wheelBonus:true,coasterBonus:true,score:6365}]]){
+  const x=await setup(l,uid,'valid',extra);await assertSucceeds(batch(x).commit());
+ }
+ const x=await setup('rooftop','risk-user','wrong-link',{falls:1,score:7700});await assertFails(batch(x,{budget:{book:'current'}}).commit());
+ const valid=updateBook(emptyBook(),x.job),b=writeBatch(x.db);b.set(doc(x.db,bookPath('rooftop','original')),{...valid,updatedAt:serverTimestamp()});await assertFails(b.commit());
+ for(const l of ['snow','thai','encore'])await assertFails(setDoc(doc(x.db,`games/seth-happens-2/levels/${l}/record-book/risk-v2`),emptyBook()));
+ const c=await setup('cabin','bad-cab','wrong',{condition:85,hits:1,score:7875}),p={...c.job.payload,condition:100};await assertFails(batch(c,{book:(await getDoc(doc(c.db,bookPath('cabin')))).data(),change:{lastPayload:p,normal:[{key:p.id,payload:p}]}}).commit());
+ const k=await setup('carnival','bad-car','wrong',{wheelBonus:true,coasterBonus:true,score:6365}),q={...k.job.payload,score:7640};await assertFails(batch(k,{book:(await getDoc(doc(k.db,bookPath('carnival')))).data(),change:{lastPayload:q,normal:[{key:q.id,payload:q}]}}).commit());
 });

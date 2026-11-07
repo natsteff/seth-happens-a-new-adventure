@@ -71,7 +71,7 @@ class GameAudio {
     if(this.muted||!this.context||!this.master||this.context.state!=='running')return;
     const buffer=this.voiceBuffers.get(kind);if(!buffer)return;
     const source=this.context.createBufferSource(),gain=this.context.createGain();
-    source.buffer=buffer;gain.gain.value=.45;source.connect(gain);gain.connect(this.master);source.start();
+    source.buffer=buffer;gain.gain.value=kind==='scooter-high'?.28:.45;source.connect(gain);gain.connect(this.master);source.start();
     this.locationSources.add(source);this.playedKinds.add(kind);this.lastLocation=kind;
     source.onended=()=>{this.locationSources.delete(source);source.disconnect();gain.disconnect();};
   }

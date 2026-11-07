@@ -12,7 +12,7 @@ test('shared server persists, recalculates, deduplicates, limits cheaters and pr
  let url=await start();
  const post=(body,path='',origin='https://game.example')=>fetch(url+path,{method:'POST',headers:{'Content-Type':'application/json',Origin:origin},body:JSON.stringify(body)});
  try{
-  let result=await (await post(entry(1))).json();assert.equal(result.scores[0].score,4990);
+  let result=await (await post(entry(1))).json();assert.equal(result.scores[0].score,4700);
   assert.equal((await (await post(entry(1))).json()).scores.length,1);
   assert.equal((await post(entry(2),'','https://other.example')).status,403);
   assert.equal((await post({...entry(2),elapsedMs:120000})).status,400);

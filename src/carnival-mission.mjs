@@ -1,3 +1,4 @@
+import {CARNIVAL_BONUS} from './scoring-rules.mjs';
 export const CARNIVAL={width:7300,height:1100,ground:800,startX:140,boothX:1630,exitX:6970};
 export const carnivalLandings=[{x:0,y:800,width:2050},{x:2400,y:640,width:200},{x:3100,y:720,width:180},{x:3650,y:800,width:3650}];
 export const carnivalRides=[
@@ -16,4 +17,4 @@ export function carnivalAction(state,{x,bottom,action=false}){
  return {state:s,event};
 }
 export function carnivalBonus(state,x,bottom){const s={...state};let event='';if(!s.clue||s.complete)return {state:s,event};if(!s.wheelBonus&&Math.abs(x-2820)<100&&bottom<390){s.wheelBonus=true;event='wheel';}else if(s.crossed&&!s.coasterBonus&&x>4650&&x<5800&&Math.abs(bottom-590)<15){s.coasterBonus=true;event='coaster';}return {state:s,event};}
-export function carnivalScore(s,elapsed,hits){return s.complete?Math.max(0,6500+(s.wheelBonus?1000:0)+(s.coasterBonus?500:0)-Math.floor(elapsed/1000)*6-hits*100):0;}
+export function carnivalScore(s,elapsed,hits){return s.complete?Math.max(0,6500+(s.wheelBonus?CARNIVAL_BONUS.wheel:0)+(s.coasterBonus?CARNIVAL_BONUS.coaster:0)-Math.floor(elapsed/1000)*6-hits*100):0;}
