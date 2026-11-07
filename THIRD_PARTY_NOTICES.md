@@ -40,3 +40,9 @@ Cabin Fever woods, cabin, lake, boats, docks, cooler and wildlife are drawn in s
 `public/audio/birthday/happy-birthday-seth.mp3` is the owner-supplied custom “Happy Birthday, Seth” recording. Dedicated generated birthday atlases are based on the existing owner-approved Seth/Allison artwork; fitted hat/horn and held camera are baked into the poses. The cloth birthday banner is a generated transparent atlas. Confetti, lighting and camera flash are drawn in code. No additional third-party assets or services were introduced.
 
 The Cabin Fever Unicorn Haze six-pack is an owner-supplied design prepared as a transparent pickup sprite. Its original reference is kept locally; only the selected game cutout is distributed.
+
+## Beta scene artwork and supplied effects
+
+Grocery fixtures, milk/bread/egg pickups and shopping cart, Carnival food-vendor walking poses and roller-coaster car are generated transparent sprite assets. Existing approved cast artwork is reused for ordinary shoppers and the information-booth attendant. Physics bodies remain separate from decorative artwork.
+
+Grocery collection and high Scooter launches use owner-supplied Pixabay recordings; authors, source links and license links are listed in [audio credits](public/audio/README.md). Supplied originals remain local.
