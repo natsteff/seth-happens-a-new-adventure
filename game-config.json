@@ -1,4 +1,11 @@
 {
-  "serverHighScores": false,
-  "scoreApiUrl": "/api/scores"
+  "onlineHighScores": true,
+  "firebase": {
+    "apiKey": "AIzaSyCFqkMfxG_BJJxCl9W7WFTyVfOlE2r13sE",
+    "authDomain": "seth-happens-2.firebaseapp.com",
+    "projectId": "seth-happens-2",
+    "storageBucket": "seth-happens-2.firebasestorage.app",
+    "messagingSenderId": "367725359102",
+    "appId": "1:367725359102:web:761969f8336786df7d9aaf"
+  }
 }
