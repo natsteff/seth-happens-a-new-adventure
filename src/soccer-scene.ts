@@ -2,11 +2,12 @@ import Phaser from 'phaser';
 import {FootAdventure} from './foot-adventure';
 import {SOCCER,soccerShots,newSoccerRun,soccerAction,soccerPhotoReady,soccerScore} from './soccer-mission.mjs';
 import {gameAudio} from './audio';
+type IncomingBall={zone:number;phase:'waiting'|'warning'|'flying'|'spent';at:number;art:Phaser.GameObjects.Container;warning:Phaser.GameObjects.Text};
 export class SoccerHijinx extends FootAdventure{
- constructor(){super({key:'soccer',number:11,title:'Soccer Game Hijinx',...SOCCER,instructions:'A Minnesota United Loons match. Allison is saving your season-ticket seat.\nUp the stands → food / bathroom concourse → down to the locker corridor.\nPhotograph the locker-room players, the team in the tunnel, then TWO big goals.\nF / Action at each marked camera position when READY. Missed moments always repeat.'});}
- mission=newSoccerRun();photoMs=0;photoCue!:Phaser.GameObjects.Text;photoBar!:Phaser.GameObjects.Rectangle;lockerGate?:Phaser.GameObjects.Rectangle;tunnelGate?:Phaser.GameObjects.Rectangle;ball!:Phaser.GameObjects.Container;team:Phaser.GameObjects.Image[]=[];goalPlayers:Phaser.GameObjects.Image[]=[];station=0;enteredConcourse=false;
+ constructor(){super({key:'soccer',number:11,title:'Soccer Game Hijinx',...SOCCER,instructions:'A Minnesota United Loons match. Allison is saving your season-ticket seat.\nUp the stands → food / bathroom concourse → down to the locker corridor.\nPhotograph the locker-room players, the team in the tunnel, then TWO big goals.\nJump incoming balls on the field approach.\nF / Action at each marked camera position when READY. Missed moments always repeat.'});}
+ mission=newSoccerRun();incoming:IncomingBall[]=[];photoMs=0;photoCue!:Phaser.GameObjects.Text;photoBar!:Phaser.GameObjects.Rectangle;lockerGate?:Phaser.GameObjects.Rectangle;tunnelGate?:Phaser.GameObjects.Rectangle;ball!:Phaser.GameObjects.Container;team:Phaser.GameObjects.Image[]=[];goalPlayers:Phaser.GameObjects.Image[]=[];station=0;enteredConcourse=false;
  preload(){super.preload();if(!this.textures.exists('soccer-star'))this.load.image('soccer-star','./assets/runtime/soccer-star.png');}
- resetMission(){this.mission=newSoccerRun();this.photoMs=0;this.station=0;this.team=[];this.goalPlayers=[];this.enteredConcourse=false;}
+ resetMission(){this.mission=newSoccerRun();this.incoming=[];this.photoMs=0;this.station=0;this.team=[];this.goalPlayers=[];this.enteredConcourse=false;}
  oneWay(x:number,y:number,w:number){const p=this.platform(x,y,w,20,0x6b8183);const b=p.body as Phaser.Physics.Arcade.StaticBody;b.checkCollision.left=false;b.checkCollision.right=false;b.checkCollision.down=false;return p;}
  placard(x:number,y:number,copy:string){this.add.rectangle(x,y,330,60,0x244751).setStrokeStyle(2,0x9ccbc4).setDepth(-3);this.text(x,y,copy,19,'#d7eee0').setOrigin(.5).setAlign('center').setDepth(-2);}
  buildWorld(){
@@ -37,13 +38,57 @@ export class SoccerHijinx extends FootAdventure{
   g.lineStyle(5,0xe9e5cf).strokeRect(7820,950,150,200);for(let x=7840;x<7970;x+=22)g.lineStyle(1,0xb9d0c3,.6).lineBetween(x,954,x,1150);for(let y=973;y<1150;y+=24)g.lineBetween(7820,y,7970,y);
   this.placard(7000,900,'SIDELINE · PHOTOS 3 & 4');
   for(const [i,x] of [7240,7410,7610,7840].entries())this.goalPlayers.push(this.add.image(x,1160,'soccer-star').setOrigin(.5,1).setDisplaySize(59,88).setFlipX(i%2===1).setTint(i%2?0xe0c494:0xb4e4ed).setDepth(3));
-  const b=this.add.graphics().fillStyle(0xeee9d7).fillCircle(0,0,12).lineStyle(2,0x263e45).strokeCircle(0,0,12);b.fillStyle(0x263e45).fillTriangle(-5,-5,5,-5,0,4);this.ball=this.add.container(0,0,[b]).setDepth(5);
+  this.ball=this.makeBall();
+  for(const zone of [6250,6510,6770]){
+   const warning=this.text(zone+130,SOCCER.ground-105,'BALL INCOMING ←',16,'#ffe0a0')
+    .setOrigin(.5).setBackgroundColor('#163331').setPadding(6,4).setDepth(8).setVisible(false);
+   this.incoming.push({zone,phase:'waiting',at:0,art:this.makeBall().setVisible(false),warning});
+  }
   for(const [i,x] of [690,1110,1930,2490,3340,3870].entries())this.hazard(i%2?'clown':'concert-fans',x,x<1400?840-Math.floor((x-440)/160)*40:x<3020?625:x<3800?900:1125,32,2600+i*100,30,64);
   for(const target of [soccerShots[0],soccerShots[1],soccerShots[2]]){this.add.rectangle(target.x,1154,105,8,0xe4c68b).setDepth(3);this.text(target.x,1050,'CAMERA POSITION\nF / ACTION',14,'#ffe2a6').setOrigin(.5).setAlign('center');}
+ }
+ private makeBall(){
+  const art=this.add.graphics().fillStyle(0xeee9d7).fillCircle(0,0,12)
+   .lineStyle(2,0x263e45).strokeCircle(0,0,12);
+  art.fillStyle(0x263e45).fillTriangle(-5,-5,5,-5,0,4);
+  art.lineStyle(1,0x263e45).lineBetween(-5,-5,-9,-8).lineBetween(5,-5,10,-7).lineBetween(0,4,0,11);
+  return this.add.container(0,0,[art]).setDepth(5);
+ }
+ respawn(){
+  super.respawn();
+  for(const ball of this.incoming){
+   ball.phase='waiting';ball.art.setVisible(false);ball.warning.setVisible(false);
+  }
+ }
+ private incomingBalls(){
+  const playerBody=this.player.body as Phaser.Physics.Arcade.Body;
+  for(const ball of this.incoming){
+   if(this.mission.shots<2||this.mission.complete||this.player.x>=7000){
+    ball.art.setVisible(false);ball.warning.setVisible(false);
+    continue;
+   }
+   if(ball.phase==='waiting'&&this.player.x>=ball.zone-60&&this.player.x<=ball.zone+130){
+    ball.phase='warning';ball.at=this.elapsedMs;ball.warning.setVisible(true);
+   }
+   if(ball.phase==='warning'&&this.elapsedMs-ball.at>=600){
+    ball.phase='flying';ball.at=this.elapsedMs;ball.warning.setVisible(false);
+   }
+   if(ball.phase==='flying'){
+    const travel=(this.elapsedMs-ball.at)*.3;
+    const x=ball.zone+320-travel,y=SOCCER.ground-15;
+    ball.art.setPosition(x,y).setRotation(-travel/12).setVisible(true);
+    if(x<ball.zone-240){ball.phase='spent';ball.art.setVisible(false);}
+    else if(Math.abs(this.player.x-x)<playerBody.halfWidth+12&&playerBody.bottom>y-12&&playerBody.top<y+12){
+     ball.phase='spent';ball.art.setVisible(false);
+     this.takeHit('Incoming soccer ball! Jump to clear it.');
+    }
+   }
+  }
  }
  create(){super.create();this.photoCue=this.screenText(550,133,'',20,'#ffe3aa').setOrigin(.5).setBackgroundColor('#143040').setPadding(12,8).setVisible(false);this.photoBar=this.add.rectangle(350,164,0,6,0xbbe8c9).setOrigin(0,.5);this.ui.add(this.photoBar);this.photoBar.setVisible(false);}
  objectiveText(){return this.mission.complete?'FOUR SHOTS SAVED · Allison still has your seat.':`${this.mission.shots}/4 PHOTOS · ${soccerShots[this.mission.shots].name} ${this.mission.shots<2?'→':'· SIDELINE →'} · ${this.mission.misses} missed moments` ;}
  tick(delta:number,action:boolean){
+  this.incomingBalls();
   this.photoMs+=delta;const body=this.player.body as Phaser.Physics.Arcade.Body,target=soccerShots[this.mission.shots];if(!target)return;
   if(!this.enteredConcourse&&this.player.x>1450&&body.bottom<700){this.enteredConcourse=true;this.checkpoint={x:1510,bottom:660};this.say('Concourse checkpoint. Seth: “Bathroom? Somehow I found the locker room.”');}
   const at=Math.abs(this.player.x-target.x)<95&&Math.abs(body.bottom-target.bottom)<26;

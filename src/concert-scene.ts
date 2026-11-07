@@ -3,10 +3,8 @@ import Phaser from 'phaser';
 import {FootAdventure} from './foot-adventure';
 import {CONCERT,concertStairs,newConcertRun,concertAction,photoWindow,photoBlocked,shotNames,concertScore} from './concert-mission.mjs';
 import {gameAudio} from './audio';
-import {vehicleFrontHurts} from './thai-mission.mjs';
 export class ConcertChaos extends FootAdventure{
  constructor(){super({key:'concert',number:4,title:'Concert Chaos',...CONCERT,startY:CONCERT.ground,instructions:'Get inside → climb the arena stairs → F / Action at press check-in.\nBring your credentials down to the photo pit.\nRun, jump and dodge the crowd. At the pit, time three F / Action shots.\nThe press desk is a checkpoint. Missing a shot lets you try again.'});}
- traffic?:{body:Phaser.GameObjects.Rectangle;roof:Phaser.GameObjects.Rectangle;art:Phaser.GameObjects.Image;direction:number};carArt!:Phaser.GameObjects.Image;
  mission=newConcertRun();pass!:Phaser.GameObjects.Container;stage!:Phaser.GameObjects.Image;gate?:Phaser.GameObjects.Rectangle;photoUi?:Phaser.GameObjects.Container;photoCue?:Phaser.GameObjects.Text;photoBar?:Phaser.GameObjects.Rectangle;photoFrame?:Phaser.GameObjects.Graphics;photoHead?:Phaser.GameObjects.Arc;photoMs=0;signSeen=false;
  preload(){super.preload();loadCast(this,'concert');if(!this.textures.exists('concert-stage'))this.load.image('concert-stage','./assets/concert/stage-v1.png');}
  resetMission(){this.mission=newConcertRun();this.photoMs=0;this.signSeen=false;this.photoUi=undefined;}
@@ -16,8 +14,8 @@ export class ConcertChaos extends FootAdventure{
   this.platform(0,CONCERT.ground,CONCERT.width,180,0x353d49);
   for(let x=20;x<1200;x+=135)g.fillStyle(0xd6ba79).fillRect(x,CONCERT.ground+55,64,4);
   for(const x of [470,820]){this.platform(x,CONCERT.ground-52,95,52,0x45515a).setFillStyle(0x45515a,.12);const metal=this.add.graphics().setDepth(3);metal.lineStyle(3,0xa2aeb0).strokeRect(x,CONCERT.ground-52,95,48);for(let n=0;n<9;n++)metal.lineStyle(1,0x6b8088).lineBetween(x+n*10,CONCERT.ground-48,x+Math.min(95,n*10+30),CONCERT.ground-10);metal.lineStyle(4,0x8b9b9c).lineBetween(x+5,CONCERT.ground-52,x+5,CONCERT.ground).lineBetween(x+90,CONCERT.ground-52,x+90,CONCERT.ground);metal.lineBetween(x-8,CONCERT.ground,x+18,CONCERT.ground).lineBetween(x+78,CONCERT.ground,x+102,CONCERT.ground);}
-  const frames=this.textures.get('thai-props');if(!frames.has('concert-car'))frames.add('concert-car',0,726,263,418,192);
-  const car=this.add.image(620,CONCERT.ground,'thai-props','concert-car').setOrigin(.5,1).setDisplaySize(145,67).setDepth(4);this.carArt=car;
+  this.concertgoer(600,CONCERT.ground,1,35,2900);
+  this.concertgoer(710,CONCERT.ground,3,30,3100);
   this.concertgoer(1030,CONCERT.ground,0,100,2800);this.text(950,CONCERT.ground-115,'SCALPER: “PHOTO PASS? I KNOW A GUY.”',12,'#ffd18b');
   g.fillStyle(0x202c40).fillRect(1180,530,155,600);this.text(1240,700,'ARENA\nENTRANCE →',24,'#bbecdc').setOrigin(.5).setAlign('center');
   // Reusable seat rows and horizontal rail sections behind distinct collision treads.
@@ -46,11 +44,6 @@ export class ConcertChaos extends FootAdventure{
  }
  concertgoer(x:number,bottom:number,index:number,range=35,period=2600){const art=castPerson(this,'concert',index,x,bottom,78).setDepth(6);this.hazards.push({art,kind:'concert-person',x,y:bottom-31,range,period,width:28,height:62});return art;}
  afterPlayer(){
-  const body=this.add.rectangle(620,CONCERT.ground-25,124,50,0xffffff,0),roof=this.add.rectangle(629,CONCERT.ground-59.5,68,19,0xffffff,0);
-  this.physics.add.existing(body);this.physics.add.existing(roof);
-  for(const object of [body,roof])(object.body as Phaser.Physics.Arcade.Body).setAllowGravity(false).setImmovable(true).setVelocityX(-125);
-  const rp=roof.body as Phaser.Physics.Arcade.Body;rp.checkCollision.left=false;rp.checkCollision.right=false;rp.checkCollision.down=false;
-  this.traffic={body,roof,art:this.carArt,direction:-1};this.physics.add.collider(this.player,roof);this.physics.add.collider(this.player,body,()=>{const t=this.traffic!;if(vehicleFrontHurts((body.body as Phaser.Physics.Arcade.Body).touching,t.direction))this.takeHit('Front bumper! Jump onto the car or clear its nose.');});
   this.pass=this.add.container(0,0,[this.add.line(0,0,-8,-28,0,-12,0xe4b578).setLineWidth(2),this.add.rectangle(0,-8,15,20,0xf0d99e).setStrokeStyle(2,0x3c465d),this.text(0,-9,'P',10,'#25323b').setOrigin(.5)]).setDepth(11).setVisible(false);}
  objectiveText(){if(this.mission.complete)return 'PHOTO PIT · 3/3 photographs saved · SETH GOT THE SHOT!';return this.mission.phase==='photo'?`PHOTO PIT · ${this.mission.shots}/3 shots · ${this.mission.misses} misses · F / Action when READY`:this.mission.credentials?`PRESS PASS ✓ · Descend and head right to the photo pit · ${this.hits} mishaps`:'Find the arena entrance, then climb to the upper press desk · F / Action';}
  motionHeld(){return this.mission.phase==='photo'||this.mission.complete;}
@@ -62,8 +55,6 @@ export class ConcertChaos extends FootAdventure{
   this.photoBar=this.add.rectangle(330,560,0,7,0xf0c37a).setOrigin(0,.5);this.photoUi.add(this.photoBar);this.photoUi.add(this.text(550,520,'F / Action · Take the highlighted shot when READY',17,'#ffe2a1').setOrigin(.5));this.toast.setDepth(50);this.say('Three shots. One button. Please keep your head down, front row.');
  }
  tick(delta:number,action:boolean){
-  if(this.traffic){const t=this.traffic,b=t.body.body as Phaser.Physics.Arcade.Body,r=t.roof.body as Phaser.Physics.Arcade.Body;if(t.body.x<430){t.direction=1;b.reset(430,CONCERT.ground-25);}else if(t.body.x>930){t.direction=-1;b.reset(930,CONCERT.ground-25);}r.reset(t.body.x-t.direction*9,CONCERT.ground-59.5);b.setVelocityX(t.direction*125);r.setVelocityX(t.direction*125);t.art.setPosition(t.body.x,CONCERT.ground).setFlipX(t.direction>0);}
-
   if(this.mission.phase==='photo')this.photoMs+=delta;
   const body=this.player.body as Phaser.Physics.Arcade.Body;
   const atDesk=!this.mission.credentials&&Math.abs(this.player.x-CONCERT.deskX)<85&&Math.abs(body.bottom-CONCERT.deskY)<25;
