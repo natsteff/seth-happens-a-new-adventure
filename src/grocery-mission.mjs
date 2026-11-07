@@ -1,5 +1,5 @@
 export const GROCERY={width:6500,height:1120,ground:900,startX:170,checkoutX:5520,exitX:6220};
-export const groceries=[{id:'milk',name:'MILK',department:'DAIRY',x:1870,bottom:900},{id:'bread',name:'BREAD',department:'BAKERY',x:3270,bottom:700},{id:'eggs',name:'EGGS',department:'FARM FRESH',x:4430,bottom:810}];
+export const groceries=[{id:'milk',name:'MILK',department:'DAIRY',x:1870,bottom:820},{id:'bread',name:'BREAD',department:'BAKERY',x:3270,bottom:700},{id:'eggs',name:'EGGS',department:'FARM FRESH',x:4430,bottom:810}];
 export function newGroceryRun(){return {items:/** @type {string[]} */ ([]),paid:false,complete:false};}
 export function groceryAction(state,{x,bottom,action=false}){
  const s={...state,items:[...state.items]};let event='';if(s.complete||!action)return {state:s,event};
@@ -15,6 +15,7 @@ export function grocerySlippery(x){return x>2450&&x<2810||x>4750&&x<5050;}
 
 // Collision tops are shared with artwork placement; both approaches use ordinary jumps.
 export const groceryPlatforms=[
+ {x:1790,y:820,width:150,frame:0},
  {x:2880,y:820,width:120,frame:1},{x:3020,y:750,width:130,frame:2},{x:3160,y:700,width:300,frame:2},
  {x:3480,y:750,width:130,frame:2},{x:3630,y:820,width:120,frame:1},
  {x:4110,y:850,width:130,frame:3},{x:4270,y:810,width:320,frame:4},{x:4610,y:850,width:130,frame:3}
