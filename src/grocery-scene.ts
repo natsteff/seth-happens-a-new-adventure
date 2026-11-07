@@ -52,7 +52,7 @@ export class GroceryGauntlet extends FootAdventure{
   if(groceries.some(item=>item.id===result.event)){this.itemArt.get(result.event)?.setVisible(false);gameAudio.playLocation('grocery-item');this.say(`${result.event.toUpperCase()} ✓ · ${this.mission.items.length}/3. Allison’s list remains undefeated.`);}
   if(result.event==='missing')this.say('Cashier: “Milk, bread AND eggs. The list is not a suggestion.”');
   if(result.event==='unpaid')this.say('Please pay at the checkout first. This is a shopping trip, Seth.');
-  if(result.event==='checkout'){this.gate?.destroy();this.checkpoint={x:5980,bottom:900};gameAudio.play('pickup');this.say('PAID. The receipt is longer than the shopping list. EXIT →');}
+  if(result.event==='checkout'){this.gate?.destroy();this.checkpoint={x:5980,bottom:900};gameAudio.playLocation('grocery-item');this.say('PAID. The receipt is longer than the shopping list. EXIT →');}
   if(result.event==='complete')this.finish('THREE THINGS. ONE ADVENTURE.', 'Milk ✓   Bread ✓   Eggs ✓\nGroceries paid for. Allison: “What took so long?”',groceryScore(this.mission,this.elapsedMs,this.hits));
  }
  drawExtras(){const h=carryAnchor({x:this.player.x,bottom:(this.player.body as Phaser.Physics.Arcade.Body).bottom,facing:this.facing,frame:Number(this.portrait.frame.name),falling:this.portrait.texture.key==='seth-fall'});this.basket.setPosition(h.x,h.y).setVisible(this.mission.items.length>0&&!this.won);}
