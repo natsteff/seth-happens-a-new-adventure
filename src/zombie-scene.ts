@@ -1,7 +1,7 @@
 import {streetVehicle} from './street-vehicles';
 import Phaser from 'phaser';
 import {FootAdventure} from './foot-adventure';
-import {ZOMBIE,zombieBreakdownMs,zombiePlatforms,newZombieRun,zombieAction,zombieContact,zombieScore,zombieBatTarget,zombieCheckpointPositions} from './zombie-mission.mjs';
+import {ZOMBIE,zombieBreakdownMs,zombiePlatforms,zombieParkedVehicles,newZombieRun,zombieAction,zombieContact,zombieScore,zombieBatTarget,zombieCheckpointPositions} from './zombie-mission.mjs';
 import {gameAudio} from './audio';
 const truckScale=250/768;
 const batSwingMs=380;
@@ -24,15 +24,20 @@ export class ZombieApocalypse extends FootAdventure{
   this.platform(0,ZOMBIE.ground,ZOMBIE.width,200,0x35413e);
   for(let x=0;x<ZOMBIE.width;x+=160)this.add.rectangle(x,840,75,5,0xc4bd84);
   const props=this.textures.get('thai-props');
-  if(!props.has('bin'))props.add('bin',0,1171,204,339,251);
-  const obstacles=['bin','double-decker','bin','semi-trailer','bin'];
+  for(const [name,x,y,w,h] of [
+   ['bin',1171,204,339,251],['bus',20,185,697,266],
+   ['car-left',726,263,418,192],['car-right',497,710,550,226]
+  ] as [string,number,number,number,number][]){
+   if(!props.has(name))props.add(name,0,x,y,w,h);
+  }
+  const obstacles=['bin','double-decker','bin','semi-trailer','bin',...zombieParkedVehicles.map(v=>v.kind)];
   for(const [i,[x,y,w,h]] of zombiePlatforms.entries()){
    this.platforms.add(this.add.rectangle(x+w/2,y+h/2,w,h,0xffffff,0));
    const kind=obstacles[i];
-   if(kind==='bin')this.add.image(x,y+h,'thai-props',kind).setOrigin(0,1).setDisplaySize(w,h).setDepth(1);
+   if(['bin','bus','car-left','car-right'].includes(kind))this.add.image(x,y+h,'thai-props',kind).setOrigin(0,1).setDisplaySize(w,h).setDepth(1);
    else streetVehicle(this,x,y+h,w,h,kind);
   }
-  for(let i=0;i<65;i++){const x=i<9?440+i*240:3250+(i-9)*190;const floor=(x>=940&&x<=1250||x>=1800&&x<=2110)?670:800;const art=this.add.image(x,floor,i%3?'scruffy':'clown').setOrigin(.5,1).setDisplaySize(49,73).setTint(i%2?0x99bd76:0x87b8a0).setDepth(6);this.undead.push({art,home:x,floor,speed:i%3?40:90,alive:true});}
+  for(let i=0;i<65;i++){const x=i<9?440+i*240:3250+(i-9)*190;const floor=zombiePlatforms.find(([left,,w])=>x>=left&&x<=left+w)?.[1]??ZOMBIE.ground;const art=this.add.image(x,floor,i%3?'scruffy':'clown').setOrigin(.5,1).setDisplaySize(49,73).setTint(i%2?0x99bd76:0x87b8a0).setDepth(6);this.undead.push({art,home:x,floor,speed:i%3?40:90,alive:true});}
   this.truck=this.add.image(ZOMBIE.truckX,ZOMBIE.ground,'zombie-baja').setOrigin(.5,1).setScale(truckScale).setDepth(8);this.text(ZOMBIE.truckX,640,'F / ACTION · TAKE THE TRUCK',18,'#f2d496').setOrigin(.5);
   this.wheels=['rear','front'].map(end=>this.add.image(0,0,`zombie-wheel-${end}`).setScale(truckScale).setDepth(9).setVisible(false));
   for(const [i,x] of [3720,4570,5540,6100,7190,8110].entries()){
@@ -148,7 +153,12 @@ export class ZombieApocalypse extends FootAdventure{
    if(!z.alive)continue;
    if(Math.abs(z.art.x-this.player.x)<480)z.art.x+=Math.sign(this.player.x-z.art.x)*z.speed*delta/1000;
    else z.art.x=z.home+Math.sin(this.elapsedMs/900+z.home)*25;
-   if(z.floor===670)z.art.x=Phaser.Math.Clamp(z.art.x,z.home<1500?940:1800,z.home<1500?1250:2110);
+   const roof=zombiePlatforms.find(([x,y,w])=>y===z.floor&&z.home>=x&&z.home<=x+w);
+   if(roof)z.art.x=Phaser.Math.Clamp(z.art.x,roof[0],roof[0]+roof[2]);
+   else if(z.floor===ZOMBIE.ground){
+    const obstacle=zombiePlatforms.find(([x,,w])=>z.art.x>x-18&&z.art.x<x+w+18);
+    if(obstacle)z.art.x=z.home<obstacle[0]?obstacle[0]-18:obstacle[0]+obstacle[2]+18;
+   }
    const contact=zombieContact({truck:this.mission.truck,playerX:this.player.x,playerY:this.player.y,zombieX:z.art.x,zombieY:z.floor-30,allyX:this.ally.x,allyY:this.ally.y-30});
    if(contact==='crush'){this.removeZombie(z);this.mission.crushed++;gameAudio.playLocation('truck-splat');}
    else if(contact==='allison'){this.removeZombie(z);this.allyWins++;}

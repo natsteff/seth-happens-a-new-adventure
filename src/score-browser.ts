@@ -7,6 +7,15 @@ export const scoreLevels=[['rooftop','Rooftop Beer Run'],['thai','Thai Takeout R
 const selections=new WeakMap<HTMLDialogElement,string>();
 // Browsing never writes scores/progression or replaces a pending run's form.
 export function mountScoreBrowser(dialog:HTMLDialogElement){
+ const heading=dialog.querySelector<HTMLElement>('.score-heading');
+ const close=dialog.querySelector<HTMLButtonElement>('#close-scores,#thai-close,#scooter-close,#adventure-close');
+ if(heading&&close&&!heading.contains(close)){
+  const title=document.createElement('div');
+  title.append(...Array.from(heading.childNodes));
+  heading.replaceChildren(title,close);
+  heading.classList.add('score-browser-heading');
+  close.classList.add('records-close');
+ }
  dialog.querySelector('.score-browser')?.remove();
  const root=document.createElement('section');root.className='score-browser';
  const label=document.createElement('label');label.textContent='View scores for level';

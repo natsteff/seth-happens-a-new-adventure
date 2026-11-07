@@ -1,5 +1,4 @@
 import {loadCast,walkingCastPerson} from './cast';
-import {streetVehicle} from './street-vehicles';
 import {startupLoader} from './startup';
 import {modalNavigation} from './modal-navigation.mjs';
 import {levelControlCopy} from './level-control-copy';
@@ -11,7 +10,7 @@ import {scoresOpen,resetScoreEntry} from './scoreboard';
 import {openScooterScores,resetScooterScores} from './scooter-scoreboard';
 import {brickBuilding} from './scenery';
 import {mobileTrackLabel} from './mobile-track.mjs';
-import {SCOOTER,ramps,rideObstacles,movingSemis,scooterSemi,reactions,newScooterRun,scooterStep,scooterHit,scooterScore} from './scooter-mission.mjs';
+import {SCOOTER,ramps,rideObstacles,reactions,newScooterRun,scooterStep,scooterHit,scooterScore} from './scooter-mission.mjs';
 const W=1100,H=600;
 type Hazard={art:Phaser.GameObjects.Container|Phaser.GameObjects.Image;x:number;y:number;kind:string;radius:number;legs?:Phaser.GameObjects.Image[]};
 export class ScooterRide extends Phaser.Scene{
@@ -20,13 +19,13 @@ export class ScooterRide extends Phaser.Scene{
  ui!:Phaser.GameObjects.Container;introOverlay?:Phaser.GameObjects.Container;pauseOverlay?:Phaser.GameObjects.Container;
  hud!:Phaser.GameObjects.Text;objective!:Phaser.GameObjects.Text;radioLabel!:Phaser.GameObjects.Text;toast!:Phaser.GameObjects.Text;
  bubble!:Phaser.GameObjects.Container;bubbleText!:Phaser.GameObjects.Text;progress!:Phaser.GameObjects.Rectangle;
- trucks:Phaser.GameObjects.Image[]=[];controller=new ControllerInput();run=newScooterRun();hazards:Hazard[]=[];photos=new Set<number>();
+ controller=new ControllerInput();run=newScooterRun();hazards:Hazard[]=[];photos=new Set<number>();
  introActive=true;introStarted=false;paused=false;won=false;failed=false;riding=false;renderScale=1;runVersion=0;restartSince:number|null=null;scorePaused=false;bubbleUntil=0;toastUntil=0;
- preload(){startupLoader(this);loadCast(this,'scooter');for(const [key,path] of [['thai-road-vehicles','thai/street-vehicles-v1.png'],['scooter-riders','scooter/seth-allison-v1.png'],['thai-street','thai/street-backdrop-v1.png'],['thai-props','thai/street-props-v1.png'],['adventure-brick','scenery/brick-facade-v1.png'],['scruffy','runtime/scruffy-pedestrian.png'],['clown','runtime/clown.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/'+path);}
+ preload(){startupLoader(this);loadCast(this,'scooter');for(const [key,path] of [['scooter-riders','scooter/seth-allison-v1.png'],['thai-street','thai/street-backdrop-v1.png'],['thai-props','thai/street-props-v1.png'],['adventure-brick','scenery/brick-facade-v1.png'],['scruffy','runtime/scruffy-pedestrian.png'],['clown','runtime/clown.png']])if(!this.textures.exists(key))this.load.image(key,'./assets/'+path);}
  text(x:number,y:number,value:string,size=16,color='#f5e4c8'){return this.add.text(x,y,value,{fontFamily:'Arial',fontSize:`${size}px`,color,stroke:'#132436',strokeThickness:3}).setResolution(this.renderScale);}
  screenText(x:number,y:number,value:string,size=16,color='#f5e4c8'){const t=this.text(x,y,value,size,color);this.ui.add(t);return t;}
  create(){
-  this.renderScale=(this.game.config.width as number)/W;this.run=newScooterRun();this.controller=new ControllerInput();this.hazards=[];this.trucks=[];this.photos=new Set();this.runVersion++;
+  this.renderScale=(this.game.config.width as number)/W;this.run=newScooterRun();this.controller=new ControllerInput();this.hazards=[];this.photos=new Set();this.runVersion++;
   this.paused=false;this.introActive=true;this.introStarted=false;this.won=false;this.failed=false;this.riding=false;this.scorePaused=false;this.restartSince=null;this.bubbleUntil=0;this.toastUntil=0;
   document.body.dataset.level='scooter';levelControlCopy('scooter');document.getElementById('current-level')!.textContent='Level 3 · Scooter Ride';document.getElementById('game')!.setAttribute('aria-label','Level 3 · Scooter Ride with Seth and Allison');
   const footer=document.querySelector('footer')!;footer.dataset.rooftopHtml??=footer.innerHTML;footer.textContent='AUTO RIDE → · BRAKE A / Left · ACCELERATE D / Right / Shift · HOP W / Up / Space · RISKY RAMP F / Action · PAUSE P · RESTART hold R';
@@ -85,7 +84,6 @@ export class ScooterRide extends Phaser.Scene{
    const {art,legs}=walkingCastPerson(this,'scooter',i,x+offset,SCOOTER.ground,82);art.setDepth(4);this.hazards.push({art,legs,x:x+offset,y:SCOOTER.ground,kind:'person',radius:24});
    this.text(x+offset-80,SCOOTER.ground-112,'WATCH THE WALKER',12,'#ffd398');
   }
-  movingSemis.forEach((_,i)=>{const t=scooterSemi(i,0);this.trucks.push(streetVehicle(this,t.x,SCOOTER.ground,t.width,t.height,'semi-trailer').setDepth(3));});
   for(const [x,y] of [[2810,710],[4110,545],[5250,515],[6830,510]]){
    const bird=this.add.container(x,y,[this.add.arc(-8,0,11,190,350,false,0xd7d1bd),this.add.arc(10,0,11,190,350,false,0xd7d1bd)]).setDepth(5);this.hazards.push({art:bird,x,y,kind:'bird',radius:24});
   }
@@ -96,7 +94,7 @@ export class ScooterRide extends Phaser.Scene{
   this.text(SCOOTER.finish-140,SCOOTER.ground-190,'END RIDE · BOTH RIDERS',22,'#b4e8c6');
  }
  showIntro(){
-  this.introOverlay=this.add.container(0,0,[this.add.rectangle(W/2,H/2,W,H,0x112235,.96),this.text(W/2,105,'LEVEL 3 · SCOOTER RIDE',36,'#ffce8a').setOrigin(.5),this.add.image(W/2,255,'scooter-riders','trim').setDisplaySize(170,200),this.text(W/2,398,'One scooter. Two riders. Several questionable ramps.\nAuto-forward · Left: brake · Right: accelerate · Jump: hop\nRamps launch automatically. Pink ramps send you higher.\nHop onto truck roofs; avoid walkers, birds and signs. Keep Allison aboard.',19).setOrigin(.5).setAlign('center')]);this.ui.add(this.introOverlay);
+  this.introOverlay=this.add.container(0,0,[this.add.rectangle(W/2,H/2,W,H,0x112235,.96),this.text(W/2,105,'LEVEL 3 · SCOOTER RIDE',36,'#ffce8a').setOrigin(.5),this.add.image(W/2,255,'scooter-riders','trim').setDisplaySize(170,200),this.text(W/2,398,'One scooter. Two riders. Several questionable ramps.\nAuto-forward · Left: brake · Right: accelerate · Jump: hop\nRamps launch automatically. Pink ramps send you higher.\nHop onto parked cars and buses; avoid walkers, birds and signs. Keep Allison aboard.',19).setOrigin(.5).setAlign('center')]);this.ui.add(this.introOverlay);
   document.getElementById('start-game')!.hidden=false;(document.getElementById('touch-menu-open') as HTMLButtonElement).disabled=false;window.dispatchEvent(new Event('game-layout'));
  }
  async startIntro(){if(this.introStarted||!this.introActive||document.querySelector('dialog[open]'))return;this.introStarted=true;document.getElementById('start-game')!.hidden=true;const version=this.runVersion;try{await gameAudio.playIntro();}catch{}if(version!==this.runVersion||!this.sys.isActive())return;this.introActive=false;this.introOverlay?.destroy();touch.clear();for(const k of Object.values(this.keys))k.reset();gameAudio.music.startRun();for(const id of ['pause-toggle','restart-run','touch-menu-open'])(document.getElementById(id) as HTMLButtonElement).disabled=false;this.say(reactions.start);if(document.hidden||!document.hasFocus())this.togglePause();}
@@ -126,7 +124,6 @@ export class ScooterRide extends Phaser.Scene{
   const next=scooterStep(this.run,{move,boost:this.keys.SHIFT.isDown||c.sprint||m.sprint,jump:c.jump||m.jump||['W','UP','SPACE'].some(k=>Phaser.Input.Keyboard.JustDown(this.keys[k]))},delta);this.run=next.state;
   for(const event of next.events){if(event.type==='ramp'){this.say(event.high?reactions.risk:reactions.ramps[event.index!%5]);this.notice(`${ramps[event.index!].name} · AIRBORNE`);gameAudio.play('jump');}else if(event.type==='hop')gameAudio.play('jump');else if(event.type==='hit'||event.type==='hard'){this.say(event.type==='hard'?reactions.landing:reactions.hit[this.run.hits%3]);gameAudio.play('impact');this.cameras.main.shake(110,.002);}else if(event.type==='bonus'){this.say('We are not getting the security deposit back.');this.notice('SKY ROUTE · +750');gameAudio.play('pickup');}}
   for(const h of this.hazards){const t=this.run.elapsedMs/1000;h.art.x=h.x+(h.kind==='person'?Math.sin(t*1.1)*65:h.kind==='bird'?Math.sin(t*1.7)*65:0);h.art.y=h.y+(h.kind==='bird'?Math.sin(t*2.1+h.x)*24:0);if(h.kind==='person'){h.art.setScale(Math.cos(t*1.1)>=0?1:-1,1);h.legs?.forEach((leg,i)=>leg.setAngle(Math.sin(t*8+i*Math.PI)*9));}const hx=h.art.x,hy=h.kind==='person'?h.art.y-40:h.art.y;if(Math.abs(this.run.x-hx)<h.radius+25&&Math.abs(this.run.y-55-hy)<(h.kind==='bird'?37:58)){const hit=scooterHit(this.run);if(hit.hits>this.run.hits){this.say(reactions.hit[hit.hits%3]);gameAudio.play('impact');this.cameras.main.shake(100,.002);}this.run=hit;}}
-  this.trucks.forEach((art,i)=>{const t=scooterSemi(i,this.run.elapsedMs);art.setX(t.x).setFlipX(t.direction<0);});
   this.cameras.main.followOffset.y=this.run.grounded?75:-35;
   this.player.setPosition(this.run.x,this.run.y-45);(this.player.body as Phaser.Physics.Arcade.Body).reset(this.player.x,this.player.y);
   this.portrait.setPosition(this.run.x,this.run.y).setAngle(this.run.grounded?0:Phaser.Math.Clamp(this.run.vy/45,-17,18)).setAlpha(this.run.immuneMs>0?(Math.floor(time/110)%2?.45:1):1);

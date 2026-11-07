@@ -18,8 +18,6 @@ const firstObstacles=[
 ];
 export const ramps=[...firstRamps,...firstRamps.map(r=>({...r,x:r.x+7600,end:r.end+7600,name:r.name+' · AFTER DARK'}))];
 export const rideObstacles=[...firstObstacles,...firstObstacles.map(o=>({...o,x:o.x+7600}))];
-export const movingSemis=[{left:1260,right:1620,speed:90,phase:0},{left:5480,right:5800,speed:100,phase:1},{left:8910,right:9250,speed:100,phase:0},{left:13050,right:13500,speed:95,phase:1}];
-export function scooterSemi(index,elapsedMs){const t=movingSemis[index],length=t.right-t.left,u=((elapsedMs/1000*t.speed/length+t.phase)%2+2)%2;return {x:t.left+(u<=1?u:2-u)*length,direction:u<1?1:-1,width:300,height:125};}
 export const reactions={
  start:'I agreed to a ride. Not a physics experiment.',
  hop:'That pothole had a perfectly good road around it.',
@@ -76,13 +74,6 @@ export function scooterStep(state,input,deltaMs){
     // A bump costs grip but does not trap the scooter against an obstacle.
     s.y=top-3;s.vy=-280;s.grounded=false;
    }
-  }
-  for(let i=0;i<movingSemis.length;i++){
-   const truck=scooterSemi(i,s.elapsedMs),top=SCOOTER.ground-truck.height,inX=s.x+24>truck.x&&s.x-24<truck.x+truck.width;
-   if(!inX)continue;
-   if(!s.grounded&&s.vy>=0&&oldY<=top+2&&s.y>=top){s.y=top;s.vy=0;s.grounded=true;supported=true;events.push({type:'land'});}
-   else if(wasGrounded&&Math.abs(oldY-top)<3){s.y=top;supported=true;}
-   else if(s.y>top+8&&s.y-90<SCOOTER.ground){const front=truck.direction<0?oldX+24<=truck.x+6:oldX-24>=truck.x+truck.width-6;if(front){const hit=scooterHit(s,12);if(hit.hits>s.hits)events.push({type:'hit'});s=hit;}s.y=top-3;s.vy=-280;s.grounded=false;}
   }
   if(s.grounded&&!supported&&s.y<SCOOTER.ground-2){s.grounded=false;s.vy=0;}
   if(!s.grounded&&s.y>=SCOOTER.ground){

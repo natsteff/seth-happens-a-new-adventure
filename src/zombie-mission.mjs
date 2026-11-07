@@ -14,7 +14,14 @@ export function zombieBatTarget(playerX,playerY,zombies){
  }
  return target;
 }
-export const zombiePlatforms=[[650,730,95,70],[940,670,310,130],[1510,730,100,70],[1800,670,310,130],[2230,730,100,70]];
+export const zombieParkedVehicles=[
+ {x:9300,width:155,height:65,kind:'car-left'},
+ {x:10100,width:290,height:100,kind:'bus'},
+ {x:11150,width:175,height:70,kind:'car-right'},
+ {x:12050,width:290,height:100,kind:'bus'},
+ {x:13100,width:155,height:65,kind:'car-left'}
+];
+export const zombiePlatforms=[[650,730,95,70],[940,670,310,130],[1510,730,100,70],[1800,670,310,130],[2230,730,100,70],...zombieParkedVehicles.map(v=>[v.x,ZOMBIE.ground-v.height,v.width,v.height])];
 export function newZombieRun(){return {phase:'survival',truck:false,crushed:0,complete:false};}
 export function zombieAction(state,{x,bottom,action=false,breakdownFinished=false}){
  const s={...state};let event='';if(s.complete)return {state:s,event};

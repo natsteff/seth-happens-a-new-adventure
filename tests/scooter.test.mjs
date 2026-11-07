@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {SCOOTER,ramps,rideObstacles,movingSemis,scooterSemi,newScooterRun,scooterStep,scooterHit,scooterScore,SCOOTER_SCORE_KEY,readScooterScores,saveScooterScore} from '../src/scooter-mission.mjs';
+import {SCOOTER,ramps,rideObstacles,newScooterRun,scooterStep,scooterHit,scooterScore,SCOOTER_SCORE_KEY,readScooterScores,saveScooterScore} from '../src/scooter-mission.mjs';
 function ride(move,dt=1000/60){let state=newScooterRun(),events=[];for(let i=0;i<10000&&!state.won&&!state.failed;i++){const r=scooterStep(state,{move},dt);state=r.state;events.push(...r.events);}return {state,events};}
 test('every ramp launches once, climbs progressively, and has reachable safe landings at all speeds',()=>{
  assert.ok(ramps[0].launch<ramps[1].launch&&ramps[1].launch<ramps[2].launch&&ramps[2].launch<ramps[4].launch);
@@ -30,10 +30,14 @@ test('riding off a roof falls under gravity rather than snapping to the road',()
  assert.equal(s.grounded,false);assert.ok(s.y>=top&&s.y<top+5);assert.ok(s.vy>0);
 });
 
-test('route travel is doubled, and moving semis have bounded continuous motion with safe roofs',()=>{
- assert.equal(SCOOTER.finish-160,2*(7730-160));assert.equal(ramps.length,10);assert.equal(movingSemis.length,4);assert.ok(SCOOTER.hopVelocity**2/(2*SCOOTER.gravity)>scooterSemi(0,0).height);
- for(let i=0;i<movingSemis.length;i++){for(const ms of [0,1000,10000,50000]){const t=scooterSemi(i,ms);assert.ok(t.x>=movingSemis[i].left&&t.x<=movingSemis[i].right);assert.ok(Math.abs(scooterSemi(i,ms+1).x-t.x)<1);}}
- const t=scooterSemi(1,0),s={...newScooterRun(),x:t.x+75,y:SCOOTER.ground-t.height-1,vy:100,grounded:false};const result=scooterStep(s,{},20).state;assert.equal(result.hits,0);assert.equal(result.grounded,true);
+test('the doubled route is traversable after removing all semi trucks',()=>{
+ assert.equal(SCOOTER.finish-160,2*(7730-160));
+ assert.equal(ramps.length,10);
+ for(const move of [-1,0,1]){
+  const {state}=ride(move);
+  assert.equal(state.won,true);
+  assert.equal(state.bonus,1500);
+ }
 });
 
 test('both tall pink ramps launch automatically, stay visibly higher and earn both bonuses',()=>{

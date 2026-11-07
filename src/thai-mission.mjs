@@ -1,6 +1,6 @@
 import {normalizedScoreName} from './score-options.mjs';
 // Level 2 geometry and rules are independent of the original 26-roof mission.
-export const THAI = { width:5500, ground:510, homeX:180, restaurantX:5270, limitMs:180000 };
+export const THAI = { width:6200, ground:510, homeX:180, restaurantX:5270, limitMs:180000 };
 // Every tall obstacle has lower steps on both sides. Heights are the collision tops.
 export const streetObstacles = [
   {kind:'bin',x:690,width:88,height:64},
