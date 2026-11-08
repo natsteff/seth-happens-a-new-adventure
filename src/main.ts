@@ -901,30 +901,34 @@ touchMenu.addEventListener('cancel',event=>{event.preventDefault();closeTouchMen
 for(const type of ['keydown','keyup'])touchMenu.addEventListener(type,event=>event.stopPropagation());
 
 // Control configuration is local to this browser and never touches scores.
+function arrowGap(size:number,spacing:number){return size===1.5?30+(spacing-1)*10:8+(spacing-1)*8;}
 const controlSettings=document.getElementById('control-settings') as HTMLDialogElement;
 const styleSelect=document.getElementById('control-style') as HTMLInputElement;
 const spacingInput=document.getElementById('control-spacing') as HTMLInputElement;
+const sizeInput=document.getElementById('control-size') as HTMLInputElement;
+let controlSize=1;
 const quickSprintInput=document.getElementById('control-quick-sprint') as HTMLInputElement;
 let controlStyle='default',controlSpacing=3,controlQuickSprint=false,customizeFromOffer=false;
-try{const saved=JSON.parse(localStorage.getItem('seth-new-adventure-touch-controls')||'null');if(saved&&['default','slider','stick'].includes(saved.style))controlStyle=saved.style;controlQuickSprint=saved?.quickSprint===true;if(Number.isInteger(saved?.spacing)&&saved.spacing>=1&&saved.spacing<=5)controlSpacing=saved.spacing;}catch{/* Defaults remain available. */}
+try{const saved=JSON.parse(localStorage.getItem('seth-new-adventure-touch-controls')||'null');if(saved&&['default','slider','stick'].includes(saved.style))controlStyle=saved.style;controlQuickSprint=saved?.quickSprint===true;if(saved?.size===1.5||saved?.size===2)controlSize=1.5;if(Number.isInteger(saved?.spacing)&&saved.spacing>=1&&saved.spacing<=5)controlSpacing=saved.spacing;}catch{/* Defaults remain available. */}
 function applyControls(){
+ document.getElementById('touch-arrows')!.style.setProperty('--arrow-scale',String(controlSize));
  touch.clear();touch.style=controlStyle;touch.quickSprintEnabled=controlQuickSprint;
  gameElement.dataset.controlStyle=controlStyle;
- gameElement.style.setProperty('--arrow-gap',`${8+(controlSpacing-1)*8}px`);
+ gameElement.style.setProperty('--arrow-gap',`${arrowGap(controlSize,controlSpacing)}px`);
  document.getElementById('touch-arrows')!.hidden=controlStyle!=='default';
  document.getElementById('touch-stick')!.hidden=controlStyle==='default';
  document.querySelector('.touch-hint')!.textContent=controlStyle==='default'?(controlQuickSprint?'Double-tap + hold arrow · sprint':'Left / right · release to stop'):controlStyle==='stick'?'Game Stick · edges sprint':'Slide to move · edges sprint';
  levelControlCopy(document.body.dataset.level??'rooftop');
 }
-function previewControls(){document.querySelectorAll<HTMLInputElement>('input[name=movement-style]').forEach(radio=>{radio.checked=radio.value===styleSelect.value;});document.getElementById('style-detail')!.textContent=styleSelect.value==='stick'?'Up/down has no game action. Jump and Action stay separate.':'Jump and Action stay separate.';document.getElementById('spacing-value')!.textContent=spacingInput.value;document.getElementById('spacing-preview')!.style.gap=`${8+(Number(spacingInput.value)-1)*8}px`;spacingInput.disabled=styleSelect.value!=='default';quickSprintInput.disabled=styleSelect.value!=='default';}
+function previewControls(){const size=sizeInput.checked?1.5:1;document.getElementById('spacing-preview')!.style.setProperty('--preview-scale',String(size));document.querySelectorAll<HTMLInputElement>('input[name=movement-style]').forEach(radio=>{radio.checked=radio.value===styleSelect.value;});document.getElementById('style-detail')!.textContent=styleSelect.value==='stick'?'Up/down has no game action. Jump and Action stay separate.':'Jump and Action stay separate.';document.getElementById('spacing-value')!.textContent=spacingInput.value;document.getElementById('spacing-preview')!.style.gap=`${arrowGap(size,Number(spacingInput.value))/2}px`;spacingInput.disabled=styleSelect.value!=='default';quickSprintInput.disabled=styleSelect.value!=='default';}
 const controlInputGuard=installOpeningGuard(controlSettings);
-function openControls(first=false){document.getElementById('controls-save')!.textContent=first?'Save and continue':'Save controls';customizeFromOffer=first;touch.clear();styleSelect.value=controlStyle;spacingInput.value=String(controlSpacing);quickSprintInput.checked=controlQuickSprint;previewControls();modalNavigation.open(controlSettings,first?null:touchMenu,controlSettings);controlInputGuard.arm();}
+function openControls(first=false){document.getElementById('controls-save')!.textContent=first?'Save and continue':'Save controls';customizeFromOffer=first;touch.clear();sizeInput.checked=controlSize===1.5;styleSelect.value=controlStyle;spacingInput.value=String(controlSpacing);quickSprintInput.checked=controlQuickSprint;previewControls();modalNavigation.open(controlSettings,first?null:touchMenu,controlSettings);controlInputGuard.arm();}
 document.getElementById('touch-customize-first')!.addEventListener('click',()=>{touchOffer.close();openControls(true);});
 document.getElementById('touch-customize')!.addEventListener('click',()=>openControls());
 document.querySelectorAll<HTMLInputElement>('input[name=movement-style]').forEach(radio=>radio.addEventListener('change',()=>{if(radio.checked){styleSelect.value=radio.value;previewControls();}}));
-spacingInput.addEventListener('input',previewControls);styleSelect.addEventListener('change',previewControls);
-document.getElementById('controls-reset')!.addEventListener('click',()=>{styleSelect.value='default';spacingInput.value='3';quickSprintInput.checked=false;previewControls();});
-document.getElementById('controls-save')!.addEventListener('click',()=>{controlStyle=styleSelect.value;controlSpacing=Number(spacingInput.value);controlQuickSprint=quickSprintInput.checked;applyControls();try{localStorage.setItem('seth-new-adventure-touch-controls',JSON.stringify({style:controlStyle,spacing:controlSpacing,quickSprint:controlQuickSprint}));}catch{/* Session controls still work. */}controlSettings.close();if(customizeFromOffer){setTouch(true);saveMobileSetup(progressStorage,'touch');}});
+sizeInput.addEventListener('input',previewControls);spacingInput.addEventListener('input',previewControls);styleSelect.addEventListener('change',previewControls);
+document.getElementById('controls-reset')!.addEventListener('click',()=>{sizeInput.checked=false;styleSelect.value='default';spacingInput.value='3';quickSprintInput.checked=false;previewControls();});
+document.getElementById('controls-save')!.addEventListener('click',()=>{controlSize=sizeInput.checked?1.5:1;controlStyle=styleSelect.value;controlSpacing=Number(spacingInput.value);controlQuickSprint=quickSprintInput.checked;applyControls();try{localStorage.setItem('seth-new-adventure-touch-controls',JSON.stringify({size:controlSize,style:controlStyle,spacing:controlSpacing,quickSprint:controlQuickSprint}));}catch{/* Session controls still work. */}controlSettings.close();if(customizeFromOffer){setTouch(true);saveMobileSetup(progressStorage,'touch');}});
 controlSettings.addEventListener('cancel',()=>{if(customizeFromOffer)requestAnimationFrame(()=>touchOffer.showModal());});
 controlSettings.addEventListener('close',()=>modalNavigation.restore(controlSettings));
 const installHelp=document.getElementById('install-help') as HTMLDialogElement;
