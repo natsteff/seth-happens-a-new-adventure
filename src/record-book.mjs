@@ -1,7 +1,5 @@
-import {activeRuleset,ORIGINAL_RULESET} from './scoring-rules.mjs';
 import {compare,display} from './online-score-model.mjs';
-export const bookId=(level,ruleset=activeRuleset(level))=>ruleset===ORIGINAL_RULESET?'current':ruleset;
-export const bookPath=(level,ruleset=activeRuleset(level))=>`games/seth-happens-2/levels/${level}/record-book/${bookId(level,ruleset)}`;
+export const bookPath=level=>`games/seth-happens-2/levels/${level}/record-book/live`;
 export const emptyBook=()=>({schema:1,revision:0,normal:[],cheaters:[]});
 export function updateBook(book,job){
  const p=job.payload,c={key:p.id,payload:p};

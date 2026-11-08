@@ -4,7 +4,6 @@ import {carnivalScore,carnivalBonus,newCarnivalRun} from '../src/carnival-missio
 import {cabinCollision,cabinRecovery,cabinScore,newCabinRun} from '../src/cabin-mission.mjs';
 import {payload,validate,saveLocal,localScores,LOCAL_KEY,submission} from '../src/online-score-model.mjs';
 import {bookPath} from '../src/record-book.mjs';
-import {BALANCE_RULESET,BALANCED_LEVELS,ORIGINAL_RULESET,activeRuleset} from '../src/scoring-rules.mjs';
 const clean={falls:0,squishes:0,bumps:0},photos=new Set([0,1]);
 const record=(extra={})=>({id:'test',name:'Test',date:'2026-11-07T19:00:00Z',score:8000,elapsedMs:60000,beer:true,photos:2,latePhotos:0,bonus:6000,...clean,hits:0,condition:100,...extra});
 test('Rooftop rewards clean/slightly slower over reckless; uncapped whole-total penalties and photo values preserved',()=>{
@@ -32,15 +31,14 @@ test('Cabin cargo changes only after pickup, clamps and applies one event-sized 
  assert.equal(cabinRecovery({...s,condition:5}).condition,0);assert.equal(cabinCollision({...s,condition:0}).condition,0);assert.equal(cabinCollision({...s,complete:true}).condition,60);
  assert.equal(cabinScore({...s,complete:true},100000,6),6800);
 });
-test('current payload totals match all three revised missions, reject forged totals and keep old validation',()=>{
- const rooftop=payload('rooftop',record({score:7400,falls:2}));assert.equal(rooftop.ruleset,BALANCE_RULESET);assert.throws(()=>validate({...rooftop,score:7980}));assert.doesNotThrow(()=>validate({...rooftop,ruleset:undefined,score:7980}));
+test('current payload totals match all three revised missions, reject forged totals and reject obsolete totals',()=>{
+ const rooftop=payload('rooftop',record({score:7400,falls:2}));assert.equal(rooftop.ruleset,undefined);assert.throws(()=>validate({...rooftop,score:7980}));assert.throws(()=>validate({...rooftop,score:7980}));
  const carnival=payload('carnival',record({score:6365,wheelBonus:true,coasterBonus:true}));assert.equal(carnival.score,6365);assert.throws(()=>validate({...carnival,score:7640}));
  const cabin=payload('cabin',record({condition:85,score:7875,hits:1}));assert.equal(cabin.score,7875);assert.throws(()=>validate({...cabin,condition:100}));
 });
-test('versioned local and online boards preserve archives, pending old records and all nine unaffected paths',async()=>{
+test('single active local and online board for every level; old payloads cannot synchronize',async()=>{
  const map=new Map(),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};
- const legacy={...payload('rooftop',record({id:'old',score:7400,falls:2}))};delete legacy.ruleset;legacy.score=7980;storage.setItem(LOCAL_KEY,JSON.stringify([legacy]));
- saveLocal(storage,'rooftop',record({id:'new',score:7400,falls:2}));assert.deepEqual(localScores(storage,'rooftop').map(p=>p.id),['new']);assert.deepEqual(localScores(storage,'rooftop',ORIGINAL_RULESET).map(p=>p.id),['old']);assert.equal((await submission(legacy)).state,'pending');assert.equal(JSON.parse(storage.getItem(LOCAL_KEY)).length,2);
- for(const l of BALANCED_LEVELS){assert.match(bookPath(l),/risk-v2$/);assert.match(bookPath(l,ORIGINAL_RULESET),/current$/);}
- for(const l of ['thai','scooter','concert','haunted','zombie','snow','grocery','soccer','lastcall']){assert.equal(activeRuleset(l),ORIGINAL_RULESET);assert.match(bookPath(l),/current$/);}
+ const old={...payload('rooftop',record({score:7400,falls:2})),ruleset:'risk-v2'};
+ await assert.rejects(submission(old));saveLocal(storage,'rooftop',record({score:7400,falls:2}));assert.equal(localScores(storage,'rooftop').length,1);
+ for(const l of ['rooftop','thai','scooter','concert','haunted','zombie','snow','carnival','cabin','grocery','soccer','lastcall'])assert.match(bookPath(l),/record-book\/live$/);
 });

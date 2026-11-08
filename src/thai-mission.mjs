@@ -31,7 +31,7 @@ export function hitTakeout(run,thief=false){
   return {...run,hits:run.hits+1,condition:run.food?Math.max(0,run.condition-(thief?20:12)):run.condition,heatLoss:run.food?run.heatLoss+(thief?12:8):run.heatLoss};
 }
 export function canUseElevator(run,x,bottom){
-  return run.phase==='return'&&run.food&&Math.abs(x-THAI.homeX)<65&&Math.abs(bottom-THAI.ground)<16;
+  return run.phase==='return'&&run.food&&x>=40&&x<=THAI.homeX+80&&Math.abs(bottom-THAI.ground)<16;
 }
 export function takeoutScore(run,elapsedMs){
   if(!run.food)return 0;

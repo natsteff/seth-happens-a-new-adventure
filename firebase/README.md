@@ -24,6 +24,6 @@ The configured index exemptions keep record-book arrays/payloads unindexed; no c
 
 No new Console configuration is required when the supplied web app, Firestore and Anonymous Authentication already work. Physical-device acceptance is separate from browser viewport testing.
 
-## Scoring editions
+## Current boards
 
-Rooftop, Carnival and Cabin use `record-book/risk-v2` for the revised risk/reward rules. Original `record-book/current` documents are preserved and readable as earlier scores, with old pending jobs still targeting them. Other levels continue using `current`. New receipts/budgets carry `book: risk-v2`; original records keep their previous wire format. Edition linkage and exact revised Rooftop/Carnival/Cabin totals are enforced by the atomic rules. Payload checking is performed by the newly created linked receipt, while book updates protect bounded insertion/order/unchanged rows; each requires the other write and the matching budget. This keeps strict validation within Firestore's expression limit. Deploying these additive rules does not modify existing score documents.
+Every playable level uses one `record-book/live` document. There is no archive reader, historical formula or migration. Old `current` and `risk-v2` documents are denied by the active rules and can be deleted during the owner’s pre-release server purge. New scores use the current Rooftop/Carnival/Cabin formulas; receipt writes validate payloads and atomic board/budget links. Local playtest scores and old pending uploads are discarded once on upgrade; settings/progression remain separate.

@@ -1,6 +1,6 @@
 /** Persistent outbox/receipts. Reuses the original game’s transactional outbox with a separate sequel namespace. */
 export class ScoreOutbox{
- constructor(indexedDB=globalThis.indexedDB,name='seth-happens-2.online.v1'){this.indexedDB=indexedDB;this.name=name;}
+ constructor(indexedDB=globalThis.indexedDB,name='seth-happens-2.online.v2'){this.indexedDB=indexedDB;this.name=name;}
  async db(){
   if(!this.opening)this.opening=new Promise((resolve,reject)=>{
    if(!this.indexedDB)return reject(Error('Persistent online queue is unavailable.'));

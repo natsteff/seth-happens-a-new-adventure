@@ -1,4 +1,3 @@
-import {isCurrentScore} from './scoring-rules.mjs';
 import {gameAudio} from './audio';
 import {mountScoreBrowser} from './score-browser';
 import {readLevelScores,saveLevelScore} from './score-service';
@@ -19,7 +18,7 @@ function render(){
 export function offerScore(result:Result){if(document.body.dataset.review==='true')return;resetCompactEntry(dialog);pending={...result,id:crypto.randomUUID(),date:new Date().toISOString()};render();}
 export function resetScoreEntry(){resetCompactEntry(dialog);pending=null;if(dialog.open)dialog.close();}
 const browser=document.createElement('dialog');browser.id='level-score-browser';browser.className='score-dialog';browser.setAttribute('aria-labelledby','level-score-title');document.getElementById('game')!.append(browser);
-browser.innerHTML='<div class="score-heading score-browser-heading"><h2 id="level-score-title">HIGH SCORES</h2><button class="browser-close" type="button">Close</button></div><p role="status"></p><div class="score-actions"><button class="clear-local-rooftop" type="button">Clear high scores</button></div><form class="browser-clear-form" hidden><p>Clear current-rule Level 1 rooftop scores saved in this browser. Earlier scores are preserved.</p><label><input name="confirm" type="checkbox" required> Permanently delete current-rule Level 1 rooftop scores in this browser</label><button>Confirm clear</button></form>';
+browser.innerHTML='<div class="score-heading score-browser-heading"><h2 id="level-score-title">HIGH SCORES</h2><button class="browser-close" type="button">Close</button></div><p role="status"></p><div class="score-actions"><button class="clear-local-rooftop" type="button">Clear high scores</button></div><form class="browser-clear-form" hidden><p>Clear Level 1 rooftop scores saved in this browser.</p><label><input name="confirm" type="checkbox" required> Permanently delete Level 1 rooftop scores in this browser</label><button>Confirm clear</button></form>';
 let browserReturnFocus:HTMLElement|null=null;
 browser.addEventListener('close',()=>browserReturnFocus?.focus({preventScroll:true}));
 browser.querySelector('.browser-close')!.addEventListener('click',()=>browser.close());
@@ -29,7 +28,7 @@ browserClear.addEventListener('submit',async event=>{event.preventDefault();if(!
 document.getElementById('high-scores')!.addEventListener('click',()=>{if(document.querySelector('.score-dialog[open]'))return;browserReturnFocus=document.activeElement as HTMLElement;const unfinished=document.querySelector<HTMLDialogElement>('.score-dialog[data-entry=true]');showScoreDialog(unfinished??browser);});
 
 
-function clearLocalRooftop(){const rows=JSON.parse(localStorage.getItem(LOCAL_KEY)||'[]');localStorage.setItem(LOCAL_KEY,JSON.stringify(rows.filter((p:any)=>p.level!=='rooftop'||!isCurrentScore(p))));}
+function clearLocalRooftop(){const rows=JSON.parse(localStorage.getItem(LOCAL_KEY)||'[]');localStorage.setItem(LOCAL_KEY,JSON.stringify(rows.filter((p:any)=>p.level!=='rooftop')));}
 
 function updateScoreMusic(){const label=dialog.querySelector('#score-music');if(label)label.textContent=gameAudio.music.outcome?`Music: ${gameAudio.music.track.title} · ${gameAudio.music.status}`:'';}
 gameAudio.music.subscribe(updateScoreMusic);

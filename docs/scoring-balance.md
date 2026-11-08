@@ -57,10 +57,4 @@ The comparison script evaluates the original committed functions and revised fun
 
 ## Score versions and safety
 
-Rooftop/Carnival/Cabin use fresh versioned boards while preserving earlier records. Their current edition is `risk-v2`; the original edition remains stored separately. The other nine levels retain their original local/online identities. No records are deleted or migrated.
-
-The shared local journal retains both editions. High Scores exposes Current balance / Earlier scores for the three affected levels; Online and This Device remain independent view controls. Old pending submissions retain their original rules and synchronize only to their original board. Current-rule local clearing does not remove archived rows.
-
-Firestore continues to require linked atomic book, receipt and budget writes. The book update enforces bounded insertion/order/eviction and a newly created matching receipt. The linked receipt validates the after-write payload's exact formula and scoring edition; the budget is bound to that same edition. This distributes validation across the three protected writes without exceeding Firestore's per-operation expression limit. It does not relax validation. New-edition books are allowed only for the three affected levels. Exact Rooftop/Carnival/Cabin totals are checked locally and by rules; original formulas remain valid only in their original boards. Payloads from other levels are unchanged.
-
-Theoretical maxima remain 14,000 Rooftop and 8,500 Cabin; Carnival becomes 6,725. Top-25 retention and five Rooftop shortcut slots remain per edition. Client-side validation still does not prove honest gameplay.
+All twelve playable levels now use one active board per level, with the current formulas above. There is no earlier-score selector or archived formula support. On upgrade, old local playtest scores and pending uploads are discarded once; settings and unlocks remain intact. Online / This Device switches only the displayed source and never disables automatic synchronization. Server playtest data is reserved for the owner’s pre-release purge.

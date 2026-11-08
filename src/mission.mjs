@@ -109,3 +109,5 @@ export function fallingObjectHurts(motion){return motion.dropping===true;}
 export function fallingObjectSolid(motion){return motion?.landed===true;}
 
 export function formatRunSeconds(elapsedMs){return `${(Math.max(0,elapsedMs)/1000).toFixed(1)} seconds`;}
+
+export function rooftopDeliveryArea(x,bottom){const home=floors[26];return x>=home.x-16&&x<=home.x+home.width+16&&Math.abs(bottom-home.y)<18;}

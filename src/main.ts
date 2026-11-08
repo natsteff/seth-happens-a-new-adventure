@@ -1,3 +1,4 @@
+import {rooftopDeliveryArea} from './mission.mjs';
 import {installDialogRotationRecovery} from './dialog-rotation.mjs';
 import {installLayoutSettlement,refreshMeasuredScale} from './layout-settlement.mjs';
 import {fitOpenScoreDialogs} from './score-entry';
@@ -670,7 +671,7 @@ class Errand extends Phaser.Scene {
       this.updateEgg();
       if(this.riding)return;
       const stop=photoStops.findIndex(s=>Math.abs(this.player.x-s.x)<100&&Math.abs(this.player.y-s.y)<90);
-      const home=this.floor===26;
+      const home=rooftopDeliveryArea(this.player.x,body.bottom);
       if(home&&this.beer&&!this.heroHeard){
         this.heroHeard=true;this.heroPlaying=true;const run=this.runVersion;
         this.say('Allison: “My hero!”');
@@ -678,7 +679,8 @@ class Errand extends Phaser.Scene {
       }
       const beerNearby=this.floor===12&&!this.beer;
       const beerInReach=!this.beer&&Math.abs(this.player.x-beerSpot.x)<43&&Math.abs(this.player.y-beerSpot.y)<65;
-      this.prompt.setVisible(stop>=0||beerNearby);
+      this.prompt.setVisible(stop>=0||beerNearby||home);
+      if(home)this.prompt.setText(this.beer?'[ F / Action ] Deliver the beer to Allison':'Bring Allison the six-pack first');
       if(stop>=0)this.prompt.setText(this.photos.has(stop)?'✓ Photo saved. Upward, photographer.':this.heroHeard?'[ F ] RECOVER PHOTO • +125 points (half value)':'[ F ] PHOTO OPPORTUNITY • +250 points');
       if(beerNearby)this.prompt.setText(beerInReach?'[ Action ] Pick up the six-pack':`GET THE BEER ${this.player.x<beerSpot.x?'→':'←'} Move closer, then press Action`);
       if(Phaser.Input.Keyboard.JustDown(this.keys.F)||controller.interact){

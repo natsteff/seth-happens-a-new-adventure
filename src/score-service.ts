@@ -1,3 +1,5 @@
+import {resetOldScores} from './score-reset.mjs';
+resetOldScores(localStorage,indexedDB);
 import {localScores,saveLocal} from './online-score-model.mjs';
 import {OnlineScores} from './online-scores.mjs';
 let online:OnlineScores|undefined;
@@ -11,9 +13,9 @@ export const scoreReady=fetch(new URL('./game-config.json',document.baseURI),{ca
  window.dispatchEvent(new Event('scores-changed'));
 }).catch(()=>{});
 export const onlineEnabled=()=>enabled;
-export const readLevelScores=(level:string,ruleset?:string)=>localScores(localStorage,level,ruleset);
+export const readLevelScores=(level:string)=>localScores(localStorage,level);
 export function saveLevelScore(level:string,record:any){const scores=saveLocal(localStorage,level,record);void scoreReady.then(()=>online?.enqueue());window.dispatchEvent(new Event('scores-changed'));return scores;}
-export async function onlineLevelScores(level:string,ruleset?:string){await scoreReady;if(!online)throw Error('Online scoring is not enabled.');return online.list(level,ruleset);}
+export async function onlineLevelScores(level:string){await scoreReady;if(!online)throw Error('Online scoring is not enabled.');return online.list(level);}
 window.addEventListener('online',()=>{void scoreReady.then(()=>online?.retry()).catch(()=>{});window.dispatchEvent(new Event('scores-changed'));});
 window.addEventListener('storage',()=>{void online?.enqueue();window.dispatchEvent(new Event('scores-changed'));});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)void online?.kick();});

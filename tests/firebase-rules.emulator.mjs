@@ -34,23 +34,19 @@ test('bounded insertion rejects reorder/deletion/25th eviction forgery and caps 
  let short=emptyBook();for(let i=0;i<5;i++)short=updateBook(short,await submission(payload('rooftop',run('rooftop','c'+i,{score:-10000,cheater:true,bonus:0}))));await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),bookPath('rooftop')),short));
  const p=payload('rooftop',run('rooftop','sixth',{score:-10000,cheater:true,bonus:0}));const job=await submission(p);await assertFails(batch({...z,job},{book:short,change:{...short,revision:short.revision+1,lastKey:p.id,lastPayload:p,lastDigest:job.digest,lastPosition:5,cheaters:[...short.cheaters,{key:p.id,payload:p}]}}).commit());
 });
-test('revised and original scoring books remain separate; old pending runs still synchronize',async()=>{
- const client=new FirebaseScores({apiKey:'demo-key',authDomain:'demo-seth-happens-2.firebaseapp.com',projectId:'demo-seth-happens-2'},true);
- try{
-  const revised=payload('rooftop',run('rooftop','new-balanced',{falls:1,score:7700}));
-  const original={...payload('rooftop',run('rooftop','pending-old',{falls:1,score:7700}))};delete original.ruleset;original.score=7990;
-  assert.equal(await client.submit(await submission(original)),'accepted');const oldBefore=await client.list('rooftop','original');
-  await new Promise(r=>setTimeout(r,1150));assert.equal(await client.submit(await submission(revised)),'accepted');
-  assert.deepEqual(await client.list('rooftop','original'),oldBefore);assert.deepEqual((await client.list('rooftop')).map(r=>r.id),['new-balanced']);
-  assert.equal(await client.submit(await submission(original)),'duplicate');
- }finally{await client.dispose();}
+test('obsolete boards and historical payloads are denied',async()=>{
+ const x=await setup('rooftop','fresh','new',{falls:1,score:7700});
+ await assertSucceeds(batch(x).commit());
+ for(const id of ['current','risk-v2']){const ref=doc(x.db,`games/seth-happens-2/levels/rooftop/record-book/${id}`);await assertFails(getDoc(ref));await assertFails(setDoc(ref,emptyBook()));}
+ const y=await setup('rooftop','old-user','old',{falls:1,score:7700}),p={...y.job.payload,ruleset:'risk-v2'};
+ await assertFails(batch(y,{change:{lastPayload:p,normal:[{key:p.id,payload:p}]}}).commit());
 });
 test('new version enforces exact Cabin/Carnival totals and cannot bind a current receipt/budget to archived book',async()=>{
  for(const [l,uid,extra] of [['cabin','cab',{condition:85,hits:1,score:7875}],['carnival','car',{wheelBonus:true,coasterBonus:true,score:6365}]]){
   const x=await setup(l,uid,'valid',extra);await assertSucceeds(batch(x).commit());
  }
  const x=await setup('rooftop','risk-user','wrong-link',{falls:1,score:7700});await assertFails(batch(x,{budget:{book:'current'}}).commit());
- const valid=updateBook(emptyBook(),x.job),b=writeBatch(x.db);b.set(doc(x.db,bookPath('rooftop','original')),{...valid,updatedAt:serverTimestamp()});await assertFails(b.commit());
+ const valid=updateBook(emptyBook(),x.job),b=writeBatch(x.db);b.set(doc(x.db,'games/seth-happens-2/levels/rooftop/record-book/current'),{...valid,updatedAt:serverTimestamp()});await assertFails(b.commit());
  for(const l of ['snow','thai','encore'])await assertFails(setDoc(doc(x.db,`games/seth-happens-2/levels/${l}/record-book/risk-v2`),emptyBook()));
  const c=await setup('cabin','bad-cab','wrong',{condition:85,hits:1,score:7875}),p={...c.job.payload,condition:100};await assertFails(batch(c,{book:(await getDoc(doc(c.db,bookPath('cabin')))).data(),change:{lastPayload:p,normal:[{key:p.id,payload:p}]}}).commit());
  const k=await setup('carnival','bad-car','wrong',{wheelBonus:true,coasterBonus:true,score:6365}),q={...k.job.payload,score:7640};await assertFails(batch(k,{book:(await getDoc(doc(k.db,bookPath('carnival')))).data(),change:{lastPayload:q,normal:[{key:q.id,payload:q}]}}).commit());

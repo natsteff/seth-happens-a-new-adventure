@@ -1,14 +1,14 @@
 # Seth Happens - A New Adventure
 
-**Version 0.17.2 · Beta**
+**Version 0.17.3 · Beta**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.17.2 Beta"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.17.3 Beta"></a>
 </p>
 
-**Play version 0.17.2** — Fullscreen highly recommended.
+**Play version 0.17.3** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
@@ -134,4 +134,4 @@ On November 7–9 (your device’s local calendar), the idle launch screen offer
 
 During local development only, `?birthday=preview` previews the scene on any date. This parameter has no effect in production builds. The supplied 20.76-second song plays in full, with the 20-second choreography scaled to its actual playback position.
 
-Current Rooftop, Carnival and Cabin scoring uses a separate balance edition. Their **Scoring rules** selector can show preserved earlier scores; the other nine levels keep their existing leaderboards. See [scoring formulas, risk/reward rationale and comparisons](docs/scoring-balance.md).
+Each playable level has one current leaderboard with **Online** and **This Device** views. The first load of this version discards earlier device playtest scores and pending uploads while preserving settings and level unlocks. See [scoring formulas, risk/reward rationale and comparisons](docs/scoring-balance.md).

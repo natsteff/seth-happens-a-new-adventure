@@ -28,6 +28,6 @@ export class OnlineScores{
   finally{if(claimed)await this.store.release(this.owner).catch(()=>{});this.working=false;this.changed();if(this.again){this.again=false;this.schedule(0);}}
  }
  async retry(){for(const j of await this.store.jobs())if(j.state==='pending')await this.store.update(j.key,{nextAttempt:0});void this.kick();}
- list(level,ruleset){return withDeadline(this.transport.list(level,ruleset),this.waitMs);}
+ list(level){return withDeadline(this.transport.list(level),this.waitMs);}
  dispose(){this.disposed=true;clearTimeout(this.timer);this.listeners.clear();}
 }
