@@ -46,6 +46,20 @@ Run, jump, dodge and ride through a city full of familiar faces and questionable
 
 Levels 1–12 are playable now. Level 13 is an early prototype of the view-only curtain-call finale, unlocked by finishing Last Call. Complete each available level to unlock the next. Once unlocked, replay any adventure from **Choose Level** in the desktop controls or mobile game menu.
 
+## Mobile landscape screenshots
+
+![Start screen with landscape touch controls](docs/screenshots/mobile-start.jpg)
+
+| Game menu | Customize Controls |
+| --- | --- |
+| ![Game menu with level selection, music, and settings](docs/screenshots/mobile-menu.jpg) | ![Customize Controls with movement styles and arrow sizing](docs/screenshots/mobile-customize-controls.jpg) |
+
+| Adventure | Adventure |
+| --- | --- |
+| **1 · Rooftop Beer Run**<br>![Seth on the rooftops at sunset](docs/screenshots/level-01-rooftop.jpg) | **2 · Thai Takeout Run**<br>![Seth outside the Thai Takeout restaurant](docs/screenshots/level-02-thai.jpg) |
+| **3 · Scooter Ride**<br>![Seth and Allison jumping a scooter over a bus](docs/screenshots/level-03-scooter.jpg) | **5 · Haunted House**<br>![Seth inside the haunted mansion](docs/screenshots/level-05-haunted.jpg) |
+| **6 · Zombie Apocalypse**<br>![Seth driving the truck through the zombie neighborhood](docs/screenshots/level-06-zombie-truck.jpg) | **7 · Snow Day From Hell**<br>![Seth ahead of a snowplow on an icy street](docs/screenshots/level-07-snow.jpg) |
+
 ## Playtest and jukebox
 
 Normal play uses **Choose Level** and respects your saved unlocks. Developer playtesting is hidden from normal navigation; local development and owner-provided testing links support isolated review without saving scores or unlocks. [Playtest behavior and limitations](docs/playtest.md).
@@ -127,11 +141,5 @@ See [asset and dependency notices](THIRD_PARTY_NOTICES.md) for credits and third
 
 
 Firebase setup, validation, initialization and deployment are documented in [firebase/README.md](firebase/README.md).
-
-### Birthday Surprise
-
-On November 7–9 (your device’s local calendar), the idle launch screen offers a birthday interlude once per browser per year. A prominent **🎂 Birthday Surprise** button allows unlimited replays during those dates. Skip returns to the launch screen. When the celebration finishes, it stays open with Close and Replay buttons until dismissed. Muted/music-off settings are respected; blocked autoplay offers audio or silent playback, and missing audio safely continues silently. Annual playback uses an independent localStorage flag; unavailable storage falls back to once per visit. No scores or unlocks change.
-
-During local development only, `?birthday=preview` previews the scene on any date. This parameter has no effect in production builds. The supplied 20.76-second song plays in full, with the 20-second choreography scaled to its actual playback position.
 
 Each playable level has one current leaderboard with **Online** and **This Device** views. The first load of this version discards earlier device playtest scores and pending uploads while preserving settings and level unlocks. See [scoring formulas, risk/reward rationale and comparisons](docs/scoring-balance.md).
