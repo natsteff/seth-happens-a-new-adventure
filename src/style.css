@@ -354,5 +354,18 @@ html.touch-play-locked #live-status{visibility:visible}
 #control-settings #spacing-preview:before{left:0}#control-settings #spacing-preview:after{right:0}
 #control-settings #spacing-preview span{flex-shrink:0;width:26px;height:30px;font-size:13px;border-radius:10px;transform:scale(var(--preview-scale,1));transform-origin:center}
 
-/* Lower landscape controls modestly; preserve safe areas and enlarged-arrow clearance. */
-@media(orientation:landscape){.touch-mode{--control-inset-y:clamp(16px,4vh,28px)}}
+/* Keep the landscape controls within easy reach above the device safe area. */
+@media (orientation: landscape) {
+  .touch-mode {
+    --control-inset-y: clamp(9px, 2vh, 14px);
+  }
+  #touch-arrows button {
+    transform-origin: center bottom;
+  }
+  .touch-mode[data-control-style="default"] .touch-hint {
+    position: absolute;
+    inset-inline: 0;
+    bottom: calc(60px * var(--arrow-scale, 1) + 5px);
+    margin: 0;
+  }
+}

@@ -911,7 +911,7 @@ const quickSprintInput=document.getElementById('control-quick-sprint') as HTMLIn
 let controlStyle='default',controlSpacing=3,controlQuickSprint=false,customizeFromOffer=false;
 try{const saved=JSON.parse(localStorage.getItem('seth-new-adventure-touch-controls')||'null');if(saved&&['default','slider','stick'].includes(saved.style))controlStyle=saved.style;controlQuickSprint=saved?.quickSprint===true;if(saved?.size===1.5||saved?.size===2)controlSize=1.5;if(Number.isInteger(saved?.spacing)&&saved.spacing>=1&&saved.spacing<=5)controlSpacing=saved.spacing;}catch{/* Defaults remain available. */}
 function applyControls(){
- document.getElementById('touch-arrows')!.style.setProperty('--arrow-scale',String(controlSize));
+ gameElement.style.setProperty('--arrow-scale',String(controlSize));
  touch.clear();touch.style=controlStyle;touch.quickSprintEnabled=controlQuickSprint;
  gameElement.dataset.controlStyle=controlStyle;
  gameElement.style.setProperty('--arrow-gap',`${arrowGap(controlSize,controlSpacing)}px`);

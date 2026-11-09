@@ -1,14 +1,14 @@
 # Seth Happens - A New Adventure
 
-**Version 0.17.5 · Beta**
+**Version 0.17.6 · Beta**
 
 ![Seth Happens - A New Adventure](public/assets/adventure-logo.png)
 
 <p align="center">
-  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.17.5 Beta"></a>
+  <a href="https://natsteff.github.io/seth-happens-a-new-adventure/"><img src="docs/play-now.svg" width="400" alt="Play Now! Seth Happens - A New Adventure version 0.17.6 Beta"></a>
 </p>
 
-**Play version 0.17.5** — Fullscreen highly recommended.
+**Play version 0.17.6** — Fullscreen highly recommended.
 
 **Playing on a phone or tablet?** Add the game to your Home Screen and launch **Seth Happens 2** in landscape for the best mobile experience. Choose Default arrows, Sliding Speed Runner or Game Stick and save your preferred setup. In Customize Controls, enable **Oversize arrows (1.5×)** for larger arrow buttons and touch targets. See [How to add as a mobile app](#how-to-add-as-a-mobile-app).
 
