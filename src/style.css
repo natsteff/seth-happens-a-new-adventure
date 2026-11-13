@@ -369,3 +369,17 @@ html.touch-play-locked #live-status{visibility:visible}
     margin: 0;
   }
 }
+
+/* Keep sharing choices in the scrolling menu flow so landscape never clips them. */
+#share-menu summary,#menu-install summary{box-sizing:border-box;min-height:44px;padding:12px;border:1px solid #628d9b;border-radius:8px;background:#24485b;color:#e7f7f1;font-size:14px;font-weight:bold;cursor:pointer;touch-action:manipulation}
+#share-menu summary{list-style:none;text-align:center}
+#share-menu summary::-webkit-details-marker{display:none}
+#share-choices{display:grid;gap:6px;padding-top:6px}
+#share-choices button{width:100%}
+#menu-install{margin-top:12px}
+#menu-install li{font-size:14px;line-height:1.6;margin:6px 0}
+#menu-install p{font-size:14px}
+#menu-install a,#install-help a{color:#9ee9db;overflow-wrap:anywhere}
+#share-link{box-sizing:border-box;width:100%;padding:10px;user-select:text;-webkit-user-select:text;touch-action:auto}
+#share-status:empty{display:none}
+#touch-menu summary:focus-visible{outline:3px solid #ffd08b;outline-offset:2px}

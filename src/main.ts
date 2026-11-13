@@ -1,3 +1,4 @@
+import {installShareMenu} from './share.mjs';
 import {rooftopDeliveryArea} from './mission.mjs';
 import {installDialogRotationRecovery} from './dialog-rotation.mjs';
 import {installLayoutSettlement,refreshMeasuredScale} from './layout-settlement.mjs';
@@ -865,6 +866,7 @@ function closeTouchMenu(resume=true){
   const scene=activeScene();
   if(resume&&scene?.paused)scene.togglePause();
 }
+installShareMenu(touchMenu);
 const menuButton=document.getElementById('touch-menu-open') as HTMLButtonElement;
 function openTouchMenu(){
   const scene=activeScene();
