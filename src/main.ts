@@ -762,6 +762,8 @@ soundToggle?.addEventListener('click',()=>{void gameAudio.unlock();gameAudio.tog
 
 const fullscreenToggle=document.getElementById('fullscreen-toggle') as HTMLButtonElement;
 const gameElement=document.getElementById('play-area')!;
+// Kiosk launch fills the browser viewport without a user-gesture-gated API.
+if(new URLSearchParams(location.search).get('fullscreen')==='1')gameElement.classList.add('expanded');
 let menuPointer:number|null=null;
 function clearPlayPointers(){
  touch.clear();const scene=activeScene();if(scene?.keys)for(const key of Object.values(scene.keys))key.reset();if(scene&&'player' in scene)scene.player?.setVelocityX(0);const pointer=menuPointer;menuPointer=null;
@@ -775,6 +777,12 @@ const touchViewport=installTouchViewport(gameElement,{onResize:settlement.schedu
 installDialogRotationRecovery(gameElement,{onCancel:clearPlayPointers,onSettled:()=>{touchViewport.sync();refreshGameLayout();}});
 settlement.schedule();
 window.addEventListener('resize',()=>{if(!touchViewport.locked)clearPlayPointers();});
+function syncFullscreenControls(){
+  const expanded=!!document.fullscreenElement||gameElement.classList.contains('expanded');
+  document.getElementById('fullscreen-recommendation')!.hidden=expanded;
+  fullscreenToggle.textContent=expanded?'Exit full screen · V':'Full screen ⛶ · V';
+  fullscreenToggle.setAttribute('aria-label',expanded?'Exit fullscreen':'Enter fullscreen');
+}
 async function toggleFullscreen(){
   fullscreenToggle.blur();
   try {
@@ -785,7 +793,7 @@ async function toggleFullscreen(){
   } catch {
     gameElement.classList.add('expanded');
   }
-  touchViewport.sync();
+  touchViewport.sync();syncFullscreenControls();
   requestAnimationFrame(refreshGameLayout);
 }
 fullscreenToggle.addEventListener('click',()=>{void toggleFullscreen();});
@@ -795,11 +803,10 @@ document.addEventListener('keydown',(event)=>{
   }
 });
 document.addEventListener('fullscreenchange',()=>{
-  document.getElementById('fullscreen-recommendation')!.hidden=!!document.fullscreenElement;
-  fullscreenToggle.textContent=document.fullscreenElement?'Exit full screen · V':'Full screen ⛶ · V';
-  fullscreenToggle.setAttribute('aria-label',document.fullscreenElement?'Exit fullscreen':'Enter fullscreen');
+  syncFullscreenControls();
   requestAnimationFrame(refreshGameLayout);
 });
+syncFullscreenControls();
 if(!document.fullscreenEnabled){
   fullscreenToggle.disabled=false;
   fullscreenToggle.title='Use expanded view in this browser.';
@@ -814,7 +821,7 @@ function setTouch(enabled:boolean){
   if(enabled&&homeScreenLaunch)gameElement.classList.add('expanded');
   touch.clear();touch.enabled=enabled;
   document.getElementById('touch-controls')!.hidden=!enabled;
-  gameElement.classList.toggle('touch-mode',enabled);
+  gameElement.classList.toggle('touch-mode',enabled);syncFullscreenControls();
   touchViewport.sync();
   const scene=activeScene();if(scene?.sys?.isActive())scene.refreshControlCopy();
   const radio=document.getElementById('radio')!;
