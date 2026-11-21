@@ -383,3 +383,17 @@ html.touch-play-locked #live-status{visibility:visible}
 #share-link{box-sizing:border-box;width:100%;padding:10px;user-select:text;-webkit-user-select:text;touch-action:auto}
 #share-status:empty{display:none}
 #touch-menu summary:focus-visible{outline:3px solid #ffd08b;outline-offset:2px}
+
+.controller-active dialog :is(button,input,select,summary,a):focus{outline:3px solid #ffd08b;outline-offset:2px}
+.controller-ui-hint{font-size:12px;line-height:1.5;color:#b9d1db;margin:0 0 10px}
+.controller-name-open{display:block;margin:8px 0}
+.controller-name{box-sizing:border-box;width:min(540px,94vw);max-height:90dvh;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;background:#12253c;color:#e8f0ef;border:2px solid #79dec5;border-radius:14px;padding:16px}
+.controller-name::backdrop{background:#081322bb}
+.controller-name h2{margin:0 0 8px;color:#ffd08b}
+.controller-name output{display:block;min-height:26px;padding:8px;background:#081322;border-radius:6px;margin-bottom:10px;overflow-wrap:anywhere}
+.controller-characters{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.controller-name button{min-height:44px;background:#24485b;color:#e8f0ef;border:1px solid #79dec5;border-radius:8px;font:inherit;touch-action:manipulation}
+.controller-name-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.controller-name-actions button{flex:1;padding:8px}
+.controller-name output{position:sticky;top:0;z-index:1;box-shadow:0 4px 8px #08132288}
+.controller-name{scroll-padding-top:64px;scroll-padding-bottom:12px}

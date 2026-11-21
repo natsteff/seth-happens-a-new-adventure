@@ -1,3 +1,4 @@
+import {installControllerUI} from './controller-ui.mjs';
 import {installShareMenu} from './share.mjs';
 import {rooftopDeliveryArea} from './mission.mjs';
 import {installDialogRotationRecovery} from './dialog-rotation.mjs';
@@ -574,14 +575,13 @@ class Errand extends Phaser.Scene {
     try{
     gameAudio.music.setHold('scores',scoresOpen());
     let pads:readonly (Gamepad|null)[]=[];try{pads=navigator.getGamepads?.()??[];}catch{/* Keyboard remains usable if gamepad access is blocked. */}
-    const controller=this.controller.sample(Array.from(pads),document.hasFocus()&&!scoresOpen()&&!(document.getElementById('touch-menu') as HTMLDialogElement).open&&!['radio-volume','radio-select'].includes(document.activeElement?.id??''));const mobile=touch.sample(scoresOpen()||document.hidden||!!document.querySelector('dialog[open]'));
+    const controller=this.controller.sample(Array.from(pads),document.hasFocus()&&!document.querySelector('dialog[open]')&&!['radio-volume','radio-select'].includes(document.activeElement?.id??''));const mobile=touch.sample(scoresOpen()||document.hidden||!!document.querySelector('dialog[open]'));
     controller.move=controller.move||mobile.move;
     controller.jump ||= mobile.jump;controller.interact ||= mobile.interact;controller.pause ||= mobile.pause;controller.sprint ||= mobile.sprint;
     this.pad=controller;
     if(!mobile.restart)this.touchRestartSince=null;
     if(mobile.restart&&!this.introActive){this.touchRestartSince??=time;if(time-this.touchRestartSince>=RESTART_HOLD_MS){touch.clear();this.scene.restart();return;}}
 
-    const controllerStatus=document.getElementById('controller-status');if(controllerStatus&&controllerStatus.textContent!==controller.label)controllerStatus.textContent=controller.label;
     if(controller.disconnected&&!this.paused){this.player.setVelocityX(0);this.togglePause();}
     if(Phaser.Input.Keyboard.JustDown(this.keys.P)||controller.pause)this.togglePause();
     if(this.paused){const live=document.getElementById('live-status');if(live){live.dataset.paused='true';live.dataset.sound=gameAudio.state;live.textContent=controlCopy('Paused. Press P to resume.',touch.enabled);}return;}
@@ -1056,3 +1056,6 @@ void import('./birthday').then(({installBirthday})=>installBirthday({
  onOpen:()=>{clearPlayPointers();touchMenu.close();birthdayScene=activeScene();birthdayScene?.scene.pause();gameAudio.music.setHold('birthday',true);void gameAudio.setPaused(true);},
  onClose:()=>{birthdayScene?.scene.resume();birthdayScene=undefined;gameAudio.music.setHold('birthday',false);void gameAudio.setPaused(false);}
 }));
+
+const controllerUI=installControllerUI({onMenu:openTouchMenu,onRestart:()=>{const button=document.getElementById('restart-run') as HTMLButtonElement;if(!button.disabled)button.click();},onContinue:()=>{const next=document.getElementById('next-level')!;if(!next.hidden)next.click();else openTouchMenu();},getScene:activeScene});
+game.events.on('prestep',()=>controllerUI.step());

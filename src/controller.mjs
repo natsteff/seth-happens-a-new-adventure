@@ -1,3 +1,5 @@
+let uiBlocked=false;
+export function setControllerUIBlocked(value){uiBlocked=value;}
 // Standard browser Gamepad mapping. Keyboard input remains independent and takes precedence.
 export class ControllerInput {
   index=null;id='';armed=false;previous=[];
@@ -12,7 +14,7 @@ export class ControllerInput {
     const axis=Number.isFinite(pad.axes[0])?pad.axes[0]:0;
     const move=pressed[14]?-1:pressed[15]?1:Math.abs(axis)>.25?Math.sign(axis):0;
     if(fresh){this.index=pad.index;this.id=pad.id;this.armed=false;}
-    if(!enabled){this.armed=false;this.previous=pressed;return result;}
+    if(!enabled||uiBlocked){this.armed=false;this.previous=pressed;return result;}
     if(!this.armed){if(!move&&!pressed.some(Boolean))this.armed=true;this.previous=pressed;return result;}
     const edge=i=>!!pressed[i]&&!this.previous[i];
     Object.assign(result,{move,jump:edge(0),interact:edge(2),recall:edge(1),pause:edge(9),sprint:!!pressed[7]});
